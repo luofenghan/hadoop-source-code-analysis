@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.fs.LocalFileSystem</OriginalElement>
+  <nodes>
+    <node x="192.0" y="81.0">java.io.OutputStream</node>
+    <node x="182.0" y="162.0">org.apache.hadoop.fs.FSOutputSummer</node>
+    <node x="4.0" y="162.0">org.apache.hadoop.fs.FileSystem</node>
+    <node x="396.0" y="162.0">org.apache.hadoop.fs.FSInputChecker</node>
+    <node x="152.5" y="243.0">org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSOutputSummer</node>
+    <node x="366.5" y="243.0">org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSInputChecker</node>
+    <node x="399.0" y="81.0">org.apache.hadoop.fs.FSInputStream</node>
+    <node x="10.5" y="243.0">org.apache.hadoop.fs.FilterFileSystem</node>
+    <node x="271.0" y="334.0">org.apache.hadoop.fs.ChecksumFileSystem</node>
+    <node x="136.50320512820514" y="415.0">org.apache.hadoop.fs.LocalFileSystem</node>
+    <node x="405.5" y="0.0">java.io.InputStream</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem" target="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSOutputSummer">
+      <point x="-38.25" y="-15.5" />
+      <point x="309.25" y="304.0" />
+      <point x="201.0" y="304.0" />
+      <point x="-48.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSInputChecker" target="org.apache.hadoop.fs.FSInputChecker">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.FSInputStream" target="java.io.InputStream">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.FSInputChecker" target="org.apache.hadoop.fs.FSInputStream">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem" target="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSInputChecker">
+      <point x="12.75" y="-15.5" />
+      <point x="360.25" y="294.0" />
+      <point x="397.0" y="294.0" />
+      <point x="-61.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.LocalFileSystem" target="org.apache.hadoop.fs.FileSystem">
+      <point x="-31.0" y="-15.5" />
+      <point x="167.50320512820514" y="390.0" />
+      <point x="0.0" y="390.0" />
+      <point x="0.0" y="218.0" />
+      <point x="19.666666666666657" y="218.0" />
+      <point x="-31.333333333333343" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.LocalFileSystem" target="org.apache.hadoop.fs.ChecksumFileSystem">
+      <point x="31.0" y="-15.5" />
+      <point x="229.50320512820514" y="390.0" />
+      <point x="347.5" y="390.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.FilterFileSystem" target="org.apache.hadoop.fs.FileSystem">
+      <point x="-30.5" y="-15.5" />
+      <point x="41.0" y="218.0" />
+      <point x="51.0" y="218.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSOutputSummer" target="org.apache.hadoop.fs.ChecksumFileSystem">
+      <point x="48.5" y="15.5" />
+      <point x="298.0" y="294.0" />
+      <point x="334.75" y="294.0" />
+      <point x="-12.75" y="-15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem" target="org.apache.hadoop.fs.FilterFileSystem">
+      <point x="-63.75" y="-15.5" />
+      <point x="283.75" y="314.0" />
+      <point x="71.5" y="314.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSOutputSummer" target="org.apache.hadoop.fs.FSOutputSummer">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.FSOutputSummer" target="java.io.OutputStream">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.fs.ChecksumFileSystem.ChecksumFSInputChecker" target="org.apache.hadoop.fs.ChecksumFileSystem">
+      <point x="0.0" y="15.5" />
+      <point x="458.0" y="304.0" />
+      <point x="385.75" y="304.0" />
+      <point x="38.249999999999986" y="-15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="275.0" y="223.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

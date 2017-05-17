@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration</OriginalElement>
+  <nodes>
+    <node x="39.75" y="162.0">org.apache.hadoop.hdfs.protocol.DatanodeID</node>
+    <node x="198.2556818181818" y="162.0">org.apache.hadoop.hdfs.server.common.StorageInfo</node>
+    <node x="278.4962121212121" y="243.0">org.apache.hadoop.hdfs.server.protocol.NamespaceInfo</node>
+    <node x="14.25" y="81.0">org.apache.hadoop.io.WritableComparable</node>
+    <node x="146.2556818181818" y="0.0">org.apache.hadoop.io.Writable</node>
+    <node x="0.0" y="0.0">java.lang.Comparable</node>
+    <node x="97.49621212121212" y="243.0">org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.hdfs.protocol.DatanodeID" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration" target="org.apache.hadoop.hdfs.server.common.StorageInfo">
+      <point x="20.125" y="-15.5" />
+      <point x="198.12121212121212" y="218.0" />
+      <point x="215.4223484848485" y="218.0" />
+      <point x="-34.33333333333334" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.NamespaceInfo" target="org.apache.hadoop.hdfs.server.common.StorageInfo">
+      <point x="-31.5" y="-15.5" />
+      <point x="309.9962121212121" y="218.0" />
+      <point x="284.0890151515151" y="218.0" />
+      <point x="34.333333333333314" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.WritableComparable" target="org.apache.hadoop.io.Writable">
+      <point x="38.75" y="-15.5" />
+      <point x="130.5" y="56.0" />
+      <point x="160.08901515151518" y="56.0" />
+      <point x="-27.666666666666657" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration" target="org.apache.hadoop.hdfs.protocol.DatanodeID">
+      <point x="-60.375" y="-15.5" />
+      <point x="117.62121212121212" y="218.0" />
+      <point x="91.75" y="218.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration" target="org.apache.hadoop.io.Writable">
+      <point x="-20.125" y="-15.5" />
+      <point x="157.87121212121212" y="218.0" />
+      <point x="179.75" y="218.0" />
+      <point x="179.75" y="56.0" />
+      <point x="187.7556818181818" y="56.0" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.NamespaceInfo" target="org.apache.hadoop.io.Writable">
+      <point x="31.5" y="-15.5" />
+      <point x="372.9962121212121" y="218.0" />
+      <point x="363.68939393939394" y="218.0" />
+      <point x="363.68939393939394" y="56.0" />
+      <point x="215.4223484848485" y="56.0" />
+      <point x="27.666666666666686" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.WritableComparable" target="java.lang.Comparable">
+      <point x="-38.75" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="202.5" y="137.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

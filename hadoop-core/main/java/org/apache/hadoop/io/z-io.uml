@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.io</OriginalElement>
+  <nodes>
+    <node x="698.0" y="531.0">org.apache.hadoop.io.WritableName</node>
+    <node x="558.186923076923" y="222.0">org.apache.hadoop.io.NullWritable</node>
+    <node x="174.0" y="379.0">org.apache.hadoop.io.serializer</node>
+    <node x="1809.186923076923" y="222.0">org.apache.hadoop.io.Text</node>
+    <node x="418.186923076923" y="222.0">org.apache.hadoop.io.VLongWritable</node>
+    <node x="860.436923076923" y="0.0">org.apache.hadoop.io.Writable</node>
+    <node x="904.936923076923" y="101.0">org.apache.hadoop.io.VersionedWritable</node>
+    <node x="479.0" y="607.0">org.apache.hadoop.io.SequenceFile</node>
+    <node x="1395.186923076923" y="222.0">org.apache.hadoop.io.LongWritable</node>
+    <node x="180.0" y="531.0">org.apache.hadoop.io.nativeio</node>
+    <node x="322.0" y="607.0">org.apache.hadoop.io.SecureIOUtils</node>
+    <node x="578.0" y="379.0">org.apache.hadoop.io.DefaultStringifier</node>
+    <node x="633.0" y="607.0">org.apache.hadoop.io.OutputBuffer</node>
+    <node x="0.0" y="531.0">org.apache.hadoop.io.WritableFactories</node>
+    <node x="462.0" y="379.0">org.apache.hadoop.io.SetFile</node>
+    <node x="1512.6648076923077" y="101.0">org.apache.hadoop.io.GenericWritable</node>
+    <node x="163.0" y="607.0">org.apache.hadoop.io.retry</node>
+    <node x="408.75" y="298.0">org.apache.hadoop.io.MapFile</node>
+    <node x="770.936923076923" y="101.0">org.apache.hadoop.io.ArrayWritable</node>
+    <node x="1068.186923076923" y="222.0">org.apache.hadoop.io.IntWritable</node>
+    <node x="603.936923076923" y="101.0">org.apache.hadoop.io.TwoDArrayWritable</node>
+    <node x="0.0" y="222.0">org.apache.hadoop.io.SortedMapWritable</node>
+    <node x="431.0" y="455.0">org.apache.hadoop.io.compress</node>
+    <node x="1658.186923076923" y="222.0">org.apache.hadoop.io.BooleanWritable</node>
+    <node x="302.0" y="683.0">org.apache.hadoop.io.InputBuffer</node>
+    <node x="620.0" y="455.0">org.apache.hadoop.io.DataOutputBuffer</node>
+    <node x="358.0" y="379.0">org.apache.hadoop.io.ArrayFile</node>
+    <node x="1161.686923076923" y="101.0">org.apache.hadoop.io.WritableComparable</node>
+    <node x="1841.686923076923" y="101.0">org.apache.hadoop.io.BinaryComparable</node>
+    <node x="169.0" y="222.0">org.apache.hadoop.io.MapWritable</node>
+    <node x="1312.186923076923" y="222.0">org.apache.hadoop.io.UTF8</node>
+    <node x="0.0" y="379.0">org.apache.hadoop.io.WritableComparator</node>
+    <node x="923.186923076923" y="222.0">org.apache.hadoop.io.DoubleWritable</node>
+    <node x="598.5" y="298.0">org.apache.hadoop.io.Stringifier</node>
+    <node x="2003.686923076923" y="101.0">org.apache.hadoop.io.ObjectWritable</node>
+    <node x="426.936923076923" y="101.0">org.apache.hadoop.io.CompressedWritable</node>
+    <node x="684.186923076923" y="222.0">org.apache.hadoop.io.ByteWritable</node>
+    <node x="0.0" y="455.0">org.apache.hadoop.io.VersionMismatchException</node>
+    <node x="0.0" y="607.0">org.apache.hadoop.io.BloomMapFile</node>
+    <node x="1887.186923076923" y="222.0">org.apache.hadoop.io.BytesWritable</node>
+    <node x="357.0" y="531.0">org.apache.hadoop.io.DataInputBuffer</node>
+    <node x="153.0" y="683.0">org.apache.hadoop.io.file</node>
+    <node x="102.97249999999997" y="101.0">org.apache.hadoop.io.AbstractMapWritable</node>
+    <node x="528.0" y="531.0">org.apache.hadoop.io.WritableFactory</node>
+    <node x="446.0" y="683.0">org.apache.hadoop.io.IOUtils</node>
+    <node x="95.75" y="298.0">org.apache.hadoop.io.RawComparator</node>
+    <node x="812.186923076923" y="222.0">org.apache.hadoop.io.MD5Hash</node>
+    <node x="235.0" y="455.0">org.apache.hadoop.io.MultipleIOException</node>
+    <node x="1186.186923076923" y="222.0">org.apache.hadoop.io.VIntWritable</node>
+    <node x="1527.186923076923" y="222.0">org.apache.hadoop.io.FloatWritable</node>
+    <node x="0.0" y="683.0">org.apache.hadoop.io.WritableUtils</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.io.serializer" target="org.apache.hadoop.io.RawComparator">
+      <point x="0.0" y="-15.5" />
+      <point x="243.5" y="354.0" />
+      <point x="192.5" y="354.0" />
+      <point x="32.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.ByteWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="738.186923076923" y="172.0" />
+      <point x="1191.4946153846154" y="172.0" />
+      <point x="-47.69230769230762" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.FloatWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="1582.686923076923" y="182.0" />
+      <point x="1274.9561538461537" y="182.0" />
+      <point x="35.76923076923072" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.WritableComparable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="1239.186923076923" y="71.0" />
+      <point x="917.499423076923" y="71.0" />
+      <point x="15.5625" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.Text" target="org.apache.hadoop.io.BinaryComparable">
+      <point x="14.5" y="-15.5" />
+      <point x="1852.686923076923" y="202.0" />
+      <point x="1877.186923076923" y="202.0" />
+      <point x="-35.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.BytesWritable" target="org.apache.hadoop.io.BinaryComparable">
+      <point x="28.5" y="-15.5" />
+      <point x="1972.686923076923" y="202.0" />
+      <point x="1948.186923076923" y="202.0" />
+      <point x="35.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.WritableComparator" target="org.apache.hadoop.io.RawComparator">
+      <point x="0.0" y="-15.5" />
+      <point x="77.0" y="354.0" />
+      <point x="128.0" y="354.0" />
+      <point x="-32.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.VIntWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.AbstractMapWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="181.97249999999997" y="51.0" />
+      <point x="865.624423076923" y="51.0" />
+      <point x="-36.3125" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.NullWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="611.186923076923" y="162.0" />
+      <point x="1179.5715384615385" y="162.0" />
+      <point x="-59.61538461538453" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.Text" target="org.apache.hadoop.io.WritableComparable">
+      <point x="-14.5" y="-15.5" />
+      <point x="1823.686923076923" y="162.0" />
+      <point x="1298.8023076923075" y="162.0" />
+      <point x="59.61538461538453" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.LongWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="1451.186923076923" y="192.0" />
+      <point x="1263.0330769230768" y="192.0" />
+      <point x="23.84615384615381" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.DefaultStringifier" target="org.apache.hadoop.io.Stringifier">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.MapWritable" target="org.apache.hadoop.io.AbstractMapWritable">
+      <point x="0.0" y="-15.5" />
+      <point x="224.0" y="202.0" />
+      <point x="221.47249999999997" y="202.0" />
+      <point x="39.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.VersionedWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="975.936923076923" y="81.0" />
+      <point x="907.124423076923" y="81.0" />
+      <point x="5.1875" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.IntWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="1117.186923076923" y="202.0" />
+      <point x="1227.263846153846" y="202.0" />
+      <point x="-11.923076923076906" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.DoubleWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="985.686923076923" y="192.0" />
+      <point x="1215.3407692307692" y="192.0" />
+      <point x="-23.84615384615381" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.TwoDArrayWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="677.436923076923" y="71.0" />
+      <point x="886.374423076923" y="71.0" />
+      <point x="-15.5625" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.MD5Hash" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="857.686923076923" y="182.0" />
+      <point x="1203.4176923076923" y="182.0" />
+      <point x="-35.76923076923072" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.BooleanWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="1723.686923076923" y="172.0" />
+      <point x="1286.8792307692306" y="172.0" />
+      <point x="47.69230769230762" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.ArrayWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="827.936923076923" y="81.0" />
+      <point x="896.749423076923" y="81.0" />
+      <point x="-5.1875" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.CompressedWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="505.436923076923" y="61.0" />
+      <point x="875.999423076923" y="61.0" />
+      <point x="-25.9375" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.ArrayFile" target="org.apache.hadoop.io.MapFile">
+      <point x="0.0" y="-15.5" />
+      <point x="400.0" y="354.0" />
+      <point x="428.75" y="354.0" />
+      <point x="-20.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.BytesWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="-28.5" y="-15.5" />
+      <point x="1915.686923076923" y="152.0" />
+      <point x="1310.7253846153844" y="152.0" />
+      <point x="71.53846153846143" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.SetFile" target="org.apache.hadoop.io.MapFile">
+      <point x="0.0" y="-15.5" />
+      <point x="497.5" y="354.0" />
+      <point x="468.75" y="354.0" />
+      <point x="20.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.VLongWritable" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="478.186923076923" y="152.0" />
+      <point x="1167.6484615384616" y="152.0" />
+      <point x="-71.53846153846143" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.GenericWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="1576.1648076923077" y="61.0" />
+      <point x="927.874423076923" y="61.0" />
+      <point x="25.9375" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.SortedMapWritable" target="org.apache.hadoop.io.AbstractMapWritable">
+      <point x="0.0" y="-15.5" />
+      <point x="74.5" y="202.0" />
+      <point x="142.47249999999997" y="202.0" />
+      <point x="-39.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.UTF8" target="org.apache.hadoop.io.WritableComparable">
+      <point x="0.0" y="-15.5" />
+      <point x="1343.686923076923" y="202.0" />
+      <point x="1251.11" y="202.0" />
+      <point x="11.923076923076906" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.ObjectWritable" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="2064.186923076923" y="51.0" />
+      <point x="938.249423076923" y="51.0" />
+      <point x="36.3125" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.37995337995337997" x="1062.5" y="357.0" />
+  <SelectedNodes>
+    <node>org.apache.hadoop.io.WritableName</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

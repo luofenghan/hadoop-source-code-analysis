@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.io.serializer</OriginalElement>
+  <nodes>
+    <node x="315.375" y="0.0">org.apache.hadoop.io.serializer.Serialization</node>
+    <node x="588.9166666666667" y="81.0">org.apache.hadoop.io.serializer.Serializer</node>
+    <node x="17.180555555555543" y="81.0">org.apache.hadoop.io.serializer.Deserializer</node>
+    <node x="245.0" y="238.0">org.apache.hadoop.io.serializer.SerializationFactory</node>
+    <node x="208.72222222222223" y="81.0">org.apache.hadoop.io.serializer.WritableSerialization</node>
+    <node x="544.0" y="162.0">org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationSerializer</node>
+    <node x="381.72222222222223" y="81.0">org.apache.hadoop.io.serializer.JavaSerialization</node>
+    <node x="0.0" y="319.0">org.apache.hadoop.io.serializer.JavaSerializationComparator</node>
+    <node x="171.0" y="162.0">org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationDeserializer</node>
+    <node x="13.5" y="238.0">org.apache.hadoop.io.serializer.DeserializerComparator</node>
+    <node x="388.0" y="162.0">org.apache.hadoop.io.serializer.WritableSerialization.WritableSerializer</node>
+    <node x="0.0" y="162.0">org.apache.hadoop.io.serializer.WritableSerialization.WritableDeserializer</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.io.serializer.WritableSerialization.WritableDeserializer" target="org.apache.hadoop.io.serializer.WritableSerialization">
+      <point x="37.75" y="-15.5" />
+      <point x="113.25" y="142.0" />
+      <point x="246.97222222222223" y="142.0" />
+      <point x="-38.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationSerializer" target="org.apache.hadoop.io.serializer.JavaSerialization">
+      <point x="-45.5" y="-15.5" />
+      <point x="589.5" y="132.0" />
+      <point x="478.47222222222223" y="132.0" />
+      <point x="32.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerialization" target="org.apache.hadoop.io.serializer.Serialization">
+      <point x="0.0" y="-15.5" />
+      <point x="446.22222222222223" y="56.0" />
+      <point x="393.375" y="56.0" />
+      <point x="26.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationDeserializer" target="org.apache.hadoop.io.serializer.JavaSerialization">
+      <point x="49.25" y="-15.5" />
+      <point x="318.75" y="142.0" />
+      <point x="413.97222222222223" y="142.0" />
+      <point x="-32.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationDeserializer" target="org.apache.hadoop.io.serializer.Deserializer">
+      <point x="-49.25" y="-15.5" />
+      <point x="220.25" y="132.0" />
+      <point x="93.68055555555554" y="132.0" />
+      <point x="25.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerialization.JavaSerializationSerializer" target="org.apache.hadoop.io.serializer.Serializer">
+      <point x="45.5" y="-15.5" />
+      <point x="680.5" y="142.0" />
+      <point x="654.1666666666667" y="142.0" />
+      <point x="21.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.WritableSerialization.WritableSerializer" target="org.apache.hadoop.io.serializer.WritableSerialization">
+      <point x="-34.0" y="-15.5" />
+      <point x="422.0" y="132.0" />
+      <point x="323.47222222222223" y="132.0" />
+      <point x="38.25" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.WritableSerialization.WritableDeserializer" target="org.apache.hadoop.io.serializer.Deserializer">
+      <point x="-37.75" y="-15.5" />
+      <point x="37.75" y="142.0" />
+      <point x="42.68055555555554" y="142.0" />
+      <point x="-25.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.WritableSerialization" target="org.apache.hadoop.io.serializer.Serialization">
+      <point x="0.0" y="-15.5" />
+      <point x="285.22222222222223" y="56.0" />
+      <point x="341.375" y="56.0" />
+      <point x="-26.0" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.WritableSerialization.WritableSerializer" target="org.apache.hadoop.io.serializer.Serializer">
+      <point x="34.0" y="-15.5" />
+      <point x="490.0" y="142.0" />
+      <point x="610.6666666666667" y="142.0" />
+      <point x="-21.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.serializer.JavaSerializationComparator" target="org.apache.hadoop.io.serializer.DeserializerComparator">
+      <point x="0.0" y="-15.5" />
+      <point x="0.0" y="15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="377.5" y="235.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

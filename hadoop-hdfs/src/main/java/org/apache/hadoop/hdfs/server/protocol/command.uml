@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.hdfs.server.protocol.DatanodeCommand</OriginalElement>
+  <nodes>
+    <node x="0.0" y="172.0">org.apache.hadoop.hdfs.server.protocol.BlockCommand</node>
+    <node x="274.3320105820106" y="91.0">org.apache.hadoop.hdfs.server.protocol.DatanodeCommand</node>
+    <node x="9.582010582010582" y="91.0">org.apache.hadoop.hdfs.protocol.Block</node>
+    <node x="371.0" y="172.0">org.apache.hadoop.hdfs.server.protocol.KeyUpdateCommand</node>
+    <node x="369.1177248677249" y="0.0">org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Register</node>
+    <node x="21.832010582010582" y="0.0">org.apache.hadoop.io.Writable</node>
+    <node x="273.1177248677249" y="0.0">org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Finalize</node>
+    <node x="549.0" y="172.0">org.apache.hadoop.hdfs.server.protocol.UpgradeCommand</node>
+    <node x="146.0" y="172.0">org.apache.hadoop.hdfs.server.protocol.BalancerBandwidthCommand</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.UpgradeCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="0.0" y="-15.5" />
+      <point x="622.0" y="142.0" />
+      <point x="406.4570105820106" y="142.0" />
+      <point x="56.625" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand" target="org.apache.hadoop.io.Writable">
+      <point x="-64.71428571428572" y="-15.5" />
+      <point x="285.11772486772486" y="71.0" />
+      <point x="84.08201058201058" y="71.0" />
+      <point x="20.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Register" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="27.33333333333333" y="15.5" />
+      <point x="437.45105820105823" y="71.0" />
+      <point x="414.5462962962963" y="71.0" />
+      <point x="64.71428571428571" y="-15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.BlockCommand" target="org.apache.hadoop.hdfs.protocol.Block">
+      <point x="0.0" y="-15.5" />
+      <point x="63.0" y="152.0" />
+      <point x="59.08201058201058" y="152.0" />
+      <point x="16.5" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.BalancerBandwidthCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="0.0" y="-15.5" />
+      <point x="248.5" y="152.0" />
+      <point x="330.9570105820106" y="152.0" />
+      <point x="-18.875" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Register">
+      <point x="21.571428571428612" y="-15.5" />
+      <point x="371.4034391534392" y="71.0" />
+      <point x="382.7843915343916" y="71.0" />
+      <point x="-27.333333333333314" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.BlockCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="42.0" y="-15.5" />
+      <point x="105.0" y="142.0" />
+      <point x="293.2070105820106" y="142.0" />
+      <point x="-56.625" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.KeyUpdateCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="0.0" y="-15.5" />
+      <point x="450.0" y="152.0" />
+      <point x="368.7070105820106" y="152.0" />
+      <point x="18.875" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Finalize">
+      <point x="-43.14285714285711" y="-15.5" />
+      <point x="306.6891534391535" y="61.0" />
+      <point x="285.7843915343916" y="61.0" />
+      <point x="-25.333333333333314" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.protocol.Block" target="org.apache.hadoop.io.Writable">
+      <point x="0.0" y="-15.5" />
+      <point x="-20.75" y="15.5" />
+    </edge>
+    <edge source="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand.Finalize" target="org.apache.hadoop.hdfs.server.protocol.DatanodeCommand">
+      <point x="25.333333333333314" y="15.5" />
+      <point x="336.45105820105823" y="71.0" />
+      <point x="349.8320105820106" y="71.0" />
+      <point x="0.0" y="-15.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="347.5" y="101.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

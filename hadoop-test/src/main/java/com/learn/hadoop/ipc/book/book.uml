@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.learn.hadoop.ipc.book</OriginalElement>
+  <nodes>
+    <node x="38.0" y="173.0">com.learn.hadoop.ipc.book.Library</node>
+    <node x="0.0" y="572.0">com.learn.hadoop.ipc.book.BookQueryClient</node>
+    <node x="0.0" y="0.0">org.apache.hadoop.ipc.VersionedProtocol</node>
+    <node x="253.0" y="104.0">com.learn.hadoop.ipc.book.Book</node>
+    <node x="186.5" y="473.0">com.learn.hadoop.ipc.book.BookQueryServer</node>
+    <node x="159.5" y="346.0">com.learn.hadoop.ipc.book.LibraryImpl</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.learn.hadoop.ipc.book.LibraryImpl" target="com.learn.hadoop.ipc.book.Book">
+      <point x="53.75" y="-38.5" />
+      <point x="320.75" y="321.0" />
+      <point x="398.5" y="321.0" />
+      <point x="0.0" y="96.0" />
+    </edge>
+    <edge source="com.learn.hadoop.ipc.book.BookQueryServer" target="com.learn.hadoop.ipc.book.LibraryImpl">
+      <point x="0.0" y="-27.0" />
+      <point x="0.0" y="38.5" />
+    </edge>
+    <edge source="com.learn.hadoop.ipc.book.Library" target="org.apache.hadoop.ipc.VersionedProtocol">
+      <point x="0.0" y="-27.0" />
+      <point x="0.0" y="27.0" />
+    </edge>
+    <edge source="com.learn.hadoop.ipc.book.LibraryImpl" target="com.learn.hadoop.ipc.book.Library">
+      <point x="-53.75" y="-38.5" />
+      <point x="213.25" y="321.0" />
+      <point x="135.5" y="321.0" />
+      <point x="0.0" y="27.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.9591331269349846" x="447.1639767591994" y="275.04034068617693" />
+  <SelectedNodes>
+    <node>com.learn.hadoop.ipc.book.BookQueryClient</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

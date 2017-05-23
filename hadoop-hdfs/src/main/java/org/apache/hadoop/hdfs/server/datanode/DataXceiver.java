@@ -361,7 +361,7 @@ class DataXceiver implements Runnable, FSConstants {
                     }
 
                 } catch (IOException e) {
-                    // 如果不是复制请求
+                    // 如果是复制请求
                     if (client.length() != 0) {
                         //在往下一个数据节点 【写请求】 的过程中出错，向上游写应答
                         replyOut.writeShort((short) DataTransferProtocol.OP_STATUS_ERROR);

@@ -40,8 +40,8 @@ public class LocatedBlock implements Writable {
     }
 
     private Block b;
-    private long offset;  // 数据块在对应文件中的偏移量offset
-    private DatanodeInfo[] locs; // 数据块所在的数据节点信息，包含了所有可用的数据块位置，损坏的数据块对应的数据节点信息不会在里面
+    private long offset;// 数据块在对应文件中的偏移量offset
+    private DatanodeInfo[] locs;// 数据块所在的数据节点信息，包含了所有可用的数据块位置，损坏的数据块对应的数据节点信息不会在里面
     private boolean corrupt; // 数据块是否损坏标志corrupt
     private Token<BlockTokenIdentifier> blockToken = new Token<>();
 

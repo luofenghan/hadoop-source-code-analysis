@@ -425,12 +425,14 @@ public abstract class Storage extends StorageInfo {
             String rootPath = root.getCanonicalPath();
             try { // check that storage exists
                 if (!root.exists()) {
-                    // storage directory does not exist
+                    // 当前目录并不存在
                     if (startOpt != StartupOption.FORMAT) {
                         LOG.info("Storage directory " + rootPath + " does not exist.");
+                        // 为初始状态，文件不存在
                         return StorageState.NON_EXISTENT;
                     }
                     LOG.info(rootPath + " does not exist. Creating ...");
+                    // 则创建目录
                     if (!root.mkdirs())
                         throw new IOException("Cannot create directory " + rootPath);
                 }
@@ -448,10 +450,11 @@ public abstract class Storage extends StorageInfo {
                 return StorageState.NON_EXISTENT;
             }
 
-            this.lock(); // lock storage if it exists
+            this.lock(); // 锁定存储目录 ，创建了in_use.lock文件
 
             if (startOpt == HdfsConstants.StartupOption.FORMAT)
                 return StorageState.NOT_FORMATTED;
+
             if (startOpt != HdfsConstants.StartupOption.IMPORT) {
                 //make sure no conversion is required
                 checkConversionNeeded(this);

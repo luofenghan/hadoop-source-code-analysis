@@ -194,6 +194,5 @@ public interface DatanodeProtocol extends VersionedProtocol {
      */
     void commitBlockSynchronization(Block block,
                                     long newgenerationstamp, long newlength,
-                                    boolean closeFile, boolean deleteblock, DatanodeID[] newtargets
-    ) throws IOException;
+                                    boolean closeFile, boolean deleteblock, DatanodeID[] newtargets) throws IOException;
 }

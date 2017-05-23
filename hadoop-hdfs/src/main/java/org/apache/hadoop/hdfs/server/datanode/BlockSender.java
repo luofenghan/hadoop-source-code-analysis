@@ -424,8 +424,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
             ByteBuffer pktBuf = ByteBuffer.allocate(pktSize);
             /*循环调用sendChunks发送应答数据包*/
             while (endOffset > offset) {
-                long len = sendChunks(pktBuf, maxChunksPerPacket,
-                        streamForSendChunks);
+                long len = sendChunks(pktBuf, maxChunksPerPacket, streamForSendChunks);
                 offset += len;
                 totalRead += len + ((len + bytesPerChecksum - 1) / bytesPerChecksum *
                         checksumSize);

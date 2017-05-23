@@ -302,8 +302,7 @@ public class RPC {
             Class<? extends VersionedProtocol> protocol,
             long clientVersion,
             InetSocketAddress addr,
-            Configuration conf
-    ) throws IOException {
+            Configuration conf) throws IOException {
         return waitForProxy(protocol, clientVersion, addr, conf, 0, Long.MAX_VALUE);
     }
 
@@ -402,13 +401,12 @@ public class RPC {
      * talking to a server at the named address.
      */
     /**
-     *
-     * @param protocol IPC接口对应的Class对象，一般通过接口的静态成员class获得，
+     * @param protocol      IPC接口对应的Class对象，一般通过接口的静态成员class获得，
      * @param clientVersion IPC客户端要求的IPC接口版本号，用于保证IPC客户端使用的是他期望的版本服务
-     * @param addr IPC服务器的地址，包括服务器IP地址和端口信息
-     * @param ticket 用户信息，主要包含了用户的鉴权信息
-     * @param conf IPC客户端可能使用的配置参数
-     * @param factory  创建套接字时使用的套接字工厂，套接字工厂可用于创建不同策略的套接字，如带有安全性或支持防火墙隧道的套接字
+     * @param addr          IPC服务器的地址，包括服务器IP地址和端口信息
+     * @param ticket        用户信息，主要包含了用户的鉴权信息
+     * @param conf          IPC客户端可能使用的配置参数
+     * @param factory       创建套接字时使用的套接字工厂，套接字工厂可用于创建不同策略的套接字，如带有安全性或支持防火墙隧道的套接字
      * @param rpcTimeout
      * @return
      * @throws IOException
@@ -538,13 +536,12 @@ public class RPC {
      * port and address, with a secret manager.
      */
     /**
-     *
-     * @param instance IPC方法调用的目标
-     * @param bindAddress 服务器绑定的IP地址
-     * @param port 监听端口
-     * @param numHandlers 处理器线程的个数
-     * @param verbose 是否开启调用方法日志
-     * @param conf 配置Server对象的配置参数
+     * @param instance      IPC方法调用的目标
+     * @param bindAddress   服务器绑定的IP地址
+     * @param port          监听端口
+     * @param numHandlers   处理器线程的个数
+     * @param verbose       是否开启调用方法日志
+     * @param conf          配置Server对象的配置参数
      * @param secretManager
      * @return
      * @throws IOException
@@ -612,7 +609,7 @@ public class RPC {
                 if (verbose) log("Call: " + call);
 
                 Method method = protocol.getMethod(call.getMethodName(),
-                                call.getParameterClasses());
+                        call.getParameterClasses());
                 method.setAccessible(true);
 
                 long startTime = System.currentTimeMillis();

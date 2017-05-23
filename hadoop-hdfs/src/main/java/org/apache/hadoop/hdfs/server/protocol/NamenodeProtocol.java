@@ -43,23 +43,26 @@ public interface NamenodeProtocol extends VersionedProtocol {
      */
     long versionID = 3L;
 
-    /** Get a list of blocks belonged to <code>datanode</code>
+    /**
+     * Get a list of blocks belonged to <code>datanode</code>
      * whose total size is equal to <code>size</code>
      * 用于获取一个数据节点上的一系列数据块及位置
      * 根据返回值，均衡器可以把数据块从该数据节点移动到其他数据节点。达到平衡各个数据节点数据块数量的目的
-     * @param datanode  a data node
-     * @param size      requested size
+     *
+     * @param datanode a data node
+     * @param size     requested size
      * @return a list of blocks & their locations
      * @throws RemoteException if size is less than or equal to 0 or
-    datanode does not exist
+     *                         datanode does not exist
      */
     public BlocksWithLocations getBlocks(DatanodeInfo datanode, long size)
             throws IOException;
 
     /**
      * Get the current block keys
-     *
+     * <p>
      * 用于支持移动数据块过程中需要的安全特性
+     *
      * @return ExportedBlockKeys containing current block keys
      * @throws IOException
      */
@@ -67,6 +70,7 @@ public interface NamenodeProtocol extends VersionedProtocol {
 
     /**
      * Get the size of the current edit log (in bytes).
+     *
      * @return The number of bytes in the current edit log.
      * @throws IOException
      */
@@ -76,8 +80,9 @@ public interface NamenodeProtocol extends VersionedProtocol {
      * Closes the current edit log and opens a new one. The
      * call fails if the file system is in SafeMode.
      * 通知NameNode开始一次合并过程，这时NamenOde会停止使用当前编辑日志，并启用新的日志文件
-     * @throws IOException
+     *
      * @return a unique token to identify this transaction. 标识一次合并点，也称检查点
+     * @throws IOException
      */
     CheckpointSignature rollEditLog() throws IOException;
 
@@ -85,6 +90,7 @@ public interface NamenodeProtocol extends VersionedProtocol {
      * Rolls the fsImage log. It removes the old fsImage, copies the
      * new image to fsImage, removes the old edits and renames edits.new
      * to edits. The call fails if any of the four files are missing.
+     *
      * @throws IOException
      */
     public void rollFsImage() throws IOException;

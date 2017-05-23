@@ -107,7 +107,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol,
                                  RefreshAuthorizationPolicyProtocol,
                                  RefreshUserMappingsProtocol {
   static{
-    Configuration.addDefaultResource("hdfs-default.xml");
+    Configuration.addDefaultResource("src/main/resources/hdfs-default.xml");
     Configuration.addDefaultResource("hdfs-site.xml");
   }
   

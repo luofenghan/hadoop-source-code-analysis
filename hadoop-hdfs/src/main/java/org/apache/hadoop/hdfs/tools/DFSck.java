@@ -62,7 +62,7 @@ import java.security.PrivilegedExceptionAction;
  */
 public class DFSck extends Configured implements Tool {
   static{
-    Configuration.addDefaultResource("hdfs-default.xml");
+    Configuration.addDefaultResource("src/main/resources/hdfs-default.xml");
     Configuration.addDefaultResource("hdfs-site.xml");
   }
 
@@ -167,7 +167,7 @@ public class DFSck extends Configured implements Tool {
   }
 
   static{
-    Configuration.addDefaultResource("hdfs-default.xml");
+    Configuration.addDefaultResource("src/main/resources/hdfs-default.xml");
     Configuration.addDefaultResource("hdfs-site.xml");
   }
   

@@ -214,12 +214,11 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
 
             File blockFiles[] = dir.listFiles();
             if (blockFiles != null) {
-                for (int i = 0; i < blockFiles.length; i++) {
-                    if (Block.isBlockFilename(blockFiles[i])) {
+                for (File blockFile : blockFiles) {
+                    if (Block.isBlockFilename(blockFile)) {
                         long genStamp = FSDataset.getGenerationStampFromFile(blockFiles,
-                                blockFiles[i]);
-                        blockSet.add(new Block(blockFiles[i], blockFiles[i].length(),
-                                genStamp));
+                                blockFile);
+                        blockSet.add(new Block(blockFile, blockFile.length(), genStamp));
                     }
                 }
             }
@@ -987,6 +986,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         for (int idx = 0; idx < storage.getNumStorageDirs(); idx++) {
             roots[idx] = storage.getStorageDir(idx).getCurrentDir();
         }
+        /*初始化异步磁盘服务*/
         asyncDiskService = new FSDatasetAsyncDiskService(roots);
         registerMBean(storage.getStorageID());
     }
@@ -1718,7 +1718,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
     public Block[] getBlockReport() {
         TreeSet<Block> blockSet = new TreeSet<Block>();
         volumes.getBlockInfo(blockSet);
-        Block blockTable[] = new Block[blockSet.size()];
+        Block[] blockTable = new Block[blockSet.size()];
         int i = 0;
         for (Iterator<Block> it = blockSet.iterator(); it.hasNext(); i++) {
             blockTable[i] = it.next();

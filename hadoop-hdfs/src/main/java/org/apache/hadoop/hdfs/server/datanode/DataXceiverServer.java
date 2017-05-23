@@ -118,14 +118,12 @@ class DataXceiverServer implements Runnable, FSConstants {
         this.ss = ss;
         this.datanode = datanode;
 
-        this.maxXceiverCount = conf.getInt("dfs.datanode.max.xcievers",
-                MAX_XCEIVER_COUNT);
+        this.maxXceiverCount = conf.getInt("dfs.datanode.max.xcievers", MAX_XCEIVER_COUNT);
 
         this.estimateBlockSize = conf.getLong("dfs.block.size", DEFAULT_BLOCK_SIZE);
 
         //set up parameter for cluster balancing
-        this.balanceThrottler = new BlockBalanceThrottler(
-                conf.getLong("dfs.balance.bandwidthPerSec", 1024L * 1024));
+        this.balanceThrottler = new BlockBalanceThrottler(conf.getLong("dfs.balance.bandwidthPerSec", 1024L * 1024));
     }
 
     /**
@@ -135,8 +133,7 @@ class DataXceiverServer implements Runnable, FSConstants {
             try {
                 Socket s = ss.accept();
                 s.setTcpNoDelay(true);
-                new Daemon(datanode.threadGroup,
-                        new DataXceiver(s, datanode, this)).start();
+                new Daemon(datanode.threadGroup, new DataXceiver(s, datanode, this)).start();
             } catch (SocketTimeoutException ignored) {
                 // wake up to see if should continue to run
             } catch (AsynchronousCloseException ace) {

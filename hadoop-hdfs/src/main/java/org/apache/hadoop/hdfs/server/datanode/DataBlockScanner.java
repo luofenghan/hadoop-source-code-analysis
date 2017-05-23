@@ -169,7 +169,9 @@ class DataBlockScanner implements Runnable {
         }
     }
 
-    /** Update blockMap by the given LogEntry */
+    /**
+     * Update blockMap by the given LogEntry
+     */
     private synchronized void updateBlockInfo(LogEntry e) {
         BlockScanInfo info = blockMap.get(new Block(e.blockId, 0, e.genStamp));
 
@@ -237,7 +239,9 @@ class DataBlockScanner implements Runnable {
                 random.nextInt((int) period);
     }
 
-    /** Adds block to list of blocks */
+    /**
+     * Adds block to list of blocks
+     */
     synchronized void addBlock(Block block) {
         if (!isInitialized()) {
             return;
@@ -256,7 +260,9 @@ class DataBlockScanner implements Runnable {
         adjustThrottler();
     }
 
-    /** Deletes the block from internal structures */
+    /**
+     * Deletes the block from internal structures
+     */
     synchronized void deleteBlock(Block block) {
         if (!isInitialized()) {
             return;
@@ -267,7 +273,9 @@ class DataBlockScanner implements Runnable {
         }
     }
 
-    /** @return the last scan time */
+    /**
+     * @return the last scan time
+     */
     synchronized long getLastScanTime(Block block) {
         if (!isInitialized()) {
             return 0;
@@ -276,7 +284,10 @@ class DataBlockScanner implements Runnable {
         return info == null ? 0 : info.lastScanTime;
     }
 
-    /** Deletes blocks from internal structures */
+    /**
+     * Deletes blocks from internal structures
+     */
+    /*没有从磁盘中删除数据，只是删除了内存中的记录*/
     void deleteBlocks(Block[] blocks) {
         for (Block b : blocks) {
             deleteBlock(b);
@@ -299,14 +310,10 @@ class DataBlockScanner implements Runnable {
     }
 
     /**
-     * @param block
-     *          - block to update status for
-     * @param type
-     *          - client, DN, ...
-     * @param scanOk
-     *          - result of scan
-     * @param updateOnly
-     *          - if true, cannot add a block, but only update an existing block
+     * @param block      - block to update status for
+     * @param type       - client, DN, ...
+     * @param scanOk     - result of scan
+     * @param updateOnly - if true, cannot add a block, but only update an existing block
      */
     private synchronized void updateScanStatusInternal(Block block,
                                                        ScanType type, boolean scanOk, boolean updateOnly) {
@@ -505,7 +512,8 @@ class DataBlockScanner implements Runnable {
         }
     }
 
-    /** returns false if the process was interrupted
+    /**
+     * returns false if the process was interrupted
      * because the thread is marked to exit.
      */
     private boolean assignInitialVerificationTimes() {
@@ -743,8 +751,8 @@ class DataBlockScanner implements Runnable {
          * called. This is so that line count could be updated in a separate
          * thread without delaying start up.
          *
-         * @param dir where the logs files are located.
-         * @param filePrefix prefix of the file.
+         * @param dir         where the logs files are located.
+         * @param filePrefix  prefix of the file.
          * @param maxNumLines max lines in a file (its a soft limit).
          * @throws IOException
          */

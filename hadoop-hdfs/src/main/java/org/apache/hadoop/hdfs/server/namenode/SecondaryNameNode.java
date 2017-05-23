@@ -62,7 +62,7 @@ import java.util.Iterator;
 public class SecondaryNameNode implements Runnable {
     
   static{
-    Configuration.addDefaultResource("hdfs-default.xml");
+    Configuration.addDefaultResource("src/main/resources/hdfs-default.xml");
     Configuration.addDefaultResource("hdfs-site.xml");
   }
   public static final Log LOG =

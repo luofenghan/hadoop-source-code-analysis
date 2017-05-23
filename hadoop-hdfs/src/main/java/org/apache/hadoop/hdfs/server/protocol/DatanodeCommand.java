@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableFactories;
-import org.apache.hadoop.io.WritableFactory;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -51,18 +50,8 @@ public abstract class DatanodeCommand implements Writable {
     }
 
     static {                                      // register a ctor
-        WritableFactories.setFactory(Register.class,
-                new WritableFactory() {
-                    public Writable newInstance() {
-                        return new Register();
-                    }
-                });
-        WritableFactories.setFactory(Finalize.class,
-                new WritableFactory() {
-                    public Writable newInstance() {
-                        return new Finalize();
-                    }
-                });
+        WritableFactories.setFactory(Register.class, Register::new);
+        WritableFactories.setFactory(Finalize.class, Finalize::new);
     }
 
     public static final DatanodeCommand REGISTER = new Register();

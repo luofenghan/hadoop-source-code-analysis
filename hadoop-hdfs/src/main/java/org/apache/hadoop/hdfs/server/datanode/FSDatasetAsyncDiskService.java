@@ -74,11 +74,7 @@ class FSDatasetAsyncDiskService {
      */
     FSDatasetAsyncDiskService(File[] volumes) {
 
-        threadFactory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                return new Thread(threadGroup, r);
-            }
-        };
+        threadFactory = r -> new Thread(threadGroup, r);
 
         // Create one ThreadPool per volume
         for (File volume : volumes) {

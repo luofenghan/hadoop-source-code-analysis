@@ -89,8 +89,7 @@ public class DataStorage extends Storage {
      */
     void recoverTransitionRead(NamespaceInfo nsInfo,
                                Collection<File> dataDirs,
-                               StartupOption startOpt
-    ) throws IOException {
+                               StartupOption startOpt) throws IOException {
         assert FSConstants.LAYOUT_VERSION == nsInfo.getLayoutVersion() :
                 "Data-node and name-node layout versions must be the same.";
 
@@ -99,6 +98,7 @@ public class DataStorage extends Storage {
         // Format and recover.
         this.storageID = "";
         this.storageDirs = new ArrayList<StorageDirectory>(dataDirs.size());
+        /*存储空间状态*/
         ArrayList<StorageState> dataDirStates = new ArrayList<StorageState>(dataDirs.size());
         for (Iterator<File> it = dataDirs.iterator(); it.hasNext(); ) {
             File dataDir = it.next();
@@ -367,8 +367,8 @@ public class DataStorage extends Storage {
     }
 
     void finalizeUpgrade() throws IOException {
-        for (Iterator<StorageDirectory> it = storageDirs.iterator(); it.hasNext(); ) {
-            doFinalize(it.next());
+        for (StorageDirectory storageDir : storageDirs) {
+            doFinalize(storageDir);
         }
     }
 

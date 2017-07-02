@@ -25,7 +25,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -102,8 +101,8 @@ public class LocatedBlocks implements Writable {
         LocatedBlock key = new LocatedBlock();
         key.setStartOffset(offset);
         key.getBlock().setNumBytes(1);
-        // Returns 0 iff a is inside b or b is inside a
-        Comparator<LocatedBlock> comp = (a, b) -> {
+        // Returns 0 if a is inside b or b is inside a
+        return Collections.binarySearch(blocks, key, (a, b) -> {
             long aBeg = a.getStartOffset();
             long bBeg = b.getStartOffset();
             long aEnd = aBeg + a.getBlockSize();
@@ -113,8 +112,7 @@ public class LocatedBlocks implements Writable {
             if (aBeg < bBeg)
                 return -1; // a's left bound is to the left of the b's
             return 1;
-        };
-        return Collections.binarySearch(blocks, key, comp);
+        });
     }
 
     public void insertRange(int blockIdx, List<LocatedBlock> newBlocks) {

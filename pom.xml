@@ -10,7 +10,7 @@
     <modules>
         <module>hadoop-core</module>
         <module>hadoop-hdfs</module>
-        <module>hadoop-test</module>
+        <module>hadoop-mapred</module>
     </modules>
     <dependencies>
         <dependency>

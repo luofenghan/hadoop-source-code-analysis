@@ -49,8 +49,8 @@ public class DFSUtil {
       String element = tokens.nextToken();
       if (element.equals("..") || 
           element.equals(".")  ||
-          (element.indexOf(":") >= 0)  ||
-          (element.indexOf("/") >= 0)) {
+          (element.contains(":"))  ||
+          (element.contains("/"))) {
         return false;
       }
     }

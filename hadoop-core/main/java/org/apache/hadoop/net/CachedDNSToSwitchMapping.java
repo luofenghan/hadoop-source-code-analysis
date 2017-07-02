@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,74 +30,74 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class CachedDNSToSwitchMapping implements DNSToSwitchMapping {
-  private Map<String, String> cache = new ConcurrentHashMap<String, String>();
-  protected DNSToSwitchMapping rawMapping;
-  
-  public CachedDNSToSwitchMapping(DNSToSwitchMapping rawMapping) {
-    this.rawMapping = rawMapping;
-  }
-  
-  
-  /**
-   * Returns the hosts from 'names' that have not been cached previously
-   */
-  private List<String> getUncachedHosts(List<String> names) {
-    // find out all names without cached resolved location
-    List<String> unCachedHosts = new ArrayList<String>(names.size());
-    for (String name : names) {
-      if (cache.get(name) == null) {
-        unCachedHosts.add(name);
-      } 
-    }
-    return unCachedHosts;
-  }
-  
-  /**
-   * Caches the resolved hosts
-   */
-  private void cacheResolvedHosts(List<String> uncachedHosts, 
-      List<String> resolvedHosts) {
-    // Cache the result
-    if (resolvedHosts != null) {
-      for (int i=0; i<uncachedHosts.size(); i++) {
-        cache.put(uncachedHosts.get(i), resolvedHosts.get(i));
-      }
-    }
-  }
-  
-  /**
-   * Returns the cached resolution of the list of hostnames/addresses.
-   * Returns null if any of the names are not currently in the cache
-   */
-  private List<String> getCachedHosts(List<String> names) {
-    List<String> result = new ArrayList<String>(names.size());
-    // Construct the result
-    for (String name : names) {
-      String networkLocation = cache.get(name);
-      if (networkLocation != null) {
-        result.add(networkLocation);
-      } else {
-        return null;
-      }
-    }
-    return result;
-  }
+    private Map<String, String> cache = new ConcurrentHashMap<String, String>();
+    protected DNSToSwitchMapping rawMapping;
 
-  public List<String> resolve(List<String> names) {
-    // normalize all input names to be in the form of IP addresses
-    names = NetUtils.normalizeHostNames(names);
-
-    List <String> result = new ArrayList<String>(names.size());
-    if (names.isEmpty()) {
-      return result;
+    public CachedDNSToSwitchMapping(DNSToSwitchMapping rawMapping) {
+        this.rawMapping = rawMapping;
     }
 
-    List<String> uncachedHosts = this.getUncachedHosts(names);
 
-    // Resolve the uncached hosts
-    List<String> resolvedHosts = rawMapping.resolve(uncachedHosts);
-    this.cacheResolvedHosts(uncachedHosts, resolvedHosts);
-    return this.getCachedHosts(names);
+    /**
+     * Returns the hosts from 'names' that have not been cached previously
+     */
+    private List<String> getUncachedHosts(List<String> names) {
+        // find out all names without cached resolved location
+        List<String> unCachedHosts = new ArrayList<String>(names.size());
+        for (String name : names) {
+            if (cache.get(name) == null) {
+                unCachedHosts.add(name);
+            }
+        }
+        return unCachedHosts;
+    }
 
-  }
+    /**
+     * Caches the resolved hosts
+     */
+    private void cacheResolvedHosts(List<String> uncachedHosts,
+                                    List<String> resolvedHosts) {
+        // Cache the result
+        if (resolvedHosts != null) {
+            for (int i = 0; i < uncachedHosts.size(); i++) {
+                cache.put(uncachedHosts.get(i), resolvedHosts.get(i));
+            }
+        }
+    }
+
+    /**
+     * Returns the cached resolution of the list of hostnames/addresses.
+     * Returns null if any of the names are not currently in the cache
+     */
+    private List<String> getCachedHosts(List<String> names) {
+        List<String> result = new ArrayList<String>(names.size());
+        // Construct the result
+        for (String name : names) {
+            String networkLocation = cache.get(name);
+            if (networkLocation != null) {
+                result.add(networkLocation);
+            } else {
+                return null;
+            }
+        }
+        return result;
+    }
+
+    public List<String> resolve(List<String> names) {
+        // normalize all input names to be in the form of IP addresses
+        names = NetUtils.normalizeHostNames(names);
+
+        List<String> result = new ArrayList<String>(names.size());
+        if (names.isEmpty()) {
+            return result;
+        }
+
+        List<String> uncachedHosts = this.getUncachedHosts(names);
+
+        // Resolve the uncached hosts
+        List<String> resolvedHosts = rawMapping.resolve(uncachedHosts);
+        this.cacheResolvedHosts(uncachedHosts, resolvedHosts);
+        return this.getCachedHosts(names);
+
+    }
 }

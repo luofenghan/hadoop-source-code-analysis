@@ -75,13 +75,15 @@ class DataXceiver implements Runnable, FSConstants {
         DataInputStream in = null;
         try {
             in = new DataInputStream(new BufferedInputStream(NetUtils.getInputStream(s), SMALL_BUFFER_SIZE));
+            /*4字节长度的【传输版本号】*/
             short version = in.readShort();
             if (version != DataTransferProtocol.DATA_TRANSFER_VERSION) {
                 throw new IOException("Version Mismatch");
             }
             boolean local = s.getInetAddress().equals(s.getLocalAddress());
+            /*1字节的【操作码】*/
             byte op = in.readByte();
-            // Make sure the xciver count is not exceeded
+            // Make sure the xceiver count is not exceeded
             int curXceiverCount = datanode.getXceiverCount();
             if (curXceiverCount > dataXceiverServer.maxXceiverCount) {
                 throw new IOException("xceiverCount " + curXceiverCount
@@ -93,10 +95,8 @@ class DataXceiver implements Runnable, FSConstants {
                 case DataTransferProtocol.OP_READ_BLOCK:
                     readBlock(in);
                     datanode.myMetrics.addReadBlockOp(DataNode.now() - startTime);
-                    if (local)
-                        datanode.myMetrics.incrReadsFromLocalClient();
-                    else
-                        datanode.myMetrics.incrReadsFromRemoteClient();
+                    if (local) datanode.myMetrics.incrReadsFromLocalClient();
+                    else datanode.myMetrics.incrReadsFromRemoteClient();
                     break;
                 case DataTransferProtocol.OP_WRITE_BLOCK:
                     writeBlock(in);
@@ -140,18 +140,18 @@ class DataXceiver implements Runnable, FSConstants {
      * @throws IOException
      */
     private void readBlock(DataInputStream in) throws IOException {
-        // 要读取的数据块标识，数据节点通过它定位数据块
+        // 要读取的数据块标识，数据节点通过它定位数据块 8字节长度
         long blockId = in.readLong();
-        // 用于版本检查，防止读取错误的数据
+        // 用于版本检查，防止读取错误的数据 8字节长度
         long generationStamp = in.readLong();
         Block block = new Block(blockId, 0, generationStamp);
-        // 要读取的数据位于数据块中的位置
+        // 要读取的数据位于数据块中的位置 8字节长度
         long startOffset = in.readLong();
-        // 客户端需要读取的数据长度
+        // 客户端需要读取的数据长度 8字节长度
         long length = in.readLong();
         // 发起读请求的客户端名字
         String clientName = Text.readString(in);
-        Token<BlockTokenIdentifier> accessToken = new Token<BlockTokenIdentifier>();
+        Token<BlockTokenIdentifier> accessToken = new Token<>();
         //访问令牌
         accessToken.readFields(in);
 
@@ -244,7 +244,7 @@ class DataXceiver implements Runnable, FSConstants {
         String client = Text.readString(in); // 客户端名字
         boolean hasSrcDataNode = in.readBoolean(); // 是否包含源信息
         DatanodeInfo srcDataNode = null;
-        if (hasSrcDataNode) {
+        if (hasSrcDataNode) {/*在数据块恢复的过程中，为true*/
             srcDataNode = new DatanodeInfo();
             srcDataNode.readFields(in);// 读取源信息
         }
@@ -259,7 +259,7 @@ class DataXceiver implements Runnable, FSConstants {
             targets[i] = tmp;
         }
         //访问令牌
-        Token<BlockTokenIdentifier> accessToken = new Token<BlockTokenIdentifier>();
+        Token<BlockTokenIdentifier> accessToken = new Token<>();
         accessToken.readFields(in);
         DataOutputStream replyOut = null;   // stream to prev target
         replyOut = new DataOutputStream(NetUtils.getOutputStream(s, datanode.socketWriteTimeout));
@@ -317,10 +317,9 @@ class DataXceiver implements Runnable, FSConstants {
                     NetUtils.connect(mirrorSocket, mirrorTarget, timeoutValue);
                     mirrorSocket.setSoTimeout(timeoutValue);
                     mirrorSocket.setSendBufferSize(DEFAULT_DATA_SOCKET_SIZE);
-                    mirrorOut = new DataOutputStream(
-                            new BufferedOutputStream(
-                                    NetUtils.getOutputStream(mirrorSocket, writeTimeout),
-                                    SMALL_BUFFER_SIZE));
+                    mirrorOut = new DataOutputStream(new BufferedOutputStream(
+                            NetUtils.getOutputStream(mirrorSocket, writeTimeout),
+                            SMALL_BUFFER_SIZE));
                     mirrorIn = new DataInputStream(NetUtils.getInputStream(mirrorSocket));
 
                     // Write header: Copied from DFSClient.java!
@@ -388,10 +387,9 @@ class DataXceiver implements Runnable, FSConstants {
             // 顺利完成各类初始化任务，写应答
             if (client.length() != 0) {
                 if (LOG.isDebugEnabled() || mirrorInStatus != DataTransferProtocol.OP_STATUS_SUCCESS) {
-                    LOG.info("Datanode " + targets.length +
-                            " forwarding connect ack to upstream firstbadlink is " +
-                            firstBadLink);
+                    LOG.info("Datanode " + targets.length + " forwarding connect ack to upstream firstbadlink is " + firstBadLink);
                 }
+
                 /*向上游回复成功的ack*/
                 replyOut.writeShort(mirrorInStatus);
                 Text.writeString(replyOut, firstBadLink);
@@ -402,8 +400,7 @@ class DataXceiver implements Runnable, FSConstants {
             String mirrorAddr = (mirrorSocket == null) ? null : mirrorNode;
 
             // 写输出的逻辑交给 BlockReceiver.receiveBlock()
-            blockReceiver.receiveBlock(mirrorOut, mirrorIn, replyOut,
-                    mirrorAddr, null, targets.length);
+            blockReceiver.receiveBlock(mirrorOut, mirrorIn, replyOut, mirrorAddr, null, targets.length);
 
             // 如果当前是复制请求，则向NameNode进行确认汇报
             // 如果是客户端写数据，则汇报工作交给 PacketResponder

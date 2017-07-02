@@ -30,6 +30,8 @@ import java.io.IOException;
  * A Block is a Hadoop FS primitive, identified by a 
  * long.
  *
+ *  blockId 和 generationStamp 唯一确定一个Block
+ *
  **************************************************/
 public class Block implements Writable, Comparable<Block> {
 

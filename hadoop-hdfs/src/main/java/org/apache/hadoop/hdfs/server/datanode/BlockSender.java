@@ -80,6 +80,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
                 boolean corruptChecksumOk, boolean chunkOffsetOK,
                 boolean verifyChecksum, DataNode datanode, String clientTraceFmt) throws IOException {
         try {
+            /*完成成员变量的赋值操作*/
             this.block = block;
             this.chunkOffsetOK = chunkOffsetOK;
             this.corruptChecksumOk = corruptChecksumOk;
@@ -103,8 +104,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
             } else {
                 LOG.warn("Could not find metadata file for " + block);
                 // This only decides the buffer size. Use BUFFER_SIZE?
-                checksum = DataChecksum.newDataChecksum(DataChecksum.CHECKSUM_NULL,
-                        16 * 1024);
+                checksum = DataChecksum.newDataChecksum(DataChecksum.CHECKSUM_NULL, 16 * 1024);
             }
 
           /* If bytesPerChecksum is very large, then the metadata file
@@ -113,8 +113,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
            */
             bytesPerChecksum = checksum.getBytesPerChecksum();
             if (bytesPerChecksum > 10 * 1024 * 1024 && bytesPerChecksum > blockLength) {
-                checksum = DataChecksum.newDataChecksum(checksum.getChecksumType(),
-                        Math.max((int) blockLength, 10 * 1024 * 1024));
+                checksum = DataChecksum.newDataChecksum(checksum.getChecksumType(), Math.max((int) blockLength, 10 * 1024 * 1024));
                 bytesPerChecksum = checksum.getBytesPerChecksum();
             }
             checksumSize = checksum.getChecksumSize();
@@ -124,7 +123,8 @@ class BlockSender implements java.io.Closeable, FSConstants {
             }
 
             this.endOffset = blockLength;
-            if (startOffset < 0 || startOffset > endOffset
+            if (startOffset < 0
+                    || startOffset > endOffset
                     || (length + startOffset) > endOffset) {
                 String msg = " Offset " + startOffset + " and length " + length
                         + " don't match block " + block + " ( blockLen " + endOffset + " )";

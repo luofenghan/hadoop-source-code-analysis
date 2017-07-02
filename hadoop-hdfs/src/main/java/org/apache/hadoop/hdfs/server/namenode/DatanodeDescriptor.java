@@ -50,32 +50,46 @@ public class DatanodeDescriptor extends DatanodeInfo {
     // If node is not decommissioning, do not use this object for anything.
     DecommissioningStatus decommissioningStatus = new DecommissioningStatus();
 
-    /** Block and targets pair */
+    /**
+     * Block and targets pair
+     * 数据块和目标数据节点
+     * 用于数据块的恢复和复制
+     */
     public static class BlockTargetPair {
-        public final Block block;
-        public final DatanodeDescriptor[] targets;
+
+        public final Block block;  /*数据块*/
+        public final DatanodeDescriptor[] targets;  /*目标数据节点*/
 
         BlockTargetPair(Block block, DatanodeDescriptor[] targets) {
             this.block = block;
             this.targets = targets;
         }
+
     }
 
-    /** A BlockTargetPair queue. */
+    /**
+     * A BlockTargetPair queue.
+     */
     private static class BlockQueue {
         private final Queue<BlockTargetPair> blockq = new LinkedList<BlockTargetPair>();
 
-        /** Size of the queue */
+        /**
+         * Size of the queue
+         */
         synchronized int size() {
             return blockq.size();
         }
 
-        /** Enqueue */
+        /**
+         * Enqueue
+         */
         synchronized boolean offer(Block block, DatanodeDescriptor[] targets) {
             return blockq.offer(new BlockTargetPair(block, targets));
         }
 
-        /** Dequeue */
+        /**
+         * Dequeue
+         */
         synchronized List<BlockTargetPair> poll(int numBlocks) {
             if (numBlocks <= 0 || blockq.isEmpty()) {
                 return null;
@@ -89,10 +103,13 @@ public class DatanodeDescriptor extends DatanodeInfo {
         }
     }
 
+    /*数据节点保存的数据块队列的头结点*/
     private volatile BlockInfo blockList = null;
+
     // isAlive == heartbeats.contains(this)
     // This is an optimization, because contains takes O(n) time on Arraylist
-    protected boolean isAlive = false;
+    protected boolean isAlive = false;/*节点是否失效*/
+
     protected boolean needKeyUpdate = false;
 
     // A system administrator can tune the balancer bandwidth parameter
@@ -101,19 +118,37 @@ public class DatanodeDescriptor extends DatanodeInfo {
     // following 'bandwidth' variable gets updated with the new value for each
     // node. Once the heartbeat command is issued to update the value on the
     // specified datanode, this value will be set back to 0.
+
+    /*数据节点的${dfs.balance.bandwidthPerSec}参数，可以通过以下命令设置
+    * "dfsadmin -setBalanacerBandwidth <newbandwidth>"
+    * 并用DataNodeCommand更新到数据节点，更新命令发出后，bandwith会被设置为0
+    * */
     private long bandwidth;
 
-    /** A queue of blocks to be replicated by this datanode */
+    /**
+     * A queue of blocks to be replicated by this datanode
+     * 该数据节点上等待 复制到其他数据节点上 的数据块
+     */
     private BlockQueue replicateBlocks = new BlockQueue();
-    /** A queue of blocks to be recovered by this datanode */
+    /**
+     * A queue of blocks to be recovered by this datanode
+     * 该数据节点上等待 租约恢复到其他数据节点上 的数据块
+     */
     private BlockQueue recoverBlocks = new BlockQueue();
-    /** A set of blocks to be invalidated by this datanode */
+    /**
+     * A set of blocks to be invalidated by this datanode
+     * 该数据节点上等待被删除的数据块
+     */
     private Set<Block> invalidateBlocks = new TreeSet<Block>();
 
     /* Variables for maintaning number of blocks scheduled to be written to
      * this datanode. This count is approximate and might be slightly higger
      * in case of errors (e.g. datanode does not report if an error occurs
      * while writing the block).
+     * 用于估计数据节点的负载，为写文件操作分配数据块或进行数据块复制时，
+     * 优先选择比较空闲的节点作为目标
+     *
+     *
      */
     private int currApproxBlocksScheduled = 0;
     private int prevApproxBlocksScheduled = 0;
@@ -121,22 +156,30 @@ public class DatanodeDescriptor extends DatanodeInfo {
     private static final int BLOCKS_SCHEDULED_ROLL_INTERVAL = 600 * 1000; //10min
 
     // Set to false after processing first block report
+    /*
+    * 是否发送了第一个数据块上报
+    * */
     private boolean firstBlockReport = true;
 
-    /** Default constructor */
+    /**
+     * Default constructor
+     */
     public DatanodeDescriptor() {
     }
 
-    /** DatanodeDescriptor constructor
+    /**
+     * DatanodeDescriptor constructor
+     *
      * @param nodeID id of the data node
      */
     public DatanodeDescriptor(DatanodeID nodeID) {
         this(nodeID, 0L, 0L, 0L, 0);
     }
 
-    /** DatanodeDescriptor constructor
+    /**
+     * DatanodeDescriptor constructor
      *
-     * @param nodeID id of the data node
+     * @param nodeID          id of the data node
      * @param networkLocation location of the data node in network
      */
     public DatanodeDescriptor(DatanodeID nodeID,
@@ -144,11 +187,12 @@ public class DatanodeDescriptor extends DatanodeInfo {
         this(nodeID, networkLocation, null);
     }
 
-    /** DatanodeDescriptor constructor
+    /**
+     * DatanodeDescriptor constructor
      *
-     * @param nodeID id of the data node
+     * @param nodeID          id of the data node
      * @param networkLocation location of the data node in network
-     * @param hostName it could be different from host specified for DatanodeID
+     * @param hostName        it could be different from host specified for DatanodeID
      */
     public DatanodeDescriptor(DatanodeID nodeID,
                               String networkLocation,
@@ -156,12 +200,13 @@ public class DatanodeDescriptor extends DatanodeInfo {
         this(nodeID, networkLocation, hostName, 0L, 0L, 0L, 0);
     }
 
-    /** DatanodeDescriptor constructor
+    /**
+     * DatanodeDescriptor constructor
      *
-     * @param nodeID id of the data node
-     * @param capacity capacity of the data node
-     * @param dfsUsed space used by the data node
-     * @param remaining remaing capacity of the data node
+     * @param nodeID       id of the data node
+     * @param capacity     capacity of the data node
+     * @param dfsUsed      space used by the data node
+     * @param remaining    remaing capacity of the data node
      * @param xceiverCount # of data transfers at the data node
      */
     public DatanodeDescriptor(DatanodeID nodeID,
@@ -173,14 +218,15 @@ public class DatanodeDescriptor extends DatanodeInfo {
         updateHeartbeat(capacity, dfsUsed, remaining, xceiverCount);
     }
 
-    /** DatanodeDescriptor constructor
+    /**
+     * DatanodeDescriptor constructor
      *
-     * @param nodeID id of the data node
+     * @param nodeID          id of the data node
      * @param networkLocation location of the data node in network
-     * @param capacity capacity of the data node, including space used by non-dfs
-     * @param dfsUsed the used space by dfs datanode
-     * @param remaining remaing capacity of the data node
-     * @param xceiverCount # of data transfers at the data node
+     * @param capacity        capacity of the data node, including space used by non-dfs
+     * @param dfsUsed         the used space by dfs datanode
+     * @param remaining       remaing capacity of the data node
+     * @param xceiverCount    # of data transfers at the data node
      */
     public DatanodeDescriptor(DatanodeID nodeID,
                               String networkLocation,
@@ -196,6 +242,10 @@ public class DatanodeDescriptor extends DatanodeInfo {
     /**
      * Add data-node to the block.
      * Add block to the head of the list of blocks belonging to the data-node.
+     * <p>
+     * 当数据节点成功接收到一个数据块后，会通过RPC方法blockReceived()报告NameNode节点。
+     * NameNode自然需要把它添加/更新到对应的数据节点的DatanodeDescriptor对象中。
+     * 使用了该方法。
      */
     boolean addBlock(BlockInfo b) {
         if (!b.addNode(this))
@@ -340,8 +390,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
      */
     BlockCommand getInvalidateBlocks(int maxblocks) {
         Block[] deleteList = getBlockArray(invalidateBlocks, maxblocks);
-        return deleteList == null ?
-                null : new BlockCommand(DatanodeProtocol.DNA_INVALIDATE, deleteList);
+        return deleteList == null ? null : new BlockCommand(DatanodeProtocol.DNA_INVALIDATE, deleteList);
     }
 
     static private Block[] getBlockArray(Collection<Block> blocks, int max) {
@@ -383,12 +432,12 @@ public class DatanodeDescriptor extends DatanodeInfo {
     }
 
     void reportDiff(BlocksMap blocksMap,
-                    BlockListAsLongs newReport,
-                    Collection<Block> toAdd,
-                    Collection<Block> toRemove,
-                    Collection<Block> toInvalidate) {
-        // place a deilimiter in the list which separates blocks
-        // that have been reported from those that have not
+                    BlockListAsLongs newReport,/*新上报的数据块列表*/
+                    Collection<Block> toAdd,/*应该添加的副本*/
+                    Collection<Block> toRemove,/*移除*/
+                    Collection<Block> toInvalidate/*删除*/) {
+        // 添加一个特殊的数据块 delimiter 到 DatanodeDescriptor中
+        // 用于分割 原有数据块 和 新添加的数据块
         BlockInfo delimiter = new BlockInfo(new Block(), 1);
         boolean added = this.addBlock(delimiter);
         assert added : "Delimiting block cannot be present in the node";
@@ -397,7 +446,9 @@ public class DatanodeDescriptor extends DatanodeInfo {
         // scan the report and collect newly reported blocks
         // Note we are taking special precaution to limit tmp blocks allocated
         // as part this block report - which why block list is stored as longs
-        Block iblk = new Block(); // a fixed new'ed block to be reused with index i
+
+        /*扫描上报的数据块列表*/
+        Block iblk = new Block(); // 工作Block对象，将newReport中的信息转换为对象
         Block oblk = new Block(); // for fixing genstamps
         for (int i = 0; i < newReport.getNumberOfBlocks(); ++i) {
             iblk.set(newReport.getBlockId(i), newReport.getBlockLen(i),
@@ -409,7 +460,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
                 // This block has a diferent generation stamp on the datanode
                 // because of a lease-recovery-attempt.
                 oblk.set(newReport.getBlockId(i), newReport.getBlockLen(i),
-                        GenerationStamp.WILDCARD_STAMP);
+                        GenerationStamp.WILDCARD_STAMP);/*不带时间戳查找*/
                 storedBlock = blocksMap.getStoredBlock(oblk);
                 if (storedBlock != null && storedBlock.getINode() != null &&
                         (storedBlock.getGenerationStamp() <= iblk.getGenerationStamp() ||
@@ -419,7 +470,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
                     storedBlock = null;
                 }
             }
-            if (storedBlock == null) {
+            if (storedBlock == null) {/*没有找到任何信息*/
                 // If block is not in blocksMap it does not belong to any file
                 toInvalidate.add(new Block(iblk));
                 continue;
@@ -440,6 +491,9 @@ public class DatanodeDescriptor extends DatanodeInfo {
         }
         // collect blocks that have not been reported
         // all of them are next to the delimiter
+        /*这次上报中没有出现的数据块，即数据节点已经没有，而 DatanodeDescriptor 中
+        * 还保存的副本
+        * */
         Iterator<Block> it = new BlockIterator(delimiter.getNext(0), this);
         while (it.hasNext()) {
             BlockInfo storedBlock = (BlockInfo) it.next();
@@ -451,7 +505,9 @@ public class DatanodeDescriptor extends DatanodeInfo {
         this.removeBlock(delimiter);
     }
 
-    /** Serialization for FSEditLog */
+    /**
+     * Serialization for FSEditLog
+     */
     void readFieldsFromFSEditLog(DataInput in) throws IOException {
         this.name = UTF8.readString(in);
         this.storageID = UTF8.readString(in);
@@ -498,8 +554,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
      * Adjusts curr and prev number of blocks scheduled every few minutes.
      */
     private void rollBlocksScheduled(long now) {
-        if ((now - lastBlocksScheduledRollTime) >
-                BLOCKS_SCHEDULED_ROLL_INTERVAL) {
+        if ((now - lastBlocksScheduledRollTime) > BLOCKS_SCHEDULED_ROLL_INTERVAL) {
             prevApproxBlocksScheduled = currApproxBlocksScheduled;
             currApproxBlocksScheduled = 0;
             lastBlocksScheduledRollTime = now;
@@ -508,12 +563,13 @@ public class DatanodeDescriptor extends DatanodeInfo {
 
     class DecommissioningStatus {
         int underReplicatedBlocks;
+        /*当节点处于撤销状态时使用*/
         int decommissionOnlyReplicas;
         int underReplicatedInOpenFiles;
         long startTime;
 
         synchronized void set(int underRep, int onlyRep, int underConstruction) {
-            if (isDecommissionInProgress() == false) {
+            if (!isDecommissionInProgress()) {
                 return;
             }
             underReplicatedBlocks = underRep;
@@ -522,21 +578,21 @@ public class DatanodeDescriptor extends DatanodeInfo {
         }
 
         synchronized int getUnderReplicatedBlocks() {
-            if (isDecommissionInProgress() == false) {
+            if (!isDecommissionInProgress()) {
                 return 0;
             }
             return underReplicatedBlocks;
         }
 
         synchronized int getDecommissionOnlyReplicas() {
-            if (isDecommissionInProgress() == false) {
+            if (!isDecommissionInProgress()) {
                 return 0;
             }
             return decommissionOnlyReplicas;
         }
 
         synchronized int getUnderReplicatedInOpenFiles() {
-            if (isDecommissionInProgress() == false) {
+            if (!isDecommissionInProgress()) {
                 return 0;
             }
             return underReplicatedInOpenFiles;
@@ -547,7 +603,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
         }
 
         synchronized long getStartTime() {
-            if (isDecommissionInProgress() == false) {
+            if (!isDecommissionInProgress()) {
                 return 0;
             }
             return startTime;

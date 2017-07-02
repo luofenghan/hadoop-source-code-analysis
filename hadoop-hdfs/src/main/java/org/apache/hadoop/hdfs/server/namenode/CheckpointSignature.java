@@ -26,15 +26,13 @@ import java.io.IOException;
 
 /**
  * A unique signature intended to identify checkpoint transactions.
+ * 检查点事务唯一签名
  */
 public class CheckpointSignature extends StorageInfo
         implements WritableComparable<CheckpointSignature> {
     private static final String FIELD_SEPARATOR = ":";
     long editsTime = -1L;
     long checkpointTime = -1L;
-
-    CheckpointSignature() {
-    }
 
     CheckpointSignature(FSImage fsImage) {
         super(fsImage);
@@ -75,21 +73,20 @@ public class CheckpointSignature extends StorageInfo
     // Comparable interface
     //
     public int compareTo(CheckpointSignature o) {
-        return
-                (layoutVersion < o.layoutVersion) ? -1 :
-                        (layoutVersion > o.layoutVersion) ? 1 :
-                                (namespaceID < o.namespaceID) ? -1 : (namespaceID > o.namespaceID) ? 1 :
-                                        (cTime < o.cTime) ? -1 : (cTime > o.cTime) ? 1 :
-                                                (editsTime < o.editsTime) ? -1 : (editsTime > o.editsTime) ? 1 :
-                                                        (checkpointTime < o.checkpointTime) ? -1 :
-                                                                (checkpointTime > o.checkpointTime) ? 1 : 0;
+        return (layoutVersion < o.layoutVersion) ? -1 :
+                (layoutVersion > o.layoutVersion) ? 1 :
+                        (namespaceID < o.namespaceID) ? -1 :
+                                (namespaceID > o.namespaceID) ? 1 :
+                                        (cTime < o.cTime) ? -1 :
+                                                (cTime > o.cTime) ? 1 :
+                                                        (editsTime < o.editsTime) ? -1 :
+                                                                (editsTime > o.editsTime) ? 1 :
+                                                                        (checkpointTime < o.checkpointTime) ? -1 :
+                                                                                (checkpointTime > o.checkpointTime) ? 1 : 0;
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof CheckpointSignature)) {
-            return false;
-        }
-        return compareTo((CheckpointSignature) o) == 0;
+        return o instanceof CheckpointSignature && compareTo((CheckpointSignature) o) == 0;
     }
 
     public int hashCode() {

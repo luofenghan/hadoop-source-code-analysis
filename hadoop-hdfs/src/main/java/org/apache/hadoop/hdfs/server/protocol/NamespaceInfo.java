@@ -31,7 +31,9 @@ import java.io.IOException;
 
 /**
  * NamespaceInfo is returned by the name-node in reply
- * to a data-node handshake.
+ * to a data-node handshake.\
+ * <p>
+ * 用于DataNode与NameNode握手时的返回信息
  */
 public class NamespaceInfo extends StorageInfo implements Writable {
     String buildVersion;

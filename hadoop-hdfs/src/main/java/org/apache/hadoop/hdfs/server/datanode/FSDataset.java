@@ -47,15 +47,14 @@ import java.util.*;
  ***************************************************/
 public class FSDataset implements FSConstants, FSDatasetInterface {
 
-
     /**
      * Find the metadata file for the specified block file.
      * Return the generation stamp from the name of the metafile.
      */
     private static long getGenerationStampFromFile(File[] listdir, File blockFile) {
         String blockName = blockFile.getName();
-        for (int j = 0; j < listdir.length; j++) {
-            String path = listdir[j].getName();
+        for (File file : listdir) {
+            String path = file.getName();
             if (!path.startsWith(blockName)) {
                 continue;
             }
@@ -144,8 +143,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
             return (file != null) ? file : addBlock(b, src, true, true);
         }
 
-        private File addBlock(Block b, File src, boolean createOk,
-                              boolean resetIdx) throws IOException {
+        private File addBlock(Block b, File src, boolean createOk, boolean resetIdx) throws IOException {
             if (numBlocks < maxBlocksPerDir) {
                 File dest = new File(dir, b.getBlockName());
                 File metaData = getMetaFile(src, b);
@@ -231,36 +229,36 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
          */
         void getBlockAndFileInfo(TreeSet<BlockAndFile> blockSet) {
             if (children != null) {
-                for (int i = 0; i < children.length; i++) {
-                    children[i].getBlockAndFileInfo(blockSet);
+                for (FSDir aChildren : children) {
+                    aChildren.getBlockAndFileInfo(blockSet);
                 }
             }
 
             File blockFiles[] = dir.listFiles();
-            for (int i = 0; i < blockFiles.length; i++) {
-                if (Block.isBlockFilename(blockFiles[i])) {
-                    long genStamp = FSDataset.getGenerationStampFromFile(blockFiles, blockFiles[i]);
-                    Block block = new Block(blockFiles[i], blockFiles[i].length(), genStamp);
-                    blockSet.add(new BlockAndFile(blockFiles[i].getAbsoluteFile(), block));
+            for (File blockFile : blockFiles) {
+                if (Block.isBlockFilename(blockFile)) {
+                    long genStamp = FSDataset.getGenerationStampFromFile(blockFiles, blockFile);
+                    Block block = new Block(blockFile, blockFile.length(), genStamp);
+                    blockSet.add(new BlockAndFile(blockFile.getAbsoluteFile(), block));
                 }
             }
         }
 
         void getVolumeMap(HashMap<Block, DatanodeBlockInfo> volumeMap, FSVolume volume) {
             if (children != null) {
-                for (int i = 0; i < children.length; i++) {
-                    children[i].getVolumeMap(volumeMap, volume);
+                for (FSDir aChildren : children) {
+                    aChildren.getVolumeMap(volumeMap, volume);
                 }
             }
 
             File blockFiles[] = dir.listFiles();
             if (blockFiles != null) {
-                for (int i = 0; i < blockFiles.length; i++) {
-                    if (Block.isBlockFilename(blockFiles[i])) {
+                for (File blockFile : blockFiles) {
+                    if (Block.isBlockFilename(blockFile)) {
                         long genStamp = FSDataset.getGenerationStampFromFile(blockFiles,
-                                blockFiles[i]);
-                        volumeMap.put(new Block(blockFiles[i], blockFiles[i].length(),
-                                genStamp), new DatanodeBlockInfo(volume, blockFiles[i]));
+                                blockFile);
+                        volumeMap.put(new Block(blockFile, blockFile.length(),
+                                genStamp), new DatanodeBlockInfo(volume, blockFile));
                     }
                 }
             }
@@ -275,8 +273,8 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
             DiskChecker.checkDir(dir);
 
             if (children != null) {
-                for (int i = 0; i < children.length; i++) {
-                    children[i].checkDirTree();
+                for (FSDir aChildren : children) {
+                    aChildren.checkDirTree();
                 }
             }
         }
@@ -320,14 +318,13 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
                     // layout changed? we could print a warning.
                     return false;
                 }
-                return (childIdx >= 0 && childIdx < children.length) ?
-                        children[childIdx].clearPath(f, dirNames, idx + 1) : false;
+                return (childIdx >= 0 && childIdx < children.length) && children[childIdx].clearPath(f, dirNames, idx + 1);
             }
 
             //guesses failed. back to blind iteration.
             if (children != null) {
-                for (int i = 0; i < children.length; i++) {
-                    if (children[i].clearPath(f, null, -1)) {
+                for (FSDir aChildren : children) {
+                    if (aChildren.clearPath(f, null, -1)) {
                         return true;
                     }
                 }
@@ -913,8 +910,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         }
         File metafile = findMetaFile(blockfile);
         Block block = new Block(blkid);
-        return new Block(blkid, getVisibleLength(block),
-                parseGenerationStamp(blockfile, metafile));
+        return new Block(blkid, getVisibleLength(block), parseGenerationStamp(blockfile, metafile));
     }
 
     public boolean metaFileExists(Block b) throws IOException {
@@ -1409,9 +1405,8 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         //
         // Make sure the block isn't a valid one - we're still creating it!
         //
-        /*验证数据块是否有效*/
-        /**
-         * 数据块有效的条件：
+        /*
+         * 验证数据块是否有效的条件：
          * 1. 对应的数据块文件file存在
          * 2. 数据块是否已提交
          */

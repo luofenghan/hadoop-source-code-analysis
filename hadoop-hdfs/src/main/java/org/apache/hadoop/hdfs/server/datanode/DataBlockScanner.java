@@ -52,8 +52,7 @@ class DataBlockScanner implements Runnable {
     static final long DEFAULT_SCAN_PERIOD_HOURS = 21 * 24L; // three weeks
     private static final long ONE_DAY = 24 * 3600 * 1000L;
 
-    static final DateFormat dateFormat =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+    static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
 
     static final String verificationLogFile = "dncp_block_verification.log";
     static final int verficationLogLimit = 5; // * numBlocks.
@@ -81,7 +80,7 @@ class DataBlockScanner implements Runnable {
 
     BlockTransferThrottler throttler = null;
 
-    private static enum ScanType {
+    private enum ScanType {
         REMOTE_READ,           // Verified when a block read by a client etc
         VERIFICATION_SCAN,     // scanned as part of periodic verfication
         NONE,

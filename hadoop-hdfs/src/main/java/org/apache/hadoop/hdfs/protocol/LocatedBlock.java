@@ -65,8 +65,7 @@ public class LocatedBlock implements Writable {
 
     /**
      */
-    public LocatedBlock(Block b, DatanodeInfo[] locs, long startOffset,
-                        boolean corrupt) {
+    public LocatedBlock(Block b, DatanodeInfo[] locs, long startOffset, boolean corrupt) {
         this.b = b;
         this.offset = startOffset;
         this.corrupt = corrupt;
@@ -101,6 +100,11 @@ public class LocatedBlock implements Writable {
         return offset;
     }
 
+    /**
+     * 数据块包含的文件部分数据大小
+     *
+     * @return
+     */
     public long getBlockSize() {
         return b.getNumBytes();
     }
@@ -126,8 +130,8 @@ public class LocatedBlock implements Writable {
         out.writeLong(offset);
         b.write(out);
         out.writeInt(locs.length);
-        for (int i = 0; i < locs.length; i++) {
-            locs[i].write(out);
+        for (DatanodeInfo loc : locs) {
+            loc.write(out);
         }
     }
 

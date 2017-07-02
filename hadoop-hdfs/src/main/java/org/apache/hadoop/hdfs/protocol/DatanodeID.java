@@ -26,10 +26,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 /**
- * DatanodeID is composed of the data node 
- * name (hostname:portNumber) and the data storage ID, 
+ * DatanodeID is composed of the data node
+ * name (hostname:portNumber) and the data storage ID,
  * which it currently represents.
- *
  */
 public class DatanodeID implements WritableComparable<DatanodeID> {
     public static final DatanodeID[] EMPTY_ARRAY = {};
@@ -43,12 +42,16 @@ public class DatanodeID implements WritableComparable<DatanodeID> {
     protected int infoPort;     /// 数据节点3w服务器的监听端口，通过这个端口可以使用http协议访问数据节点
     public int ipcPort;     /// the port where the ipc server is running
 
-    /** Equivalent to DatanodeID(""). */
+    /**
+     * Equivalent to DatanodeID("").
+     */
     public DatanodeID() {
         this("");
     }
 
-    /** Equivalent to DatanodeID(nodeName, "", -1, -1). */
+    /**
+     * Equivalent to DatanodeID(nodeName, "", -1, -1).
+     */
     public DatanodeID(String nodeName) {
         this(nodeName, "", -1, -1);
     }
@@ -67,10 +70,11 @@ public class DatanodeID implements WritableComparable<DatanodeID> {
 
     /**
      * Create DatanodeID
-     * @param nodeName (hostname:portNumber)
+     *
+     * @param nodeName  (hostname:portNumber)
      * @param storageID data storage ID
-     * @param infoPort info server port
-     * @param ipcPort ipc server port
+     * @param infoPort  info server port
+     * @param ipcPort   ipc server port
      */
     public DatanodeID(String nodeName, String storageID,
                       int infoPort, int ipcPort) {
@@ -136,14 +140,8 @@ public class DatanodeID implements WritableComparable<DatanodeID> {
     }
 
     public boolean equals(Object to) {
-        if (this == to) {
-            return true;
-        }
-        if (!(to instanceof DatanodeID)) {
-            return false;
-        }
-        return (name.equals(((DatanodeID) to).getName()) &&
-                storageID.equals(((DatanodeID) to).getStorageID()));
+        return this == to || to instanceof DatanodeID
+                && (name.equals(((DatanodeID) to).getName()) && storageID.equals(((DatanodeID) to).getStorageID()));
     }
 
     public int hashCode() {
@@ -165,8 +163,10 @@ public class DatanodeID implements WritableComparable<DatanodeID> {
         // update any more fields added in future.
     }
 
-    /** Comparable.
+    /**
+     * Comparable.
      * Basis of compare is the String name (host:portNumber) only.
+     *
      * @param that
      * @return as specified by Comparable.
      */
@@ -178,14 +178,18 @@ public class DatanodeID implements WritableComparable<DatanodeID> {
     // Writable
     /////////////////////////////////////////////////
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void write(DataOutput out) throws IOException {
         UTF8.writeString(out, name);
         UTF8.writeString(out, storageID);
         out.writeShort(infoPort);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void readFields(DataInput in) throws IOException {
         name = UTF8.readString(in);
         storageID = UTF8.readString(in);

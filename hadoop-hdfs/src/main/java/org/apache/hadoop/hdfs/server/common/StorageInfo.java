@@ -24,9 +24,9 @@ package org.apache.hadoop.hdfs.server.common;
  * TODO namespaceID should be long and computed as hash(address + port)
  */
 public class StorageInfo {
-    public int layoutVersion;  // Version read from the stored file.
-    public int namespaceID;    // namespace id of the storage
-    public long cTime;          // creation timestamp
+    public int layoutVersion;  // Version read from the stored file. 存储空间版本
+    public int namespaceID;    // namespace id of the storage 该存储的命名空间id
+    public long cTime;          // creation timestamp 创建时间
 
     public StorageInfo() {
         this(0, 0, 0L);
@@ -54,7 +54,7 @@ public class StorageInfo {
         return cTime;
     }
 
-    public void setStorageInfo(StorageInfo from) {
+    protected void setStorageInfo(StorageInfo from) {
         layoutVersion = from.layoutVersion;
         namespaceID = from.namespaceID;
         cTime = from.cTime;

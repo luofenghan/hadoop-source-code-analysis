@@ -315,10 +315,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
      * Returns true if the node has been decommissioned.
      */
     public boolean isDecommissioned() {
-        if (adminState == AdminStates.DECOMMISSIONED) {
-            return true;
-        }
-        return false;
+        return adminState == AdminStates.DECOMMISSIONED;
     }
 
     /**

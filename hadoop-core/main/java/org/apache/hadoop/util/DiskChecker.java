@@ -55,6 +55,7 @@ public class DiskChecker {
      * non-existent directory, then we signal an error; Sun's mkdir would signal
      * an error (return false) if a directory it is attempting to create already
      * exists or the mkdir fails.
+     *
      * @param dir
      * @return true on success, false on failure
      */
@@ -76,6 +77,7 @@ public class DiskChecker {
 
     /**
      * Create the directory if it doesn't exist and
+     *
      * @param dir
      * @throws DiskErrorException
      */
@@ -111,7 +113,7 @@ public class DiskChecker {
 
     /**
      * Create the directory or check permissions if it already exists.
-     *
+     * <p>
      * The semantics of mkdirsWithExistsAndPermissionCheck method is different
      * from the mkdirs method provided in the Sun's java.io.File class in the
      * following way:
@@ -122,8 +124,9 @@ public class DiskChecker {
      * non-existent directory, then we signal an error; Sun's mkdir would signal
      * an error (return false) if a directory it is attempting to create already
      * exists or the mkdir fails.
-     * @param localFS local filesystem
-     * @param dir directory to be created or checked
+     *
+     * @param localFS  local filesystem
+     * @param dir      directory to be created or checked
      * @param expected expected permission
      * @return true on success, false on failure
      */
@@ -148,8 +151,9 @@ public class DiskChecker {
     /**
      * Create the local directory if necessary, check permissions and also ensure
      * it can be read from and written into.
-     * @param localFS local filesystem
-     * @param dir directory
+     *
+     * @param localFS  local filesystem
+     * @param dir      directory
      * @param expected permission
      * @throws DiskErrorException
      * @throws IOException

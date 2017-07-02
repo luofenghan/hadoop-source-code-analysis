@@ -421,8 +421,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
         } else {
             offsetInBlock += len;
 
-            int checksumLen = ((len + bytesPerChecksum - 1) / bytesPerChecksum) *
-                    checksumSize;
+            int checksumLen = ((len + bytesPerChecksum - 1) / bytesPerChecksum) * checksumSize;
 
             if (buf.remaining() != (checksumLen + len)) {
                 throw new IOException("Data remaining in packet does not match " +
@@ -519,17 +518,14 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             if (clientName.length() > 0) {
                 /*表示是客户端发起的写请求，而不是复制*/
                 responder = new Daemon(datanode.threadGroup,
-                        new PacketResponder(this, block, mirrIn,
-                                replyOut, numTargets,
-                                Thread.currentThread()));
-                responder.start(); // start thread to processes reponses
+                                new PacketResponder(this, block, mirrIn, replyOut, numTargets, Thread.currentThread()));
+                responder.start(); // start thread to processes responses
             }
 
-      /* 
-       * Receive until packet length is zero.
-       */
-            while (receivePacket() > 0) {
-            }
+             /*
+             * Receive until packet length is zero.
+             */
+            while (receivePacket() > 0) ;
 
             // flush the mirror out
             if (mirrorOut != null) {
@@ -613,8 +609,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
         if (datanode.data.getChannelPosition(block, streams) == offsetInBlock) {
             return;                   // nothing to do
         }
-        long offsetInChecksum = BlockMetadataHeader.getHeaderSize() +
-                offsetInBlock / bytesPerChecksum * checksumSize;
+        long offsetInChecksum = BlockMetadataHeader.getHeaderSize() + offsetInBlock / bytesPerChecksum * checksumSize;
         if (out != null) {
             out.flush();
         }
@@ -874,7 +869,6 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
                                     " from " + receiver.inAddr);
                         }
                     }
-
 
                     /*无论当前处理的是否是最后一个数据包，也无论当前数据节点是否是管道的最后一个节点*/
                     /*确认包都需要往上游发送*/

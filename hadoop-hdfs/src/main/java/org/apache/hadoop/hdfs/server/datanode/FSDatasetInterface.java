@@ -69,8 +69,7 @@ public interface FSDatasetInterface extends FSDatasetMBean {
      * @return the metadata input stream;
      * @throws IOException
      */
-    MetaDataInputStream getMetaDataInputStream(Block b)
-            throws IOException;
+    MetaDataInputStream getMetaDataInputStream(Block b) throws IOException;
 
     /**
      * Does the meta file exist for this block?
@@ -134,8 +133,7 @@ public interface FSDatasetInterface extends FSDatasetMBean {
      * starting at the offset
      * @throws IOException
      */
-    InputStream getBlockInputStream(Block b, long seekOffset)
-            throws IOException;
+    InputStream getBlockInputStream(Block b, long seekOffset) throws IOException;
 
     /**
      * Returns an input stream at specified offset of the specified block
@@ -148,8 +146,7 @@ public interface FSDatasetInterface extends FSDatasetMBean {
      * starting at the offset
      * @throws IOException
      */
-    BlockInputStreams getTmpInputStreams(Block b, long blkoff, long ckoff)
-            throws IOException;
+    BlockInputStreams getTmpInputStreams(Block b, long blkoff, long ckoff) throws IOException;
 
     /**
      * This class contains the output streams for the data and checksum
@@ -198,8 +195,7 @@ public interface FSDatasetInterface extends FSDatasetMBean {
      * and CRC
      * @throws IOException
      */
-    BlockWriteStreams writeToBlock(Block b, boolean isRecovery,
-                                   boolean isReplicationRequest) throws IOException;
+    BlockWriteStreams writeToBlock(Block b, boolean isRecovery, boolean isReplicationRequest) throws IOException;
 
     /**
      * Update the block to the new generation stamp and length.

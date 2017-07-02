@@ -61,6 +61,7 @@ public interface ClientDatanodeProtocol extends VersionedProtocol {
     /**
      * Returns a block object that contains the specified block object
      * from the specified Datanode.
+     * 从指定的数据节点上获取执行的数据块信息
      *
      * @param block the specified block
      * @return the Block object from the specified Datanode

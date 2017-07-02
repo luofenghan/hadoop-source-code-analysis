@@ -44,12 +44,10 @@ import java.util.*;
 
 /**
  * FSImage handles checkpointing and logging of the namespace edits.
- *
  */
 public class FSImage extends Storage {
 
-    private static final SimpleDateFormat DATE_FORM =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORM = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     //
     // The filenames used for storing the images
@@ -63,7 +61,7 @@ public class FSImage extends Storage {
 
         private String fileName = null;
 
-        private NameNodeFile(String name) {
+        NameNodeFile(String name) {
             this.fileName = name;
         }
 
@@ -83,7 +81,7 @@ public class FSImage extends Storage {
      * or of type EDITS which stores edits or of type IMAGE_AND_EDITS which
      * stores both fsimage and edits.
      */
-    static enum NameNodeDirType implements StorageDirType {
+    enum NameNodeDirType implements StorageDirType {
         UNDEFINED,
         IMAGE,
         EDITS,
@@ -94,9 +92,7 @@ public class FSImage extends Storage {
         }
 
         public boolean isOfType(StorageDirType type) {
-            if ((this == IMAGE_AND_EDITS) && (type == IMAGE || type == EDITS))
-                return true;
-            return this == type;
+            return (this == IMAGE_AND_EDITS) && (type == IMAGE || type == EDITS) || this == type;
         }
     }
 
@@ -158,8 +154,7 @@ public class FSImage extends Storage {
     }
 
     void setStorageDirectories(Collection<File> fsNameDirs,
-                               Collection<File> fsEditsDirs
-    ) throws IOException {
+                               Collection<File> fsEditsDirs) throws IOException {
         this.storageDirs = new ArrayList<StorageDirectory>();
         this.removedStorageDirs = new ArrayList<StorageDirectory>();
         // Add all name dirs with appropriate NameNodeDirType
@@ -233,8 +228,8 @@ public class FSImage extends Storage {
      *
      * @param dataDirs
      * @param startOpt startup option
-     * @throws IOException
      * @return true if the image needs to be saved or false otherwise
+     * @throws IOException
      */
     boolean recoverTransitionRead(Collection<File> dataDirs,
                                   Collection<File> editsDirs,
@@ -361,8 +356,7 @@ public class FSImage extends Storage {
         }
         // Upgrade is allowed only if there are
         // no previous fs states in any of the directories
-        for (Iterator<StorageDirectory> it =
-             dirIterator(); it.hasNext(); ) {
+        for (Iterator<StorageDirectory> it = dirIterator(); it.hasNext(); ) {
             StorageDirectory sd = it.next();
             if (sd.getPreviousDir().exists())
                 throw new InconsistentFSStateException(sd.getRoot(),
@@ -484,6 +478,7 @@ public class FSImage extends Storage {
 
     /**
      * Load image from a checkpoint directory and save it into the current one.
+     *
      * @throws IOException
      */
     void doImportCheckpoint() throws IOException {
@@ -552,7 +547,7 @@ public class FSImage extends Storage {
 
     /**
      * Write last checkpoint time and version file into the storage directory.
-     *
+     * <p>
      * The version file should always be written last.
      * Missing or corrupted version file indicates that
      * the checkpoint is not valid.
@@ -713,6 +708,10 @@ public class FSImage extends Storage {
     /**
      * Choose latest image from one of the directories,
      * load it and merge with the edits from that directory.
+     * <p>读取命名空间镜像，并将它包含的元数据添加/更新到内存元数据中</p>
+     * <p>
+     * <p>loadFSImage()比saveFSImage()复杂，包含了大量的判断语句，
+     * 这些判断语句都是为了兼容以前版本的命名空间镜像文件二引入的</p>
      *
      * @return whether the image should be saved
      * @throws IOException
@@ -821,6 +820,8 @@ public class FSImage extends Storage {
      * Load in the filesystem imagefrom file. It's a big list of
      * filenames and blocks.  Return whether we should
      * "re-save" and consolidate the edit-logs
+     * 通过该方法读取命名空间镜像后，内存中的NameNode第一关系信息只包含了保运镜像的那一刻的内容，
+     * 还需要加载后续对元数据的修改，即【编辑日志】中的内容，才能完全恢复元数据
      */
     boolean loadFSImage(File curFile) throws IOException {
         assert this.getLayoutVersion() < 0 : "Negative layout version is expected.";
@@ -949,7 +950,7 @@ public class FSImage extends Storage {
                     parentINode = null;
                     parentPath = getParent(path);
                 }
-                // add new inode
+                // 将节点添加到目录树中
                 parentINode = fsDir.addToParent(path, parentINode, permissions,
                         blocks, replication, modificationTime,
                         atime, nsQuota, dsQuota, blockSize);
@@ -958,9 +959,9 @@ public class FSImage extends Storage {
             // load datanode info
             this.loadDatanodes(imgVersion, in);
 
-            // load Files Under Construction
+            // 加载租约信息
             this.loadFilesUnderConstruction(imgVersion, in, fsNamesys);
-
+            /*加载安全相关信息*/
             this.loadSecretManagerState(imgVersion, in, fsNamesys);
 
         } finally {
@@ -985,6 +986,7 @@ public class FSImage extends Storage {
 
     /**
      * Load and merge edits from two edits files
+     * 加载编辑日志，重放并应用日志记录的操作，以获得元数据在某个时刻的状态
      *
      * @param sd storage directory
      * @return number of edits loaded
@@ -1021,18 +1023,20 @@ public class FSImage extends Storage {
                 new BufferedOutputStream(
                         new FileOutputStream(newFile)));
         try {
-            out.writeInt(FSConstants.LAYOUT_VERSION);
-            out.writeInt(namespaceID);
-            out.writeLong(fsDir.rootDir.numItemsInTree());
-            out.writeLong(fsNamesys.getGenerationStamp());
+            /*首先输出镜像文件的文件头*/
+            out.writeInt(FSConstants.LAYOUT_VERSION);/*命名空间镜像格式的版本号*/
+            out.writeInt(namespaceID);/*存储系统标识*/
+            out.writeLong(fsDir.rootDir.numItemsInTree());/*目录树包含的节点数*/
+            out.writeLong(fsNamesys.getGenerationStamp());/*当前已用的数据块版本号*/
+
             byte[] byteStore = new byte[4 * FSConstants.MAX_PATH_LENGTH];
             ByteBuffer strbuf = ByteBuffer.wrap(byteStore);
             // save the root
-            saveINode2Image(strbuf, fsDir.rootDir, out);
+            saveINode2Image(strbuf, fsDir.rootDir, out); //保存根节点
             // save the rest of the nodes
-            saveImage(strbuf, 0, fsDir.rootDir, out);
-            fsNamesys.saveFilesUnderConstruction(out);
-            fsNamesys.saveSecretManagerState(out);
+            saveImage(strbuf, 0, fsDir.rootDir, out); // 保存其他节点
+            fsNamesys.saveFilesUnderConstruction(out); // 保存构建中的节点
+            fsNamesys.saveSecretManagerState(out); //安全信息
             strbuf = null;
         } finally {
             out.close();
@@ -1044,7 +1048,7 @@ public class FSImage extends Storage {
 
     /**
      * Save the contents of the FS image and create empty edits.
-     *
+     * <p>
      * In order to minimize the recovery effort in case of failure during
      * saveNamespace the algorithm reduces discrepancy between directory states
      * by performing updates in the following order:
@@ -1058,11 +1062,12 @@ public class FSImage extends Storage {
      * in which case the journal will be lost.
      */
     void saveNamespace(boolean renewCheckpointTime) throws IOException {
-        editLog.close();
+        editLog.close();/*关闭输出流*/
         if (renewCheckpointTime)
             this.checkpointTime = FSNamesystem.now();
 
         // mv current -> lastcheckpoint.tmp
+        /*目录改名，将current目录改名为lastcheckpoint.tmp*/
         for (Iterator<StorageDirectory> it = dirIterator(); it.hasNext(); ) {
             StorageDirectory sd = it.next();
             try {
@@ -1074,6 +1079,7 @@ public class FSImage extends Storage {
         }
 
         // save images into current
+       /*建立新的current目录*/
         for (Iterator<StorageDirectory> it = dirIterator(NameNodeDirType.IMAGE);
              it.hasNext(); ) {
             StorageDirectory sd = it.next();
@@ -1107,9 +1113,11 @@ public class FSImage extends Storage {
             }
         }
         // mv lastcheckpoint.tmp -> previous.checkpoint
+        /*将目录 lastcheckpoint.tmp  重命名为 previous.checkpoint*/
         for (Iterator<StorageDirectory> it = dirIterator(); it.hasNext(); ) {
             StorageDirectory sd = it.next();
             try {
+
                 moveLastCheckpoint(sd);
             } catch (IOException ie) {
                 LOG.error("Unable to move last checkpoint for " + sd.getRoot(), ie);
@@ -1142,6 +1150,10 @@ public class FSImage extends Storage {
      * recreate empty {@code current}.
      * {@code current} is moved only if it is well formatted,
      * that is contains VERSION file.
+     * 将原来的current目录重命名为lastcheckpoint.tmp目录
+     * 并重新新建current目录
+     * <p></p>
+     * 如果用户在第二名字节点目录中发现lastcheckpoint.tmp目录，表明第二名字节点正在创建检查点
      *
      * @see org.apache.hadoop.hdfs.server.common.Storage.StorageDirectory#getLastCheckpointTmp()
      * @see org.apache.hadoop.hdfs.server.common.Storage.StorageDirectory#getPreviousCheckpoint()
@@ -1182,7 +1194,7 @@ public class FSImage extends Storage {
 
     /**
      * Generate new namespaceID.
-     *
+     * <p>
      * namespaceID is a persistent attribute of the namespace.
      * It is generated when the namenode is formatted and remains the same
      * during the life cycle of the namenode.
@@ -1201,8 +1213,10 @@ public class FSImage extends Storage {
         return newID;
     }
 
-    /** Create new dfs name directory.  Caution: this destroys all files
-     * in this filesystem. */
+    /**
+     * Create new dfs name directory.  Caution: this destroys all files
+     * in this filesystem.
+     */
     void format(StorageDirectory sd) throws IOException {
         sd.clearDirectory(); // create currrent dir
         sd.lock();
@@ -1220,8 +1234,7 @@ public class FSImage extends Storage {
         this.namespaceID = newNamespaceID();
         this.cTime = 0L;
         this.checkpointTime = FSNamesystem.now();
-        for (Iterator<StorageDirectory> it =
-             dirIterator(); it.hasNext(); ) {
+        for (Iterator<StorageDirectory> it = dirIterator(); it.hasNext(); ) {
             StorageDirectory sd = it.next();
             format(sd);
         }
@@ -1269,6 +1282,8 @@ public class FSImage extends Storage {
      * Save file tree image starting from the given root.
      * This is a recursive procedure, which first saves all children of
      * a current directory and then moves inside the sub-directories.
+     * 将目录树current下的所有INode信息输出到输出流out中、
+     * 首先处理该目录下的所有文件数据，然后在处理子目录
      */
     private static void saveImage(ByteBuffer parentPrefix,
                                   int prefixLength,
@@ -1283,6 +1298,7 @@ public class FSImage extends Storage {
             parentPrefix.put(PATH_SEPARATOR).put(child.getLocalNameBytes());
             saveINode2Image(parentPrefix, child, out);
         }
+
         for (INode child : current.getChildren()) {
             if (!child.isDirectory())
                 continue;
@@ -1409,10 +1425,14 @@ public class FSImage extends Storage {
     }
 
     /**
+     * 用于第二名字节点上传新的命名空间镜像后
      * Moves fsimage.ckpt to fsImage and edits.new to edits
      * Reopens the new edits file.
+     * <p>
+     * <p></p>
      */
     void rollFSImage() throws IOException {
+        /*进行状态检查*/
         if (ckptState != CheckpointStates.UPLOAD_DONE) {
             throw new IOException("Cannot roll fsImage before rolling edits log.");
         }
@@ -1420,11 +1440,12 @@ public class FSImage extends Storage {
         // First, verify that edits.new and fsimage.ckpt exists in all
         // checkpoint directories.
         //
+        /*existed。new必须存在*/
         if (!editLog.existsNew()) {
             throw new IOException("New Edits file does not exist");
         }
-        for (Iterator<StorageDirectory> it =
-             dirIterator(NameNodeDirType.IMAGE); it.hasNext(); ) {
+        /*检查 新镜像 fsimage.ckpt 是否存在*/
+        for (Iterator<StorageDirectory> it = dirIterator(NameNodeDirType.IMAGE); it.hasNext(); ) {
             StorageDirectory sd = it.next();
             File ckpt = getImageFile(sd, NameNodeFile.IMAGE_NEW);
             if (!ckpt.exists()) {
@@ -1436,6 +1457,7 @@ public class FSImage extends Storage {
 
         //
         // Renames new image
+        /*修改新命名空间镜像的名字*/
         //
         for (Iterator<StorageDirectory> it =
              dirIterator(NameNodeDirType.IMAGE); it.hasNext(); ) {
@@ -1460,6 +1482,9 @@ public class FSImage extends Storage {
         //
         // Updates the fstime file on all directories (fsimage and edits)
         // and write version file
+        /*
+        * 输出新的fstime文件和version文件
+        * */
         //
         this.layoutVersion = FSConstants.LAYOUT_VERSION;
         this.checkpointTime = FSNamesystem.now();
@@ -1491,9 +1516,18 @@ public class FSImage extends Storage {
         ckptState = FSImage.CheckpointStates.START;
     }
 
+    /**
+     * 用于第二名字节点下载命名空间镜像和编辑日志前
+     *
+     * @return
+     * @throws IOException
+     */
     CheckpointSignature rollEditLog() throws IOException {
         getEditLog().rollEditLog();
+        /*修改检查点状态*/
         ckptState = CheckpointStates.ROLLED_EDITS;
+        /*签名可以唯一确定一个检查点*/
+        /**/
         return new CheckpointSignature(this);
     }
 
@@ -1689,8 +1723,7 @@ public class FSImage extends Storage {
 
     static Collection<File> getCheckpointEditsDirs(Configuration conf,
                                                    String defaultName) {
-        Collection<String> dirNames =
-                conf.getStringCollection("fs.checkpoint.edits.dir");
+        Collection<String> dirNames = conf.getStringCollection("fs.checkpoint.edits.dir");
         if (dirNames.size() == 0 && defaultName != null) {
             dirNames.add(defaultName);
         }

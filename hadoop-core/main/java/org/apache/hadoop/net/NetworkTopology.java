@@ -27,14 +27,14 @@ import java.util.Random;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/** The class represents a cluster of computer with a tree hierarchical
+/**
+ * The class represents a cluster of computer with a tree hierarchical
  * network topology.
- * For example, a cluster may be consists of many data centers filled 
+ * For example, a cluster may be consists of many data centers filled
  * with racks of computers.
  * In a network topology, leaves represent data nodes (computers) and inner
  * nodes represent switches/routers that manage traffic in/out of data centers
- * or racks.  
- *
+ * or racks.
  */
 public class NetworkTopology {
     public final static String DEFAULT_RACK = "/default-rack";
@@ -49,33 +49,44 @@ public class NetworkTopology {
         private ArrayList<Node> children = new ArrayList<Node>();
         private int numOfLeaves;
 
-        /** Construct an InnerNode from a path-like string */
+        /**
+         * Construct an InnerNode from a path-like string
+         */
         InnerNode(String path) {
             super(path);
         }
 
-        /** Construct an InnerNode from its name and its network location */
+        /**
+         * Construct an InnerNode from its name and its network location
+         */
         InnerNode(String name, String location) {
             super(name, location);
         }
 
-        /** Construct an InnerNode
-         * from its name, its network location, its parent, and its level */
+        /**
+         * Construct an InnerNode
+         * from its name, its network location, its parent, and its level
+         */
         InnerNode(String name, String location, InnerNode parent, int level) {
             super(name, location, parent, level);
         }
 
-        /** Get its children */
+        /**
+         * Get its children
+         */
         Collection<Node> getChildren() {
             return children;
         }
 
-        /** Return the number of children this node has */
+        /**
+         * Return the number of children this node has
+         */
         int getNumOfChildren() {
             return children.size();
         }
 
-        /** Judge if this node represents a rack
+        /**
+         * Judge if this node represents a rack
          * Return true if it has no child or its children are not InnerNodes
          */
         boolean isRack() {
@@ -91,7 +102,8 @@ public class NetworkTopology {
             return true;
         }
 
-        /** Judge if this node is an ancestor of node <i>n</i>
+        /**
+         * Judge if this node is an ancestor of node <i>n</i>
          *
          * @param n a node
          * @return true if this node is an ancestor of <i>n</i>
@@ -102,7 +114,8 @@ public class NetworkTopology {
                             startsWith(getPath(this) + NodeBase.PATH_SEPARATOR_STR);
         }
 
-        /** Judge if this node is the parent of node <i>n</i>
+        /**
+         * Judge if this node is the parent of node <i>n</i>
          *
          * @param n a node
          * @return true if this node is the parent of <i>n</i>
@@ -127,7 +140,9 @@ public class NetworkTopology {
             return name;
         }
 
-        /** Add node <i>n</i> to the subtree of this node
+        /**
+         * Add node <i>n</i> to the subtree of this node
+         *
          * @param n node to be added
          * @return true if the node is added; false otherwise
          */
@@ -175,7 +190,9 @@ public class NetworkTopology {
             }
         }
 
-        /** Remove node <i>n</i> from the subtree of this node
+        /**
+         * Remove node <i>n</i> from the subtree of this node
+         *
          * @param n node to be deleted
          * @return true if the node is deleted; false otherwise
          */
@@ -224,7 +241,9 @@ public class NetworkTopology {
             }
         } // end of remove
 
-        /** Given a node's string representation, return a reference to the node */
+        /**
+         * Given a node's string representation, return a reference to the node
+         */
         private Node getLoc(String loc) {
             if (loc == null || loc.length() == 0) return this;
 
@@ -244,8 +263,10 @@ public class NetworkTopology {
             }
         }
 
-        /** get <i>leafIndex</i> leaf of this subtree
-         * if it is not in the <i>excludedNode</i>*/
+        /**
+         * get <i>leafIndex</i> leaf of this subtree
+         * if it is not in the <i>excludedNode</i>
+         */
         private Node getLeaf(int leafIndex, Node excludedNode) {
             int count = 0;
             // check if the excluded node a leaf
@@ -305,12 +326,13 @@ public class NetworkTopology {
         netlock = new ReentrantReadWriteLock();
     }
 
-    /** Add a leaf node
+    /**
+     * Add a leaf node
      * Update node counter & rack counter if neccessary
-     * @param node
-     *          node to be added
-     * @exception IllegalArgumentException if add a node to a leave
-    or node to be added is not a leaf
+     *
+     * @param node node to be added
+     * @throws IllegalArgumentException if add a node to a leave
+     *                                  or node to be added is not a leaf
      */
     public void add(Node node) {
         if (node == null) return;
@@ -338,10 +360,11 @@ public class NetworkTopology {
         }
     }
 
-    /** Remove a node
+    /**
+     * Remove a node
      * Update node counter & rack counter if neccessary
-     * @param node
-     *          node to be removed
+     *
+     * @param node node to be removed
      */
     public void remove(Node node) {
         if (node == null) return;
@@ -364,10 +387,10 @@ public class NetworkTopology {
         }
     }
 
-    /** Check if the tree contains node <i>node</i>
+    /**
+     * Check if the tree contains node <i>node</i>
      *
-     * @param node
-     *          a node
+     * @param node a node
      * @return true if <i>node</i> is already in the tree; false otherwise
      */
     public boolean contains(Node node) {
@@ -386,10 +409,10 @@ public class NetworkTopology {
         return false;
     }
 
-    /** Given a string representation of a node, return its reference
+    /**
+     * Given a string representation of a node, return its reference
      *
-     * @param loc
-     *          a path-like string representation of a node
+     * @param loc a path-like string representation of a node
      * @return a reference to the node; null if the node is not in the tree
      */
     public Node getNode(String loc) {
@@ -404,7 +427,9 @@ public class NetworkTopology {
         }
     }
 
-    /** Return the total number of racks */
+    /**
+     * Return the total number of racks
+     */
     public int getNumOfRacks() {
         netlock.readLock().lock();
         try {
@@ -414,7 +439,9 @@ public class NetworkTopology {
         }
     }
 
-    /** Return the total number of nodes */
+    /**
+     * Return the total number of nodes
+     */
     public int getNumOfLeaves() {
         netlock.readLock().lock();
         try {
@@ -424,10 +451,12 @@ public class NetworkTopology {
         }
     }
 
-    /** Return the distance between two nodes
+    /**
+     * Return the distance between two nodes
      * It is assumed that the distance from one node to its parent is 1
      * The distance between two nodes is calculated by summing up their distances
      * to their closest common  ancestor.
+     *
      * @param node1 one node
      * @param node2 another node
      * @return the distance between node1 and node2
@@ -471,12 +500,15 @@ public class NetworkTopology {
         return dis + 2;
     }
 
-    /** Check if two nodes are on the same rack
+    /**
+     * Check if two nodes are on the same rack
+     * 判断两个节点是否处于同一个机架
+     *
      * @param node1 one node
      * @param node2 another node
      * @return true if node1 and node2 are pm the same rack; false otherwise
-     * @exception IllegalArgumentException when either node1 or node2 is null, or
-     * node1 or node2 do not belong to the cluster
+     * @throws IllegalArgumentException when either node1 or node2 is null, or
+     *                                  node1 or node2 do not belong to the cluster
      */
     public boolean isOnSameRack(Node node1, Node node2) {
         if (node1 == null || node2 == null) {
@@ -493,9 +525,11 @@ public class NetworkTopology {
 
     final private static Random r = new Random();
 
-    /** randomly choose one node from <i>scope</i>
+    /**
+     * randomly choose one node from <i>scope</i>
      * if scope starts with ~, choose one from the all nodes except for the
      * ones in <i>scope</i>; otherwise, choose one from <i>scope</i>
+     *
      * @param scope range of nodes from which a node will be choosen
      * @return the choosen node
      */
@@ -541,10 +575,12 @@ public class NetworkTopology {
         return innerNode.getLeaf(leaveIndex, node);
     }
 
-    /** return the number of leaves in <i>scope</i> but not in <i>excludedNodes</i>
+    /**
+     * return the number of leaves in <i>scope</i> but not in <i>excludedNodes</i>
      * if scope starts with ~, return the number of nodes that are not
      * in <i>scope</i> and <i>excludedNodes</i>;
-     * @param scope a path string that may start with ~
+     *
+     * @param scope         a path string that may start with ~
      * @param excludedNodes a list of nodes
      * @return number of available nodes
      */
@@ -581,7 +617,9 @@ public class NetworkTopology {
         }
     }
 
-    /** convert a network tree to a string */
+    /**
+     * convert a network tree to a string
+     */
     public String toString() {
         // print the number of racks
         StringBuffer tree = new StringBuffer();
@@ -603,14 +641,14 @@ public class NetworkTopology {
 
     /* swap two array items */
     static private void swap(Node[] nodes, int i, int j) {
-        Node tempNode;
-        tempNode = nodes[j];
+        Node tempNode = nodes[j];
         nodes[j] = nodes[i];
         nodes[i] = tempNode;
 
     }
 
-    /** Sort nodes array by their distances to <i>reader</i>
+    /**
+     * Sort nodes array by their distances to <i>reader</i>
      * It linearly scans the array, if a local node is found, swap it with
      * the first element of the array.
      * If a local rack node is found, swap it with the first element following
@@ -618,6 +656,9 @@ public class NetworkTopology {
      * If neither local node or local rack node is found, put a random replica
      * location at postion 0.
      * It leaves the rest nodes untouched.
+     * <p>
+     * 将nodes 中，和reader同一个节点或同一个机架放在最前面，它并不对nodes排序，
+     * 只是尽量找一个离reader最近的节点，并把它
      */
     public void pseudoSortByDistance(Node reader, Node[] nodes) {
         int tempIndex = 0;

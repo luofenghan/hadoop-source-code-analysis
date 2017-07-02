@@ -59,8 +59,7 @@ public class RetryProxy {
    */
   public static Object create(Class<?> iface, Object implementation,
                               Map<String,RetryPolicy> methodNameToPolicyMap) {
-    return Proxy.newProxyInstance(
-                                  implementation.getClass().getClassLoader(),
+    return Proxy.newProxyInstance(implementation.getClass().getClassLoader(),
                                   new Class<?>[] { iface },
                                   new RetryInvocationHandler(implementation, methodNameToPolicyMap)
                                   );

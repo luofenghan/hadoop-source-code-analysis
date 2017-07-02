@@ -51,6 +51,7 @@ import java.io.IOException;
 @KerberosInfo(
         serverPrincipal = DFSConfigKeys.DFS_NAMENODE_USER_NAME_KEY)
 @TokenInfo(DelegationTokenSelector.class)
+@SuppressWarnings("all")
 public interface ClientProtocol extends VersionedProtocol {
 
     /**
@@ -86,9 +87,7 @@ public interface ClientProtocol extends VersionedProtocol {
      * @return file length and array of blocks with their locations
      * @throws IOException
      */
-    LocatedBlocks getBlockLocations(String src,
-                                    long offset,
-                                    long length) throws IOException;
+    LocatedBlocks getBlockLocations(String src, long offset, long length) throws IOException;
 
     /**
      * Create a new file entry in the namespace.
@@ -171,6 +170,9 @@ public interface ClientProtocol extends VersionedProtocol {
      * The actual block replication is not expected to be performed during
      * this method call. The blocks will be populated or removed in the
      * background as the result of the routine block maintenance procedures.
+     * 设置文件的数据块副本系数，由于新副本系数可以高于当前副本系数
+     * 所以需要根据情况调用 updateNeededReplications() 复制副本，
+     * 或者 processOverReplicateBlock() 删除多余副本
      *
      * @param src         file name
      * @param replication new replication
@@ -337,6 +339,8 @@ public interface ClientProtocol extends VersionedProtocol {
      * renewLease().  If a certain amount of time passes since
      * the last call to renewLease(), the NameNode assumes the
      * client has died.
+     * <p>
+     * 定期维护租约
      */
     public void renewLease(String clientName) throws IOException;
 
@@ -448,6 +452,7 @@ public interface ClientProtocol extends VersionedProtocol {
 
     /**
      * Tells the namenode to reread the hosts and exclude files.
+     * 通过名字节点 hosts和exclude文件已更新，需要重新读取
      *
      * @throws IOException
      */

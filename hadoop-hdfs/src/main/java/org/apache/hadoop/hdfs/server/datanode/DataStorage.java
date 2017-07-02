@@ -97,7 +97,7 @@ public class DataStorage extends Storage {
         // check whether all is consistent before transitioning.
         // Format and recover.
         this.storageID = "";
-        this.storageDirs = new ArrayList<StorageDirectory>(dataDirs.size());
+        this.storageDirs = new ArrayList<>(dataDirs.size());
         /*存储空间状态*/
         ArrayList<StorageState> dataDirStates = new ArrayList<StorageState>(dataDirs.size());
         for (Iterator<File> it = dataDirs.iterator(); it.hasNext(); ) {
@@ -167,15 +167,13 @@ public class DataStorage extends Storage {
     }
 
     protected void setFields(Properties props,
-                             StorageDirectory sd
-    ) throws IOException {
+                             StorageDirectory sd) throws IOException {
         super.setFields(props, sd);
         props.setProperty("storageID", storageID);
     }
 
     protected void getFields(Properties props,
-                             StorageDirectory sd
-    ) throws IOException {
+                             StorageDirectory sd) throws IOException {
         super.getFields(props, sd);
         String ssid = props.getProperty("storageID");
         if (ssid == null ||
@@ -222,8 +220,7 @@ public class DataStorage extends Storage {
      */
     private void doTransition(StorageDirectory sd,
                               NamespaceInfo nsInfo,
-                              StartupOption startOpt
-    ) throws IOException {
+                              StartupOption startOpt) throws IOException {
         if (startOpt == StartupOption.ROLLBACK)
             doRollback(sd, nsInfo); // rollback if applicable
         sd.read();
@@ -231,13 +228,12 @@ public class DataStorage extends Storage {
         assert this.layoutVersion >= FSConstants.LAYOUT_VERSION :
                 "Future version is not allowed";
         if (getNamespaceID() != nsInfo.getNamespaceID())
-            throw new IOException(
-                    "Incompatible namespaceIDs in " + sd.getRoot().getCanonicalPath()
-                            + ": namenode namespaceID = " + nsInfo.getNamespaceID()
-                            + "; datanode namespaceID = " + getNamespaceID());
-        if (this.layoutVersion == FSConstants.LAYOUT_VERSION
-                && this.cTime == nsInfo.getCTime())
+            throw new IOException("Incompatible namespaceIDs in " + sd.getRoot().getCanonicalPath()
+                    + ": namenode namespaceID = " + nsInfo.getNamespaceID()
+                    + "; datanode namespaceID = " + getNamespaceID());
+        if (this.layoutVersion == FSConstants.LAYOUT_VERSION && this.cTime == nsInfo.getCTime())
             return; // regular startup
+
         // verify necessity of a distributed upgrade
         verifyDistributedUpgradeProgress(nsInfo);
         if (this.layoutVersion > FSConstants.LAYOUT_VERSION
@@ -372,12 +368,11 @@ public class DataStorage extends Storage {
         }
     }
 
-    static void linkBlocks(File from, File to, int oldLV, HardLink hl)
+    private static void linkBlocks(File from, File to, int oldLV, HardLink hl)
             throws IOException {
         if (!from.isDirectory()) {
             if (from.getName().startsWith(COPY_FILE_PREFIX)) {
-                IOUtils.copyBytes(new FileInputStream(from),
-                        new FileOutputStream(to), 16 * 1024, true);
+                IOUtils.copyBytes(new FileInputStream(from), new FileOutputStream(to), 16 * 1024, true);
                 hl.linkStats.countPhysicalFileCopies++;
             } else {
 
@@ -401,18 +396,15 @@ public class DataStorage extends Storage {
         //If upgrading from old stuff, need to munge the filenames.  That has to
         //be done one file at a time, so hardlink them one at a time (slow).
         if (oldLV >= PRE_GENERATIONSTAMP_LAYOUT_VERSION) {
-            String[] blockNames = from.list(new java.io.FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.startsWith(BLOCK_SUBDIR_PREFIX)
-                            || name.startsWith(BLOCK_FILE_PREFIX)
-                            || name.startsWith(COPY_FILE_PREFIX);
-                }
-            });
+            String[] blockNames = from.list((dir, name) -> name.startsWith(BLOCK_SUBDIR_PREFIX)
+                    || name.startsWith(BLOCK_FILE_PREFIX)
+                    || name.startsWith(COPY_FILE_PREFIX));
             if (blockNames.length == 0) {
                 hl.linkStats.countEmptyDirs++;
-            } else for (int i = 0; i < blockNames.length; i++)
-                linkBlocks(new File(from, blockNames[i]),
-                        new File(to, blockNames[i]), oldLV, hl);
+            } else {
+                for (String blockName : blockNames)
+                    linkBlocks(new File(from, blockName), new File(to, blockName), oldLV, hl);
+            }
         } else {
             //If upgrading from a relatively new version, we only need to create
             //links with the same filename.  This can be done in bulk (much faster).
@@ -433,8 +425,7 @@ public class DataStorage extends Storage {
             //now take care of the rest of the files and subdirectories
             String[] otherNames = from.list((dir, name) -> name.startsWith(BLOCK_SUBDIR_PREFIX) || name.startsWith(COPY_FILE_PREFIX));
             for (String otherName : otherNames)
-                linkBlocks(new File(from, otherName),
-                        new File(to, otherName), oldLV, hl);
+                linkBlocks(new File(from, otherName), new File(to, otherName), oldLV, hl);
         }
     }
 
@@ -445,18 +436,14 @@ public class DataStorage extends Storage {
         // recreate old storage file to let pre-upgrade versions fail
         if (!oldF.createNewFile())
             throw new IOException("Cannot create file " + oldF);
-        RandomAccessFile oldFile = new RandomAccessFile(oldF, "rws");
         // write new version into old storage file
-        try {
+        try (RandomAccessFile oldFile = new RandomAccessFile(oldF, "rws")) {
             writeCorruptedData(oldFile);
-        } finally {
-            oldFile.close();
         }
     }
 
     private void verifyDistributedUpgradeProgress(
-            NamespaceInfo nsInfo
-    ) throws IOException {
+            NamespaceInfo nsInfo) throws IOException {
         UpgradeManagerDatanode um = DataNode.getDataNode().upgradeManager;
         assert um != null : "DataNode.upgradeManager is null.";
         um.setUpgradeState(false, getLayoutVersion());

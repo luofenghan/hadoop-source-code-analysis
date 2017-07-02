@@ -81,12 +81,8 @@ abstract public class FSOutputSummer extends OutputStream {
         if (off < 0 || len < 0 || off > b.length - len) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        /**
-         * n == totalBytesWrite
-         */
-        // n表示已写的字节数
-        for (int n = 0; n < len; n += write1(b, off + n, len - n)) {
-        }
+        /*n表示已写的字节数*/
+        for (int n = 0; n < len; n += write1(b, off + n, len - n)) ;
     }
 
     /**

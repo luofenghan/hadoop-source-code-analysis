@@ -61,20 +61,21 @@ public abstract class Storage extends StorageInfo {
 
     // this corresponds to Hadoop-0.14.
     public static final int LAST_UPGRADABLE_LAYOUT_VERSION = -7;
-    protected static final String LAST_UPGRADABLE_HADOOP_VERSION = "Hadoop-0.14";
+
+    private static final String LAST_UPGRADABLE_HADOOP_VERSION = "Hadoop-0.14";
 
     /* this should be removed when LAST_UPGRADABLE_LV goes beyond -13.
      * any upgrade code that uses this constant should also be removed. */
-    public static final int PRE_GENERATIONSTAMP_LAYOUT_VERSION = -13;
+    protected static final int PRE_GENERATIONSTAMP_LAYOUT_VERSION = -13;
 
     /**
      * Layout versions of 203 release
      */
-    public static final int[] LAYOUT_VERSIONS_203 = {-19, -31};
+    private static final int[] LAYOUT_VERSIONS_203 = {-19, -31};
 
     private static final String STORAGE_FILE_LOCK = "in_use.lock";
-    protected static final String STORAGE_FILE_VERSION = "VERSION";
-    public static final String STORAGE_DIR_CURRENT = "current";
+    private static final String STORAGE_FILE_VERSION = "VERSION";
+    private static final String STORAGE_DIR_CURRENT = "current";
     private static final String STORAGE_DIR_PREVIOUS = "previous";
     private static final String STORAGE_TMP_REMOVED = "removed.tmp";
     private static final String STORAGE_TMP_PREVIOUS = "previous.tmp";
@@ -92,7 +93,7 @@ public abstract class Storage extends StorageInfo {
         RECOVER_ROLLBACK,
         COMPLETE_CHECKPOINT,
         RECOVER_CHECKPOINT,
-        NORMAL;
+        NORMAL
     }
 
     /**
@@ -160,7 +161,7 @@ public abstract class Storage extends StorageInfo {
      * Return default iterator
      * This iterator returns all entires of storageDirs
      */
-    public Iterator<StorageDirectory> dirIterator() {
+    protected Iterator<StorageDirectory> dirIterator() {
         return dirIterator(null);
     }
 
@@ -513,7 +514,7 @@ public abstract class Storage extends StorageInfo {
             }
 
             assert hasRemovedTmp : "hasRemovedTmp must be true";
-            if (!(hasCurrent ^ hasPrevious))
+            if (hasCurrent == hasPrevious)
                 throw new InconsistentFSStateException(root,
                         "one and only one directory " + STORAGE_DIR_CURRENT
                                 + " or " + STORAGE_DIR_PREVIOUS
@@ -715,9 +716,7 @@ public abstract class Storage extends StorageInfo {
      * @param props
      * @throws IOException
      */
-    protected void getFields(Properties props,
-                             StorageDirectory sd
-    ) throws IOException {
+    protected void getFields(Properties props, StorageDirectory sd) throws IOException {
         String sv, st, sid, sct;
         sv = props.getProperty("layoutVersion");
         st = props.getProperty("storageType");
@@ -777,8 +776,8 @@ public abstract class Storage extends StorageInfo {
      */
     public void writeAll() throws IOException {
         this.layoutVersion = FSConstants.LAYOUT_VERSION;
-        for (Iterator<StorageDirectory> it = storageDirs.iterator(); it.hasNext(); ) {
-            it.next().write();
+        for (StorageDirectory storageDir : storageDirs) {
+            storageDir.write();
         }
     }
 
@@ -788,8 +787,8 @@ public abstract class Storage extends StorageInfo {
      * @throws IOException
      */
     public void unlockAll() throws IOException {
-        for (Iterator<StorageDirectory> it = storageDirs.iterator(); it.hasNext(); ) {
-            it.next().unlock();
+        for (StorageDirectory storageDir : storageDirs) {
+            storageDir.unlock();
         }
     }
 

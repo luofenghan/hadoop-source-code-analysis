@@ -82,7 +82,8 @@ public class VersionInfo {
   
   /**
    * Returns the buildVersion which includes version, 
-   * revision, user and date. 
+   * revision, user and date.
+   * 1.0.0-dev from 451451 by cwc on
    */
   public static String getBuildVersion(){
     return VersionInfo.getVersion() + 

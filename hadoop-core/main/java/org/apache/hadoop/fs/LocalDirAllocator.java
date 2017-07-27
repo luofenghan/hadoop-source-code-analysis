@@ -320,9 +320,7 @@ public class LocalDirAllocator {
      *  with probability proportional to their available space.
      */
     public synchronized 
-    Path getLocalPathForWrite(String pathStr, long size, 
-    	                      Configuration conf, boolean checkWrite
-    	                      ) throws IOException {
+    Path getLocalPathForWrite(String pathStr, long size, Configuration conf, boolean checkWrite) throws IOException {
       confChanged(conf);
       int numDirs = localDirsPath.length;
       int numDirsSearched = 0;

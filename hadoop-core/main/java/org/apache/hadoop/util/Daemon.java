@@ -23,7 +23,7 @@ package org.apache.hadoop.util;
  */
 public class Daemon extends Thread {
     {
-        setDaemon(true);                              // always a daemon
+        setDaemon(true);//always a daemon
     }
 
     Runnable runnable = null;

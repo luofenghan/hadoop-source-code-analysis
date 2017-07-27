@@ -32,10 +32,10 @@ public class BlockLocation implements Writable {
         WritableFactories.setFactory(BlockLocation.class, BlockLocation::new);
     }
 
-    private String[] hosts; //hostnames of datanodes
-    private String[] names; //hostname:portNumber of datanodes
-    private String[] topologyPaths; // full path name in network topology
-    private long offset;  //offset of the of the block in the file
+    private String[] hosts; //hostnames of datanodes 该块所在的数据节点的主机
+    private String[] names; //hostname:portNumber of datanodes 该块所在的数据节点的主机名+端口号
+    private String[] topologyPaths; // full path name in network topology 网络拓扑全路径
+    private long offset;  //offset of the of the block in the file 该块在文件中的偏移量
     private long length;
 
     /**
@@ -180,18 +180,18 @@ public class BlockLocation implements Writable {
         out.writeLong(offset);
         out.writeLong(length);
         out.writeInt(names.length);
-        for (int i = 0; i < names.length; i++) {
-            Text name = new Text(names[i]);
+        for (String name1 : names) {
+            Text name = new Text(name1);
             name.write(out);
         }
         out.writeInt(hosts.length);
-        for (int i = 0; i < hosts.length; i++) {
-            Text host = new Text(hosts[i]);
+        for (String host1 : hosts) {
+            Text host = new Text(host1);
             host.write(out);
         }
         out.writeInt(topologyPaths.length);
-        for (int i = 0; i < topologyPaths.length; i++) {
-            Text host = new Text(topologyPaths[i]);
+        for (String topologyPath : topologyPaths) {
+            Text host = new Text(topologyPath);
             host.write(out);
         }
     }

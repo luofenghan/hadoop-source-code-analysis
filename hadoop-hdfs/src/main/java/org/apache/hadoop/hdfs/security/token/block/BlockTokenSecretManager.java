@@ -226,11 +226,9 @@ public class BlockTokenSecretManager extends
                             Block block, AccessMode mode) throws InvalidToken {
         BlockTokenIdentifier id = new BlockTokenIdentifier();
         try {
-            id.readFields(new DataInputStream(new ByteArrayInputStream(token
-                    .getIdentifier())));
+            id.readFields(new DataInputStream(new ByteArrayInputStream(token.getIdentifier())));
         } catch (IOException e) {
-            throw new InvalidToken(
-                    "Unable to de-serialize block token identifier for user=" + userId
+            throw new InvalidToken("Unable to de-serialize block token identifier for user=" + userId
                             + ", block=" + block + ", access mode=" + mode);
         }
         checkAccess(id, userId, block, mode);

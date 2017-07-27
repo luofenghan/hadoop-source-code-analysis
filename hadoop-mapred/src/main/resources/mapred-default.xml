@@ -225,9 +225,7 @@
     <property>
         <name>mapred.map.tasks</name>
         <value>2</value>
-        <description>The default number of map tasks per job.
-            Ignored when mapred.job.tracker is "local".
-        </description>
+        <description>The default number of map tasks per job. Ignored when mapred.job.tracker is "local".</description>
     </property>
 
     <property>
@@ -371,8 +369,7 @@
     <property>
         <name>mapred.tasktracker.map.tasks.maximum</name>
         <value>2</value>
-        <description>The maximum number of map tasks that will be run
-            simultaneously by a task tracker.
+        <description>The maximum number of map tasks that will be run simultaneously by a task tracker.
         </description>
     </property>
 

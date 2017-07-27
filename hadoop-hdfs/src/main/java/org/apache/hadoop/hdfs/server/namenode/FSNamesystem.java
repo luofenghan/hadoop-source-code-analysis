@@ -1529,9 +1529,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * are replicated.  Will return an empty 2-elt array if we want the
      * client to "try again later".
      */
-    public LocatedBlock getAdditionalBlock(String src,
-                                           String clientName,
-                                           List<Node> excludedNodes) throws IOException {
+    public LocatedBlock getAdditionalBlock(String src, String clientName, List<Node> excludedNodes) throws IOException {
         long fileLength, blockSize;
         int replication;
         DatanodeDescriptor clientNode = null;
@@ -1560,7 +1558,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         }
 
         /* 为新的数据块副本选择保存位置*/
-        DatanodeDescriptor targets[] = replicator.chooseTarget(replication,
+        DatanodeDescriptor[] targets = replicator.chooseTarget(replication,
                 clientNode,
                 excludedNodes,
                 blockSize);
@@ -2245,8 +2243,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
 
-    private void finalizeINodeFileUnderConstruction(String src,
-                                                    INodeFileUnderConstruction pendingFile) throws IOException {
+    private void finalizeINodeFileUnderConstruction(String src, INodeFileUnderConstruction pendingFile) throws IOException {
         NameNode.stateChangeLog.info("Removing lease on  file " + src +
                 " from client " + pendingFile.clientName);
         /*释放租约*/
@@ -2268,9 +2265,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
     public void commitBlockSynchronization(Block lastblock,
-                                           long newgenerationstamp, long newlength,
-                                           boolean closeFile, boolean deleteblock, DatanodeID[] newtargets
-    ) throws IOException {
+                                           long newgenerationstamp,
+                                           long newlength,
+                                           boolean closeFile,
+                                           boolean deleteblock,
+                                           DatanodeID[] newtargets) throws IOException {
         LOG.info("commitBlockSynchronization(lastblock=" + lastblock
                 + ", newgenerationstamp=" + newgenerationstamp
                 + ", newlength=" + newlength
@@ -2536,8 +2535,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         }
         // register new datanode
         /*创建数据节点描述符*/
-        DatanodeDescriptor nodeDescr
-                = new DatanodeDescriptor(nodeReg, NetworkTopology.DEFAULT_RACK, hostName);
+        DatanodeDescriptor nodeDescr = new DatanodeDescriptor(nodeReg, NetworkTopology.DEFAULT_RACK, hostName);
+
         /*获得节点的网络拓扑位置*/
         resolveNetworkLocation(nodeDescr);
         unprotectedAddDatanode(nodeDescr);
@@ -3395,8 +3394,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
        remove  from host2DataNodeMap the datanodeDescriptor removed
        from datanodeMap before adding nodeDescr to host2DataNodeMap.
     */
-        host2DataNodeMap.remove(
-                datanodeMap.put(nodeDescr.getStorageID(), nodeDescr));
+        host2DataNodeMap.remove(datanodeMap.put(nodeDescr.getStorageID(), nodeDescr));
         host2DataNodeMap.add(nodeDescr);
 
         NameNode.stateChangeLog.debug(

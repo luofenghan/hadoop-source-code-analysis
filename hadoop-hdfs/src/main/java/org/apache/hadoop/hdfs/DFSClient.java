@@ -3370,7 +3370,7 @@ public class DFSClient implements FSConstants, Closeable {
                 // generated access token.
                 block = newBlock.getBlock();
                 accessToken = newBlock.getBlockToken();
-                nodes = newBlock.getLocations();
+                nodes = newBlock.getLocations();/*上次故障节点不包含在内*/
 
                 this.hasError = false;
                 lastException = null;
@@ -3634,9 +3634,7 @@ public class DFSClient implements FSConstants, Closeable {
                 //
                 // Xmit header info to datanode
                 //
-                DataOutputStream out = new DataOutputStream(
-                        new BufferedOutputStream(NetUtils.getOutputStream(s, writeTimeout),
-                                DataNode.SMALL_BUFFER_SIZE));
+                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(NetUtils.getOutputStream(s, writeTimeout), DataNode.SMALL_BUFFER_SIZE));
                 blockReplyStream = new DataInputStream(NetUtils.getInputStream(s));
 
                 out.writeShort(DataTransferProtocol.DATA_TRANSFER_VERSION);

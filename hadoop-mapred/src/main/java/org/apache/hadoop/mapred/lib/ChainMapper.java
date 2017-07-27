@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -89,90 +89,89 @@ import java.io.IOException;
  */
 public class ChainMapper implements Mapper {
 
-  /**
-   * Adds a Mapper class to the chain job's JobConf.
-   * <p/>
-   * It has to be specified how key and values are passed from one element of
-   * the chain to the next, by value or by reference. If a Mapper leverages the
-   * assumed semantics that the key and values are not modified by the collector
-   * 'by value' must be used. If the Mapper does not expect this semantics, as
-   * an optimization to avoid serialization and deserialization 'by reference'
-   * can be used.
-   * <p/>
-   * For the added Mapper the configuration given for it,
-   * <code>mapperConf</code>, have precedence over the job's JobConf. This
-   * precedence is in effect when the task is running.
-   * <p/>
-   * IMPORTANT: There is no need to specify the output key/value classes for the
-   * ChainMapper, this is done by the addMapper for the last mapper in the chain
-   * <p/>
-   *
-   * @param job              job's JobConf to add the Mapper class.
-   * @param klass            the Mapper class to add.
-   * @param inputKeyClass    mapper input key class.
-   * @param inputValueClass  mapper input value class.
-   * @param outputKeyClass   mapper output key class.
-   * @param outputValueClass mapper output value class.
-   * @param byValue          indicates if key/values should be passed by value
-   * to the next Mapper in the chain, if any.
-   * @param mapperConf       a JobConf with the configuration for the Mapper
-   * class. It is recommended to use a JobConf without default values using the
-   * <code>JobConf(boolean loadDefaults)</code> constructor with FALSE.
-   */
-  public static <K1, V1, K2, V2> void addMapper(JobConf job,
-                           Class<? extends Mapper<K1, V1, K2, V2>> klass,
-                           Class<? extends K1> inputKeyClass,
-                           Class<? extends V1> inputValueClass,
-                           Class<? extends K2> outputKeyClass,
-                           Class<? extends V2> outputValueClass,
-                           boolean byValue, JobConf mapperConf) {
-    job.setMapperClass(ChainMapper.class);
-    job.setMapOutputKeyClass(outputKeyClass);
-    job.setMapOutputValueClass(outputValueClass);
-    Chain.addMapper(true, job, klass, inputKeyClass, inputValueClass,
-                    outputKeyClass, outputValueClass, byValue, mapperConf);
-  }
-
-  private Chain chain;
-
-  /**
-   * Constructor.
-   */
-  public ChainMapper() {
-    chain = new Chain(true);
-  }
-
-  /**
-   * Configures the ChainMapper and all the Mappers in the chain.
-   * <p/>
-   * If this method is overriden <code>super.configure(...)</code> should be
-   * invoked at the beginning of the overwriter method.
-   */
-  public void configure(JobConf job) {
-    chain.configure(job);
-  }
-
-  /**
-   * Chains the <code>map(...)</code> methods of the Mappers in the chain.
-   */
-  @SuppressWarnings({"unchecked"})
-  public void map(Object key, Object value, OutputCollector output,
-                  Reporter reporter) throws IOException {
-    Mapper mapper = chain.getFirstMap();
-    if (mapper != null) {
-      mapper.map(key, value, chain.getMapperCollector(0, output, reporter),
-                 reporter);
+    /**
+     * Adds a Mapper class to the chain job's JobConf.
+     * <p/>
+     * It has to be specified how key and values are passed from one element of
+     * the chain to the next, by value or by reference. If a Mapper leverages the
+     * assumed semantics that the key and values are not modified by the collector
+     * 'by value' must be used. If the Mapper does not expect this semantics, as
+     * an optimization to avoid serialization and deserialization 'by reference'
+     * can be used.
+     * <p/>
+     * For the added Mapper the configuration given for it,
+     * <code>mapperConf</code>, have precedence over the job's JobConf. This
+     * precedence is in effect when the task is running.
+     * <p/>
+     * IMPORTANT: There is no need to specify the output key/value classes for the
+     * ChainMapper, this is done by the addMapper for the last mapper in the chain
+     * <p/>
+     *
+     * @param job              job's JobConf to add the Mapper class.
+     * @param klass            the Mapper class to add.
+     * @param inputKeyClass    mapper input key class.
+     * @param inputValueClass  mapper input value class.
+     * @param outputKeyClass   mapper output key class.
+     * @param outputValueClass mapper output value class.
+     * @param byValue          indicates if key/values should be passed by value
+     *                         to the next Mapper in the chain, if any.
+     * @param mapperConf       a JobConf with the configuration for the Mapper
+     *                         class. It is recommended to use a JobConf without default values using the
+     *                         <code>JobConf(boolean loadDefaults)</code> constructor with FALSE.
+     */
+    public static <K1, V1, K2, V2> void addMapper(JobConf job,
+                                                  Class<? extends Mapper<K1, V1, K2, V2>> klass,
+                                                  Class<? extends K1> inputKeyClass,
+                                                  Class<? extends V1> inputValueClass,
+                                                  Class<? extends K2> outputKeyClass,
+                                                  Class<? extends V2> outputValueClass,
+                                                  boolean byValue, JobConf mapperConf) {
+        job.setMapperClass(ChainMapper.class);
+        job.setMapOutputKeyClass(outputKeyClass);
+        job.setMapOutputValueClass(outputValueClass);
+        Chain.addMapper(true, job, klass, inputKeyClass, inputValueClass,
+                outputKeyClass, outputValueClass, byValue, mapperConf);
     }
-  }
 
-  /**
-   * Closes  the ChainMapper and all the Mappers in the chain.
-   * <p/>
-   * If this method is overriden <code>super.close()</code> should be
-   * invoked at the end of the overwriter method.
-   */
-  public void close() throws IOException {
-    chain.close();
-  }
+    private Chain chain;
+
+    /**
+     * Constructor.
+     */
+    public ChainMapper() {
+        chain = new Chain(true);
+    }
+
+    /**
+     * Configures the ChainMapper and all the Mappers in the chain.
+     * <p/>
+     * If this method is overriden <code>super.configure(...)</code> should be
+     * invoked at the beginning of the overwriter method.
+     */
+    public void configure(JobConf job) {
+        chain.configure(job);
+    }
+
+    /**
+     * Chains the <code>map(...)</code> methods of the Mappers in the chain.
+     */
+    @SuppressWarnings({"unchecked"})
+    public void map(Object key, Object value, OutputCollector output,
+                    Reporter reporter) throws IOException {
+        Mapper mapper = chain.getFirstMap();
+        if (mapper != null) {
+            mapper.map(key, value, chain.getMapperCollector(0, output, reporter), reporter);
+        }
+    }
+
+    /**
+     * Closes  the ChainMapper and all the Mappers in the chain.
+     * <p/>
+     * If this method is overriden <code>super.close()</code> should be
+     * invoked at the end of the overwriter method.
+     */
+    public void close() throws IOException {
+        chain.close();
+    }
 
 }

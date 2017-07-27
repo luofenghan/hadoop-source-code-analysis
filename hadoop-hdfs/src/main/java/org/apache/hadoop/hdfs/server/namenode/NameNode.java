@@ -707,20 +707,16 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
      * @return
      * @throws IOException
      */
-    public LocatedBlock addBlock(String src,
-                                 String clientName,
-                                 DatanodeInfo[] excludedNodes) throws IOException {
+    public LocatedBlock addBlock(String src, String clientName, DatanodeInfo[] excludedNodes) throws IOException {
 
         List<Node> excludedNodeList = null;
         if (excludedNodes != null) {
             // We must copy here, since this list gets modified later on
             // in ReplicationTargetChooser
-            excludedNodeList = new ArrayList<Node>(
-                    Arrays.<Node>asList(excludedNodes));
+            excludedNodeList = new ArrayList<Node>(Arrays.<Node>asList(excludedNodes));
         }
 
-        stateChangeLog.debug("*BLOCK* NameNode.addBlock: file "
-                + src + " for " + clientName);
+        stateChangeLog.debug("*BLOCK* NameNode.addBlock: file " + src + " for " + clientName);
         LocatedBlock locatedBlock = namesystem.getAdditionalBlock(src, clientName, excludedNodeList);
         if (locatedBlock != null)
             myMetrics.incrNumAddBlockOps();
@@ -783,8 +779,11 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
      * {@inheritDoc}
      */
     public void commitBlockSynchronization(Block block,
-                                           long newgenerationstamp, long newlength,
-                                           boolean closeFile, boolean deleteblock, DatanodeID[] newtargets) throws IOException {
+                                           long newgenerationstamp,
+                                           long newlength,
+                                           boolean closeFile,
+                                           boolean deleteblock,
+                                           DatanodeID[] newtargets) throws IOException {
         namesystem.commitBlockSynchronization(block, newgenerationstamp, newlength, closeFile, deleteblock, newtargets);
     }
 

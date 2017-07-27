@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,13 +17,13 @@
  */
 package org.apache.hadoop.mapred;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.server.jobtracker.TaskTracker;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Used by a {@link JobTracker} to schedule {@link Task}s on
@@ -38,63 +38,66 @@ import org.apache.hadoop.mapreduce.server.jobtracker.TaskTracker;
  * {@link JobInProgressListener#jobAdded(JobInProgress)} is called)
  * and tasks for that job being assigned (by
  * {@link #assignTasks(TaskTracker)}).
+ *
  * @see EagerTaskInitializationListener
  */
 abstract class TaskScheduler implements Configurable {
 
-  protected Configuration conf;
-  protected TaskTrackerManager taskTrackerManager;
-  
-  public Configuration getConf() {
-    return conf;
-  }
+    protected Configuration conf;
+    protected TaskTrackerManager taskTrackerManager;
 
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
+    public Configuration getConf() {
+        return conf;
+    }
 
-  public synchronized void setTaskTrackerManager(
-      TaskTrackerManager taskTrackerManager) {
-    this.taskTrackerManager = taskTrackerManager;
-  }
-  
-  /**
-   * Lifecycle method to allow the scheduler to start any work in separate
-   * threads.
-   * @throws IOException
-   */
-  public void start() throws IOException {
-    // do nothing
-  }
-  
-  /**
-   * Lifecycle method to allow the scheduler to stop any work it is doing.
-   * @throws IOException
-   */
-  public void terminate() throws IOException {
-    // do nothing
-  }
+    public void setConf(Configuration conf) {
+        this.conf = conf;
+    }
 
-  /**
-   * Returns the tasks we'd like the TaskTracker to execute right now.
-   * 
-   * @param taskTracker The TaskTracker for which we're looking for tasks.
-   * @return A list of tasks to run on that TaskTracker, possibly empty.
-   */
-  public abstract List<Task> assignTasks(TaskTracker taskTracker)
-  throws IOException;
+    public synchronized void setTaskTrackerManager(TaskTrackerManager taskTrackerManager) {
+        this.taskTrackerManager = taskTrackerManager;
+    }
 
-  /**
-   * Returns a collection of jobs in an order which is specific to 
-   * the particular scheduler.
-   * @param queueName
-   * @return
-   */
-  public abstract Collection<JobInProgress> getJobs(String queueName);
+    /**
+     * Lifecycle method to allow the scheduler to start any work in separate
+     * threads.
+     *
+     * @throws IOException
+     */
+    public void start() throws IOException {
+        // do nothing
+    }
 
-  /**
-   * Refresh the configuration of the scheduler.
-   */
-  public void refresh() throws IOException {}
-  
+    /**
+     * Lifecycle method to allow the scheduler to stop any work it is doing.
+     *
+     * @throws IOException
+     */
+    public void terminate() throws IOException {
+        // do nothing
+    }
+
+    /**
+     * 给指定的TaskTracker 分配任务
+     *
+     * @param taskTracker 寻找任务的TaskTracker
+     * @return 返回给TaskTracker运行的任务列表，可能为空
+     */
+    public abstract List<Task> assignTasks(TaskTracker taskTracker) throws IOException;
+
+    /**
+     * Returns a collection of jobs in an order which is specific to
+     * the particular scheduler.
+     *
+     * @param queueName
+     * @return
+     */
+    public abstract Collection<JobInProgress> getJobs(String queueName);
+
+    /**
+     * Refresh the configuration of the scheduler.
+     */
+    public void refresh() throws IOException {
+    }
+
 }

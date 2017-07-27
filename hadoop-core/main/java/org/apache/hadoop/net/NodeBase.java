@@ -72,8 +72,7 @@ public class NodeBase implements Node {
     /* set this node's name and location */
     private void set(String name, String location) {
         if (name != null && name.contains(PATH_SEPARATOR_STR))
-            throw new IllegalArgumentException(
-                    "Network location name contains /: " + name);
+            throw new IllegalArgumentException("Network location name contains /: " + name);
         this.name = (name == null) ? "" : name;
         this.location = location;
     }

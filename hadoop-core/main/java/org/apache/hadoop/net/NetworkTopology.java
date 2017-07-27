@@ -39,8 +39,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class NetworkTopology {
     public final static String DEFAULT_RACK = "/default-rack";
     public final static int DEFAULT_HOST_LEVEL = 2;
-    public static final Log LOG =
-            LogFactory.getLog(NetworkTopology.class);
+    public static final Log LOG = LogFactory.getLog(NetworkTopology.class);
 
     /* Inner Node represent a switch/router of a data center or rack.
      * Different from a leave node, it has non-null children.
@@ -95,11 +94,7 @@ public class NetworkTopology {
             }
 
             Node firstChild = children.get(0);
-            if (firstChild instanceof InnerNode) {
-                return false;
-            }
-
-            return true;
+            return !(firstChild instanceof InnerNode);
         }
 
         /**

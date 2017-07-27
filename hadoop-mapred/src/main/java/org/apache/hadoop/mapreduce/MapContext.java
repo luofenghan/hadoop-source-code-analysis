@@ -18,24 +18,24 @@
 
 package org.apache.hadoop.mapreduce;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
+
+import java.io.IOException;
 
 /**
  * The context that is given to the {@link Mapper}.
- * @param <KEYIN> the key input type to the Mapper
+ * @param <KEY_IN> the key input type to the Mapper
  * @param <VALUEIN> the value input type to the Mapper
  * @param <KEYOUT> the key output type from the Mapper
  * @param <VALUEOUT> the value output type from the Mapper
  */
-public class MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> 
-  extends TaskInputOutputContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
-  private RecordReader<KEYIN,VALUEIN> reader;
+public class MapContext<KEY_IN,VALUEIN,KEYOUT,VALUEOUT>
+  extends TaskInputOutputContext<KEY_IN,VALUEIN,KEYOUT,VALUEOUT> {
+  private RecordReader<KEY_IN,VALUEIN> reader;
   private InputSplit split;
 
   public MapContext(Configuration conf, TaskAttemptID taskid,
-                    RecordReader<KEYIN,VALUEIN> reader,
+                    RecordReader<KEY_IN,VALUEIN> reader,
                     RecordWriter<KEYOUT,VALUEOUT> writer,
                     OutputCommitter committer,
                     StatusReporter reporter,
@@ -53,7 +53,7 @@ public class MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT>
   }
 
   @Override
-  public KEYIN getCurrentKey() throws IOException, InterruptedException {
+  public KEY_IN getCurrentKey() throws IOException, InterruptedException {
     return reader.getCurrentKey();
   }
 

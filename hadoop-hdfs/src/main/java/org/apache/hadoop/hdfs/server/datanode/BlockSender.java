@@ -48,11 +48,11 @@ class BlockSender implements java.io.Closeable, FSConstants {
     private long offset; // starting position to read
     private long endOffset; // ending position
     private long blockLength;
-    private int bytesPerChecksum; // chunk size
-    private int checksumSize; // checksum size
-    private boolean corruptChecksumOk; // if need to verify checksum
-    private boolean chunkOffsetOK; // if need to send chunk offset
-    private long seqno; // sequence number of packet
+    private int bytesPerChecksum; // chunk size 512
+    private int checksumSize; // checksum size 4
+    private boolean corruptChecksumOk; // 是否需要验证校验和
+    private boolean chunkOffsetOK; // 是否需要发动块的偏移量
+    private long seqno; // 包的序列号
 
     private boolean transferToAllowed = true;
     private boolean blockReadFully; //set when the whole block is read
@@ -72,8 +72,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
     BlockSender(Block block, long startOffset, long length,
                 boolean corruptChecksumOk, boolean chunkOffsetOK,
                 boolean verifyChecksum, DataNode datanode) throws IOException {
-        this(block, startOffset, length, corruptChecksumOk, chunkOffsetOK,
-                verifyChecksum, datanode, null);
+        this(block, startOffset, length, corruptChecksumOk, chunkOffsetOK, verifyChecksum, datanode, null);
     }
 
     BlockSender(Block block, long startOffset, long length,
@@ -90,8 +89,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
             this.clientTraceFmt = clientTraceFmt;
 
             if (!corruptChecksumOk || datanode.data.metaFileExists(block)) {
-                checksumIn = new DataInputStream(new BufferedInputStream(datanode.data.getMetaDataInputStream(block), BUFFER_SIZE));
-
+                this.checksumIn = new DataInputStream(new BufferedInputStream(datanode.data.getMetaDataInputStream(block), BUFFER_SIZE));
                 // read and handle the common header here. For now just a version
                 BlockMetadataHeader header = BlockMetadataHeader.readHeader(checksumIn);
                 short version = header.getVersion();
@@ -215,19 +213,16 @@ class BlockSender implements java.io.Closeable, FSConstants {
     }
 
     /**
-     * Sends upto maxChunks chunks of data.
-     * <p>
-     * When blockInPosition is >= 0, assumes 'out' is a
-     * {@link SocketOutputStream} and tries
-     * {@link SocketOutputStream#transferToFully(FileChannel, long, int)} to
-     * send data (and updates blockInPosition).
+     * @param pkt       packet包缓冲区
+     * @param maxChunks 本次发送的最大块数
+     * @param out       输出流
+     * @return
+     * @throws IOException
      */
-    private int sendChunks(ByteBuffer pkt, int maxChunks, OutputStream out)
-            throws IOException {
+    private int sendChunks(ByteBuffer pkt, int maxChunks, OutputStream out) throws IOException {
         // Sends multiple chunks in one packet with a single write().
-
-        int len = Math.min((int) (endOffset - offset),
-                bytesPerChecksum * maxChunks);
+        /*本次发送的包中 数据长度的最大长度，假设每次发送3个chunk，那么本次发送的数据长度就为 512*3*/
+        int len = Math.min((int) (endOffset - offset), bytesPerChecksum * maxChunks);
 
         // truncate len so that any partial chunks will be sent as a final packet.
         // this is not necessary for correctness, but partial chunks are
@@ -253,6 +248,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
         //why no ByteBuf.putBoolean()?
         pkt.putInt(len);
 
+        /*读取checksum部分*/
         int checksumOff = pkt.position();
         int checksumLen = numChunks * checksumSize;
         byte[] buf = pkt.array();
@@ -276,14 +272,14 @@ class BlockSender implements java.io.Closeable, FSConstants {
                 }
             }
         }
-
+        /*读取data部分*/
         int dataOff = checksumOff + checksumLen;
 
-        if (blockInPosition < 0) {
-            //normal transfer
+        if (blockInPosition < 0) {/*【普通方式】传输*/
+            // normal transfer
             IOUtils.readFully(blockIn, buf, dataOff, len);
 
-            if (verifyChecksum) {
+            if (verifyChecksum) {/*在客户端读取数据的时候，该值为false，交给客户端去验证*/
                 int dOff = dataOff;
                 int cOff = checksumOff;
                 int dLeft = len;
@@ -304,10 +300,9 @@ class BlockSender implements java.io.Closeable, FSConstants {
 
             // only recompute checksum if we can't trust the meta data due to
             // concurrent writes
+            /*由于读取数据的时候可能发现写操作，这是校验和数据会改变，这时需要重新计算*/
             if (memoizedBlock.hasBlockChanged(len)) {
-                ChecksumUtil.updateChunkChecksum(
-                        buf, checksumOff, dataOff, len, checksum
-                );
+                ChecksumUtil.updateChunkChecksum(buf, checksumOff, dataOff, len, checksum);
             }
 
             try {
@@ -315,7 +310,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
             } catch (IOException e) {
                 throw ioeToSocketException(e);
             }
-        } else {
+        } else {/*【零拷贝】数据传输*/
             try {
                 //use transferTo(). Checks on out and blockIn are already done.
                 SocketOutputStream sockOut = (SocketOutputStream) out;
@@ -323,12 +318,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
 
                 if (memoizedBlock.hasBlockChanged(len)) {
                     fileChannel.position(blockInPosition);
-                    IOUtils.readFileChannelFully(
-                            fileChannel,
-                            buf,
-                            dataOff,
-                            len
-                    );
+                    IOUtils.readFileChannelFully(fileChannel, buf, dataOff, len);
 
                     ChecksumUtil.updateChunkChecksum(buf, checksumOff, dataOff, len, checksum);
                     sockOut.write(buf, 0, dataOff + len);
@@ -369,12 +359,12 @@ class BlockSender implements java.io.Closeable, FSConstants {
      * @param throttler  for sending data.
      * @return total bytes reads, including crc.
      */
-    long sendBlock(DataOutputStream out, OutputStream baseStream,
-                   BlockTransferThrottler throttler) throws IOException {
+    long sendBlock(DataOutputStream out, OutputStream baseStream, BlockTransferThrottler throttler) throws IOException {
         if (out == null) {
             throw new IOException("out stream is null");
         }
         this.throttler = throttler;
+
         /*第一部分：发送应答头*/
         long initialOffset = offset;
         long totalRead = 0;
@@ -398,9 +388,10 @@ class BlockSender implements java.io.Closeable, FSConstants {
             /*除数据长度以外其他字段的长度和 + length字段大小*/
             int pktSize = DataNode.PKT_HEADER_LEN + SIZE_OF_INTEGER;
 
-            if (transferToAllowed && !verifyChecksum &&
-                    baseStream instanceof SocketOutputStream &&
-                    blockIn instanceof FileInputStream) {
+            if (transferToAllowed
+                    && !verifyChecksum /*客户端读取数据的时候 verifyChecksum为false，这时会以transferTO方式传输*/
+                    && baseStream instanceof SocketOutputStream
+                    && blockIn instanceof FileInputStream) {/*使用【零拷贝技术】进行传输*/
 
                 FileChannel fileChannel = ((FileInputStream) blockIn).getChannel();
 
@@ -409,31 +400,31 @@ class BlockSender implements java.io.Closeable, FSConstants {
                 streamForSendChunks = baseStream;
 
                 // assure a mininum buffer size.
-                maxChunksPerPacket = (Math.max(BUFFER_SIZE, MIN_BUFFER_WITH_TRANSFERTO) + bytesPerChecksum - 1) / bytesPerChecksum;
+                maxChunksPerPacket = (Math.max(BUFFER_SIZE, MIN_BUFFER_WITH_TRANSFERTO) + bytesPerChecksum - 1) / bytesPerChecksum;/*128*/
 
                 // packet buffer has to be able to do a normal transfer in the case
                 // of recomputing checksum
                 // 无论是否使用 零拷贝 的数据传输方式，应答包中还必须包含校验数据，
                 // 另外，还需要在缓冲区中为数据块内容预留空间，以便在数据块内容发生变化的时候，重新计算校验和。
-                pktSize += (bytesPerChecksum + checksumSize) * maxChunksPerPacket;
-            } else {
-                maxChunksPerPacket = Math.max(1, (BUFFER_SIZE + bytesPerChecksum - 1) / bytesPerChecksum);
-                pktSize += (bytesPerChecksum + checksumSize) * maxChunksPerPacket;
+                pktSize += (bytesPerChecksum + checksumSize) * maxChunksPerPacket;/*66048*/
+            } else {/*使用【普通方式】进行传输*/
+                maxChunksPerPacket = Math.max(1, (BUFFER_SIZE + bytesPerChecksum - 1) / bytesPerChecksum);/*8*/
+                pktSize += (bytesPerChecksum + checksumSize) * maxChunksPerPacket;/*4128*/
             }
 
             ByteBuffer pktBuf = ByteBuffer.allocate(pktSize);
+
             /*循环调用sendChunks发送应答数据包*/
-            while (endOffset > offset) {
+            while (offset < endOffset) {
                 long len = sendChunks(pktBuf, maxChunksPerPacket, streamForSendChunks);
                 offset += len;
-                totalRead += len + ((len + bytesPerChecksum - 1) / bytesPerChecksum *
-                        checksumSize);
+                totalRead += len + ((len + bytesPerChecksum - 1) / bytesPerChecksum * checksumSize);
                 seqno++;
             }
             try {
                 out.writeInt(0); // mark the end of block
                 out.flush();
-            } catch (IOException e) { //socket error
+            } catch (IOException e) { // socket error
                 throw ioeToSocketException(e);
             }
         } catch (RuntimeException e) {
@@ -484,20 +475,17 @@ class BlockSender implements java.io.Closeable, FSConstants {
         boolean hasBlockChanged(long dataLen) throws IOException {
             // check if we are using transferTo since we tell if the file has changed
             // (blockInPosition >= 0 => we are using transferTo and File Channels
-            if (BlockSender.this.blockInPosition >= 0) {
+            if (BlockSender.this.blockInPosition >= 0) {/*使用零拷贝传输技术*/
                 long currentLength = ((FileInputStream) inputStream).getChannel().size();
 
-                return (blockInPosition % bytesPerChecksum != 0 ||
-                        dataLen % bytesPerChecksum != 0) &&
-                        currentLength > blockLength;
-
-            } else {
+                return (blockInPosition % bytesPerChecksum != 0
+                        || (dataLen % bytesPerChecksum != 0) && currentLength > blockLength);
+            } else { /*使用普通方式传输*/
                 long currentLength = fsDataset.getLength(block);
 
                 // offset is the offset into the block
-                return (BlockSender.this.offset % bytesPerChecksum != 0 ||
-                        dataLen % bytesPerChecksum != 0) &&
-                        currentLength > blockLength;
+                return (BlockSender.this.offset % bytesPerChecksum != 0 || dataLen % bytesPerChecksum != 0)
+                        && currentLength > blockLength;
             }
         }
     }

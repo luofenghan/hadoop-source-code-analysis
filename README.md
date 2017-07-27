@@ -16,5 +16,6 @@
 - [ ] 《Spark大数据处理技术》
 - [ ] [Spark源码分析](https://github.com/JerryLead/SparkInternals/tree/master/markdown)
 - [ ] 《HBase权威指南》
+- [ ] [推酷大数据周刊](http://www.tuicool.com/kans/3305909279)
 
 

@@ -49,7 +49,7 @@ class DataBlockScanner implements Runnable {
     private static final int MAX_SCAN_RATE = 8 * 1024 * 1024; // 8MB per sec
     private static final int MIN_SCAN_RATE = 1 * 1024 * 1024; // 1MB per sec
 
-    static final long DEFAULT_SCAN_PERIOD_HOURS = 21 * 24L; // three weeks
+    private static final long DEFAULT_SCAN_PERIOD_HOURS = 21 * 24L; // three weeks
     private static final long ONE_DAY = 24 * 3600 * 1000L;
 
     static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
@@ -62,7 +62,7 @@ class DataBlockScanner implements Runnable {
     FSDataset dataset;
 
     // sorted set
-    TreeSet<BlockScanInfo> blockInfoSet;
+    TreeSet<BlockScanInfo> blockInfoSet;/*待扫描的【数据块】信息都存储在该集合中*/
     HashMap<Block, BlockScanInfo> blockMap;
 
     long totalScans = 0;
@@ -81,17 +81,17 @@ class DataBlockScanner implements Runnable {
     BlockTransferThrottler throttler = null;
 
     private enum ScanType {
-        REMOTE_READ,           // Verified when a block read by a client etc
-        VERIFICATION_SCAN,     // scanned as part of periodic verfication
-        NONE,
+        REMOTE_READ, /*最后一次扫描结果是由客户端读产生*/
+        VERIFICATION_SCAN, /*扫描结果由数据块扫描器产生*/
+        NONE, /*还没有执行扫描*/
     }
 
     static class BlockScanInfo implements Comparable<BlockScanInfo> {
-        Block block;
-        long lastScanTime = 0;
-        long lastLogTime = 0;
-        ScanType lastScanType = ScanType.NONE;
-        boolean lastScanOk = true;
+        Block block;/*数据块*/
+        long lastScanTime = 0;/*最后一次扫描时间*/
+        long lastLogTime = 0;/*最后写日志的时间*/
+        ScanType lastScanType = ScanType.NONE;/*扫描的类型，定义在枚举DataBlockScanner.ScanType*/
+        boolean lastScanOk = true;/*扫描结果，true表示通过了扫描，false表示扫描失败*/
 
         BlockScanInfo(Block block) {
             this.block = block;
@@ -186,11 +186,11 @@ class DataBlockScanner implements Runnable {
     private void init() {
 
         // get the list of blocks and arrange them in random order
-        Block arr[] = dataset.getBlockReport();
+        Block[] arr = dataset.getBlockReport();
         Collections.shuffle(Arrays.asList(arr));
 
-        blockInfoSet = new TreeSet<BlockScanInfo>();
-        blockMap = new HashMap<Block, BlockScanInfo>();
+        blockInfoSet = new TreeSet<>();
+        blockMap = new HashMap<>();
 
         long scanTime = -1;
         for (Block block : arr) {
@@ -200,9 +200,10 @@ class DataBlockScanner implements Runnable {
             addBlockInfo(info);
         }
 
-    /* Pick the first directory that has any existing scanner log.
-     * otherwise, pick the first directory.
-     */
+        /*
+         * Pick the first directory that has any existing scanner log.
+         * otherwise, pick the first directory.
+         */
         File dir = null;
         FSDataset.FSVolume[] volumes = dataset.volumes.volumes;
         for (FSDataset.FSVolume vol : volumes) {
@@ -444,8 +445,7 @@ class DataBlockScanner implements Runnable {
                 blockSender = new BlockSender(block, 0, -1, false,
                         false, true, datanode);
 
-                DataOutputStream out =
-                        new DataOutputStream(new IOUtils.NullOutputStream());
+                DataOutputStream out = new DataOutputStream(new IOUtils.NullOutputStream());
 
                 blockSender.sendBlock(out, null, throttler);
 
@@ -559,10 +559,10 @@ class DataBlockScanner implements Runnable {
                 10 * 60 * 1000));
         long lastScanTime = System.currentTimeMillis() - scanPeriod;
     
-    /* Before this loop, entries in blockInfoSet that are not
-     * updated above have lastScanTime of <= 0 . Loop until first entry has
-     * lastModificationTime > 0.
-     */
+        /* Before this loop, entries in blockInfoSet that are not
+         * updated above have lastScanTime of <= 0 . Loop until first entry has
+         * lastModificationTime > 0.
+         */
         synchronized (this) {
             if (blockInfoSet.size() > 0) {
                 BlockScanInfo info;

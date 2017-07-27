@@ -70,9 +70,7 @@ public class DiskChecker {
             return false;
         }
         String parent = canonDir.getParent();
-        return (parent != null) &&
-                (mkdirsWithExistsCheck(new File(parent)) &&
-                        (canonDir.mkdir() || canonDir.exists()));
+        return (parent != null) && (mkdirsWithExistsCheck(new File(parent)) && (canonDir.mkdir() || canonDir.exists()));
     }
 
     /**
@@ -130,9 +128,7 @@ public class DiskChecker {
      * @param expected expected permission
      * @return true on success, false on failure
      */
-    public static boolean mkdirsWithExistsAndPermissionCheck(
-            LocalFileSystem localFS, Path dir, FsPermission expected)
-            throws IOException {
+    public static boolean mkdirsWithExistsAndPermissionCheck(LocalFileSystem localFS, Path dir, FsPermission expected) throws IOException {
         File directory = new File(dir.makeQualified(localFS).toUri().getPath());
         if (!directory.exists()) {
             boolean created = mkdirsWithExistsCheck(directory);
@@ -158,9 +154,7 @@ public class DiskChecker {
      * @throws DiskErrorException
      * @throws IOException
      */
-    public static void checkDir(LocalFileSystem localFS, Path dir,
-                                FsPermission expected)
-            throws DiskErrorException, IOException {
+    public static void checkDir(LocalFileSystem localFS, Path dir, FsPermission expected) throws DiskErrorException, IOException {
         if (!mkdirsWithExistsAndPermissionCheck(localFS, dir, expected))
             throw new DiskErrorException("can not create directory: "
                     + dir.toString());

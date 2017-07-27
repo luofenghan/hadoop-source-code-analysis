@@ -42,7 +42,5 @@ public interface MapRunnable<K1, V1, K2, V2>
    * @param reporter {@link Reporter} to report progress, status-updates etc.
    * @throws IOException
    */
-  void run(RecordReader<K1, V1> input, OutputCollector<K2, V2> output,
-           Reporter reporter)
-    throws IOException;
+  void run(RecordReader<K1, V1> input, OutputCollector<K2, V2> output, Reporter reporter) throws IOException;
 }

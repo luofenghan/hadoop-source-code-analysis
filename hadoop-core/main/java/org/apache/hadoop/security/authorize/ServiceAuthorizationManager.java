@@ -17,11 +17,6 @@
  */
 package org.apache.hadoop.security.authorize;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -29,6 +24,11 @@ import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.security.KerberosInfo;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * An authorization manager which handles service-level authorization
@@ -50,8 +50,7 @@ public class ServiceAuthorizationManager {
    *             instead.
    */
   @Deprecated
-  public static final String SERVICE_AUTHORIZATION_CONFIG = 
-    "hadoop.security.authorization";
+  public static final String SERVICE_AUTHORIZATION_CONFIG = "hadoop.security.authorization";
   
   private static final Log AUDITLOG =
     LogFactory.getLog("SecurityLogger."+ServiceAuthorizationManager.class.getName());

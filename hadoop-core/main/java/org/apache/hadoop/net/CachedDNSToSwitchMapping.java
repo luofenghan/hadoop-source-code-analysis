@@ -24,10 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A cached implementation of DNSToSwitchMapping that takes an
- * raw DNSToSwitchMapping and stores the resolved network location in 
+ * raw DNSToSwitchMapping and stores the resolved network location in
  * a cache. The following calls to a resolved network location
- * will get its location from the cache. 
- *
+ * will get its location from the cache.
  */
 public class CachedDNSToSwitchMapping implements DNSToSwitchMapping {
     private Map<String, String> cache = new ConcurrentHashMap<String, String>();
@@ -55,8 +54,7 @@ public class CachedDNSToSwitchMapping implements DNSToSwitchMapping {
     /**
      * Caches the resolved hosts
      */
-    private void cacheResolvedHosts(List<String> uncachedHosts,
-                                    List<String> resolvedHosts) {
+    private void cacheResolvedHosts(List<String> uncachedHosts, List<String> resolvedHosts) {
         // Cache the result
         if (resolvedHosts != null) {
             for (int i = 0; i < uncachedHosts.size(); i++) {

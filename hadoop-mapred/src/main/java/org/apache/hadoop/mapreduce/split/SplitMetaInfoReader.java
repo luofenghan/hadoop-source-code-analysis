@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,9 +18,6 @@
 
 package org.apache.hadoop.mapreduce.split;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -29,6 +26,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.JobSubmissionFiles;
+import org.apache.hadoop.mapreduce.split.JobSplit.SplitMetaInfo;
+import org.apache.hadoop.mapreduce.split.JobSplit.TaskSplitIndex;
+import org.apache.hadoop.mapreduce.split.JobSplit.TaskSplitMetaInfo;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * A (internal) utility that reads the split meta info and creates
@@ -36,51 +39,49 @@ import org.apache.hadoop.mapreduce.JobSubmissionFiles;
  */
 
 public class SplitMetaInfoReader {
-  
-  public static JobSplit.TaskSplitMetaInfo[] readSplitMetaInfo(
-      JobID jobId, FileSystem fs, Configuration conf, Path jobSubmitDir) 
-  throws IOException {
-    long maxMetaInfoSize = conf.getLong("mapreduce.jobtracker.split.metainfo.maxsize", 
-        10000000L);
-    Path metaSplitFile = JobSubmissionFiles.getJobSplitMetaFile(jobSubmitDir);
-    FileStatus fStatus = fs.getFileStatus(metaSplitFile);
-    if (maxMetaInfoSize > 0 && fStatus.getLen() > maxMetaInfoSize) {
-      throw new IOException("Split metadata size exceeded " +
-          maxMetaInfoSize +". Aborting job " + jobId);
+
+    public static TaskSplitMetaInfo[] readSplitMetaInfo(
+            JobID jobId, FileSystem fs, Configuration conf, Path jobSubmitDir)
+            throws IOException {
+        long maxMetaInfoSize = conf.getLong("mapreduce.jobtracker.split.metainfo.maxsize",
+                10000000L);
+        Path metaSplitFile = JobSubmissionFiles.getJobSplitMetaFile(jobSubmitDir);
+        FileStatus fStatus = fs.getFileStatus(metaSplitFile);
+        if (maxMetaInfoSize > 0 && fStatus.getLen() > maxMetaInfoSize) {
+            throw new IOException("Split metadata size exceeded " +
+                    maxMetaInfoSize + ". Aborting job " + jobId);
+        }
+        /*读取 job.splitmetainfo 文件*/
+        FSDataInputStream in = fs.open(metaSplitFile);
+        byte[] header = new byte[JobSplit.META_SPLIT_FILE_HEADER.length];
+        in.readFully(header);
+        if (!Arrays.equals(JobSplit.META_SPLIT_FILE_HEADER, header)) {
+            throw new IOException("Invalid header on split file");
+        }
+        int vers = WritableUtils.readVInt(in);
+        if (vers != JobSplit.META_SPLIT_VERSION) {
+            in.close();
+            throw new IOException("Unsupported split version " + vers);
+        }
+        int numSplits = WritableUtils.readVInt(in); //TODO: check for insane values
+        /*分片信息*/
+        TaskSplitMetaInfo[] allSplitMetaInfo = new TaskSplitMetaInfo[numSplits];
+        final int maxLocations = conf.getInt(JobSplitWriter.MAX_SPLIT_LOCATIONS, Integer.MAX_VALUE);
+
+        for (int i = 0; i < numSplits; i++) {
+            SplitMetaInfo splitMetaInfo = new SplitMetaInfo();
+            splitMetaInfo.readFields(in);
+            final int numLocations = splitMetaInfo.getLocations().length;
+            if (numLocations > maxLocations) {
+                throw new IOException("Max block location exceeded for split: #" + i +
+                        " splitsize: " + numLocations + " maxsize: " + maxLocations);
+            }
+            TaskSplitIndex splitIndex = new TaskSplitIndex(JobSubmissionFiles.getJobSplitFile(jobSubmitDir).toString(),
+                    splitMetaInfo.getStartOffset());
+            allSplitMetaInfo[i] = new TaskSplitMetaInfo(splitIndex, splitMetaInfo.getLocations(), splitMetaInfo.getInputDataLength());
+        }
+        in.close();
+        return allSplitMetaInfo;
     }
-    FSDataInputStream in = fs.open(metaSplitFile);
-    byte[] header = new byte[JobSplit.META_SPLIT_FILE_HEADER.length];
-    in.readFully(header);
-    if (!Arrays.equals(JobSplit.META_SPLIT_FILE_HEADER, header)) {
-      throw new IOException("Invalid header on split file");
-    }
-    int vers = WritableUtils.readVInt(in);
-    if (vers != JobSplit.META_SPLIT_VERSION) {
-      in.close();
-      throw new IOException("Unsupported split version " + vers);
-    }
-    int numSplits = WritableUtils.readVInt(in); //TODO: check for insane values
-    JobSplit.TaskSplitMetaInfo[] allSplitMetaInfo = 
-      new JobSplit.TaskSplitMetaInfo[numSplits];
-    final int maxLocations =
-      conf.getInt(JobSplitWriter.MAX_SPLIT_LOCATIONS, Integer.MAX_VALUE);
-    for (int i = 0; i < numSplits; i++) {
-      JobSplit.SplitMetaInfo splitMetaInfo = new JobSplit.SplitMetaInfo();
-      splitMetaInfo.readFields(in);
-      final int numLocations = splitMetaInfo.getLocations().length;
-      if (numLocations > maxLocations) {
-        throw new IOException("Max block location exceeded for split: #"  + i +
-              " splitsize: " + numLocations + " maxsize: " + maxLocations);
-      }
-      JobSplit.TaskSplitIndex splitIndex = new JobSplit.TaskSplitIndex(
-          JobSubmissionFiles.getJobSplitFile(jobSubmitDir).toString(), 
-          splitMetaInfo.getStartOffset());
-      allSplitMetaInfo[i] = new JobSplit.TaskSplitMetaInfo(splitIndex, 
-          splitMetaInfo.getLocations(), 
-          splitMetaInfo.getInputDataLength());
-    }
-    in.close();
-    return allSplitMetaInfo;
-  }
 
 }

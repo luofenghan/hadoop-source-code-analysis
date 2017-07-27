@@ -490,8 +490,7 @@ public class FileUtil {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (!entry.isDirectory()) {
-                    InputStream in = zipFile.getInputStream(entry);
-                    try {
+                    try (InputStream in = zipFile.getInputStream(entry)) {
                         File file = new File(unzipDir, entry.getName());
                         if (!file.getParentFile().mkdirs()) {
                             if (!file.getParentFile().isDirectory()) {
@@ -509,8 +508,6 @@ public class FileUtil {
                         } finally {
                             out.close();
                         }
-                    } finally {
-                        in.close();
                     }
                 }
             }

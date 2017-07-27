@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,92 +49,93 @@ import java.io.IOException;
  *   Discard the task commit.
  *   </li>
  * </ol>
- * 
- * @see org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter 
+ *
+ * @see org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter
  * @see JobContext
- * @see TaskAttemptContext 
+ * @see TaskAttemptContext
  *
  */
 public abstract class OutputCommitter {
-  /**
-   * For the framework to setup the job output during initialization
-   * 
-   * @param jobContext Context of the job whose output is being written.
-   * @throws IOException if temporary output could not be created
-   */
-  public abstract void setupJob(JobContext jobContext) throws IOException;
+    /**
+     * For the framework to setup the job output during initialization
+     *
+     * @param jobContext Context of the job whose output is being written.
+     * @throws IOException if temporary output could not be created
+     */
+    public abstract void setupJob(JobContext jobContext) throws IOException;
 
-  /**
-   * For cleaning up the job's output after job completion. Note that this
-   * is invoked for jobs with final run state as 
-   * {@link JobStatus.State#SUCCEEDED}
-   * 
-   * @param jobContext Context of the job whose output is being written.
-   * @throws IOException
-   */
-  public void commitJob(JobContext jobContext) throws IOException {
-    cleanupJob(jobContext);
-  }
+    /**
+     * For cleaning up the job's output after job completion. Note that this
+     * is invoked for jobs with final run state as
+     * {@link JobStatus.State#SUCCEEDED}
+     *
+     * @param jobContext Context of the job whose output is being written.
+     * @throws IOException
+     */
+    public void commitJob(JobContext jobContext) throws IOException {
+        cleanupJob(jobContext);
+    }
 
-  /**
-   * For cleaning up the job's output after job completion
-   * @deprecated use {@link #commitJob(JobContext)} or
-   *                 {@link #abortJob(JobContext, JobStatus.State)} instead
-   */
-  @Deprecated
-  public void cleanupJob(JobContext context) throws IOException { }
+    /**
+     * For cleaning up the job's output after job completion
+     * @deprecated use {@link #commitJob(JobContext)} or
+     *                 {@link #abortJob(JobContext, JobStatus.State)} instead
+     */
+    @Deprecated
+    public void cleanupJob(JobContext context) throws IOException {
+    }
 
-  /**
-   * For aborting an unsuccessful job's output. Note that this is invoked for 
-   * jobs with final run state as {@link JobStatus.State#FAILED} or 
-   * {@link JobStatus.State#KILLED}.
- 
-   * @param jobContext Context of the job whose output is being written.
-   * @param state final run state of the job, should be either 
-   * {@link JobStatus.State#KILLED} or {@link JobStatus.State#FAILED} 
-   * @throws IOException
-   */
-  public void abortJob(JobContext jobContext, JobStatus.State state) 
-  throws IOException {
-    cleanupJob(jobContext);
-  }
-  
-  /**
-   * Sets up output for the task.
-   * 
-   * @param taskContext Context of the task whose output is being written.
-   * @throws IOException
-   */
-  public abstract void setupTask(TaskAttemptContext taskContext)
-  throws IOException;
-  
-  /**
-   * Check whether task needs a commit
-   * 
-   * @param taskContext
-   * @return true/false
-   * @throws IOException
-   */
-  public abstract boolean needsTaskCommit(TaskAttemptContext taskContext)
-  throws IOException;
+    /**
+     * For aborting an unsuccessful job's output. Note that this is invoked for
+     * jobs with final run state as {@link JobStatus.State#FAILED} or
+     * {@link JobStatus.State#KILLED}.
 
-  /**
-   * To promote the task's temporary output to final output location
-   * 
-   * The task's output is moved to the job's output directory.
-   * 
-   * @param taskContext Context of the task whose output is being written.
-   * @throws IOException if commit is not 
-   */
-  public abstract void commitTask(TaskAttemptContext taskContext)
-  throws IOException;
-  
-  /**
-   * Discard the task output
-   * 
-   * @param taskContext
-   * @throws IOException
-   */
-  public abstract void abortTask(TaskAttemptContext taskContext)
-  throws IOException;
+     * @param jobContext Context of the job whose output is being written.
+     * @param state final run state of the job, should be either
+     * {@link JobStatus.State#KILLED} or {@link JobStatus.State#FAILED}
+     * @throws IOException
+     */
+    public void abortJob(JobContext jobContext, JobStatus.State state)
+            throws IOException {
+        cleanupJob(jobContext);
+    }
+
+    /**
+     * Sets up output for the task.
+     *
+     * @param taskContext Context of the task whose output is being written.
+     * @throws IOException
+     */
+    public abstract void setupTask(TaskAttemptContext taskContext)
+            throws IOException;
+
+    /**
+     * Check whether task needs a commit
+     *
+     * @param taskContext
+     * @return true/false
+     * @throws IOException
+     */
+    public abstract boolean needsTaskCommit(TaskAttemptContext taskContext)
+            throws IOException;
+
+    /**
+     * To promote the task's temporary output to final output location
+     *
+     * The task's output is moved to the job's output directory.
+     *
+     * @param taskContext Context of the task whose output is being written.
+     * @throws IOException if commit is not
+     */
+    public abstract void commitTask(TaskAttemptContext taskContext)
+            throws IOException;
+
+    /**
+     * Discard the task output
+     *
+     * @param taskContext
+     * @throws IOException
+     */
+    public abstract void abortTask(TaskAttemptContext taskContext)
+            throws IOException;
 }

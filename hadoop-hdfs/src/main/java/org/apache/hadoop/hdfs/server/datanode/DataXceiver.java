@@ -56,8 +56,7 @@ class DataXceiver implements Runnable, FSConstants {
     DataNode datanode;
     DataXceiverServer dataXceiverServer;
 
-    public DataXceiver(Socket s, DataNode datanode,
-                       DataXceiverServer dataXceiverServer) {
+    public DataXceiver(Socket s, DataNode datanode, DataXceiverServer dataXceiverServer) {
 
         this.s = s;
         this.datanode = datanode;
@@ -140,7 +139,7 @@ class DataXceiver implements Runnable, FSConstants {
      * @throws IOException
      */
     private void readBlock(DataInputStream in) throws IOException {
-        // 要读取的数据块标识，数据节点通过它定位数据块 8字节长度
+        // 要读取的数据块标识ID，数据节点通过它定位数据块 8字节长度
         long blockId = in.readLong();
         // 用于版本检查，防止读取错误的数据 8字节长度
         long generationStamp = in.readLong();
@@ -173,6 +172,7 @@ class DataXceiver implements Runnable, FSConstants {
                 }
             }
         }
+
         // send the block
         BlockSender blockSender = null;
         final String clientTraceFmt = clientName.length() > 0 && ClientTraceLog.isInfoEnabled()
@@ -181,8 +181,8 @@ class DataXceiver implements Runnable, FSConstants {
                 : datanode.dnRegistration + " Served block " + block + " to " + s.getInetAddress();
         try {
             try {
-                blockSender = new BlockSender(block, startOffset, length,
-                        true, true, false, datanode, clientTraceFmt);
+                blockSender = new BlockSender(block, startOffset, length, true,
+                        true, false, datanode, clientTraceFmt);
             } catch (IOException e) {
                 out.writeShort(DataTransferProtocol.OP_STATUS_ERROR);
                 throw e;
@@ -234,7 +234,7 @@ class DataXceiver implements Runnable, FSConstants {
         LOG.debug("writeBlock receive buf size " + s.getReceiveBufferSize() +
                 " tcp no delay " + s.getTcpNoDelay());
 
-        Block block = new Block(in.readLong(),//读取blockID
+        Block block = new Block(in.readLong(), //读取blockID
                 dataXceiverServer.estimateBlockSize, in.readLong()); // 读取generationStamp，版本号
         LOG.info("Receiving block " + block +
                 " src: " + remoteAddress +
@@ -294,8 +294,8 @@ class DataXceiver implements Runnable, FSConstants {
         try {
             // open a block receiver and check if the block does not exist
             blockReceiver = new BlockReceiver(block, in,
-                    s.getRemoteSocketAddress().toString(),
-                    s.getLocalSocketAddress().toString(),
+                    s.getRemoteSocketAddress().toString(),/*得到客户端的地址*/
+                    s.getLocalSocketAddress().toString(),/*得到socket绑定监听的地址*/
                     isRecovery, client, srcDataNode, datanode);
 
             //
@@ -346,7 +346,6 @@ class DataXceiver implements Runnable, FSConstants {
                     // read connect ack (only for clients, not for replication req)
                     // 如果不是复制请求（即从客户端发起的写请求），从下游读取应答
                     if (client.length() != 0) {
-
                         /*如果下游构造BlockReceiver出错，则会关闭所有socket和stream ，此时readShort会出错抛出异常*/
                         /*被下面的catch块捕获*/
                         mirrorInStatus = mirrorIn.readShort();

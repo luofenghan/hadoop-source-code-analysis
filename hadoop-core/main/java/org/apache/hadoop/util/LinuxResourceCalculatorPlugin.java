@@ -18,6 +18,9 @@
 
 package org.apache.hadoop.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -25,23 +28,18 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Plugin to calculate resource information on Linux systems.
  */
 public class LinuxResourceCalculatorPlugin extends ResourceCalculatorPlugin {
-  private static final Log LOG =
-      LogFactory.getLog(LinuxResourceCalculatorPlugin.class);
+  private static final Log LOG = LogFactory.getLog(LinuxResourceCalculatorPlugin.class);
 
   /**
    * proc's meminfo virtual file has keys-values in the format
    * "key:[ \t]*value[ \t]kB".
    */
   private static final String PROCFS_MEMFILE = "/proc/meminfo";
-  private static final Pattern PROCFS_MEMFILE_FORMAT =
-      Pattern.compile("^([a-zA-Z]*):[ \t]*([0-9]*)[ \t]kB");
+  private static final Pattern PROCFS_MEMFILE_FORMAT = Pattern.compile("^([a-zA-Z]*):[ \t]*([0-9]*)[ \t]kB");
 
   // We need the values for the following keys in meminfo
   private static final String MEMTOTAL_STRING = "MemTotal";

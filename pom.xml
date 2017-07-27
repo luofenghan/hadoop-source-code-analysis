@@ -11,6 +11,7 @@
         <module>hadoop-core</module>
         <module>hadoop-hdfs</module>
         <module>hadoop-mapred</module>
+        <module>hadoop-example</module>
     </modules>
     <dependencies>
         <dependency>

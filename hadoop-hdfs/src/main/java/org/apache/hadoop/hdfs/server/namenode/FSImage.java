@@ -513,18 +513,15 @@ public class FSImage extends Storage {
         return isUpgradeFinalized;
     }
 
-    protected void getFields(Properties props,
-                             StorageDirectory sd
-    ) throws IOException {
+    protected void getFields(Properties props, StorageDirectory sd) throws IOException {
         super.getFields(props, sd);
         if (layoutVersion == 0)
-            throw new IOException("NameNode directory "
-                    + sd.getRoot() + " is not formatted.");
+            throw new IOException("NameNode directory " + sd.getRoot() + " is not formatted.");
         String sDUS, sDUV;
         sDUS = props.getProperty("distributedUpgradeState");
         sDUV = props.getProperty("distributedUpgradeVersion");
         setDistributedUpgradeState(
-                sDUS == null ? false : Boolean.parseBoolean(sDUS),
+                sDUS != null && Boolean.parseBoolean(sDUS),
                 sDUV == null ? getLayoutVersion() : Integer.parseInt(sDUV));
         this.checkpointTime = readCheckpointTime(sd);
     }

@@ -188,7 +188,7 @@ public interface DatanodeProtocol extends VersionedProtocol {
      * @param block 进行恢复的数据块
      * @param newgenerationstamp 通过nextGenerationStamp申请的新版本号
      * @param newlength 数据块恢复后的新长度
-     * @param closeFile 所述文件是否由NameNOde关闭
+     * @param closeFile 所述文件是否由NameNode关闭
      * @param deleteblock 是否删除名字节点上的数据块信息和成功参与数据块恢复的数据节点列表
      *
      */

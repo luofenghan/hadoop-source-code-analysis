@@ -121,15 +121,14 @@ class ReplicationTargetChooser {
 
         int maxNodesPerRack = (totalNumOfReplicas - 1) / clusterMap.getNumOfRacks() + 2;
 
-        List<DatanodeDescriptor> results = new ArrayList<DatanodeDescriptor>(choosenNodes);
+        List<DatanodeDescriptor> results = new ArrayList<>(choosenNodes);
         excludedNodes.addAll(choosenNodes);
 
         if (!clusterMap.contains(writer)) {
             writer = null;
         }
 
-        DatanodeDescriptor localNode = chooseTarget(numOfReplicas, writer,
-                excludedNodes, blocksize, maxNodesPerRack, results);
+        DatanodeDescriptor localNode = chooseTarget(numOfReplicas, writer, excludedNodes, blocksize, maxNodesPerRack, results);
 
         results.removeAll(choosenNodes);
 

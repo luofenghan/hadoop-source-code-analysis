@@ -886,9 +886,7 @@ public class Configuration implements Iterable<Map.Entry<String, String>>,
      * @return property value as a <code>Class</code>,
      * or <code>defaultValue</code>.
      */
-    public <U> Class<? extends U> getClass(String name,
-                                           Class<? extends U> defaultValue,
-                                           Class<U> xface) {
+    public <U> Class<? extends U> getClass(String name, Class<? extends U> defaultValue, Class<U> xface) {
         try {
             Class<?> theClass = getClass(name, defaultValue);
             if (theClass != null && !xface.isAssignableFrom(theClass))

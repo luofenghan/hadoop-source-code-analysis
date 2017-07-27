@@ -102,10 +102,8 @@ public class TaskAttemptID extends org.apache.hadoop.mapreduce.TaskAttemptID {
    * @return constructed TaskAttemptID object or null if the given String is null
    * @throws IllegalArgumentException if the given string is malformed
    */
-  public static TaskAttemptID forName(String str
-                                      ) throws IllegalArgumentException {
-    return (TaskAttemptID) 
-             org.apache.hadoop.mapreduce.TaskAttemptID.forName(str);
+  public static TaskAttemptID forName(String str) throws IllegalArgumentException {
+    return (TaskAttemptID) org.apache.hadoop.mapreduce.TaskAttemptID.forName(str);
   }
   
   /** 

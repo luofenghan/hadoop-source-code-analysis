@@ -33,37 +33,37 @@ public interface Node {
      * Return the string representation of this node's network location
      * 活动网路的拓扑位置
      */
-    public String getNetworkLocation();
+    String getNetworkLocation();
 
     /**
      * Set the node's network location
      */
-    public void setNetworkLocation(String location);
+    void setNetworkLocation(String location);
 
     /**
      * Return this node's name
      */
-    public String getName();
+    String getName();
 
     /**
      * Return this node's parent
      * 得到当前节点的父节点
      */
-    public Node getParent();
+    Node getParent();
 
     /**
      * Set this node's parent
      */
-    public void setParent(Node parent);
+    void setParent(Node parent);
 
     /**
      * Return this node's level in the tree.
      * E.g. the root of a tree returns 0 and its children return 1
      */
-    public int getLevel();
+    int getLevel();
 
     /**
      * Set this node's level in the tree.
      */
-    public void setLevel(int i);
+    void setLevel(int i);
 }

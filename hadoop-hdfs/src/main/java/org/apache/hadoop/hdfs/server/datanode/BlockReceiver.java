@@ -84,21 +84,17 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             this.srcDataNode = srcDataNode;
             this.datanode = datanode;
             this.checksum = DataChecksum.newDataChecksum(in);
-            this.bytesPerChecksum = checksum.getBytesPerChecksum();
-            this.checksumSize = checksum.getChecksumSize();
+            this.bytesPerChecksum = checksum.getBytesPerChecksum();/*512*/
+            this.checksumSize = checksum.getChecksumSize();/*4*/
             //
             // Open local disk out
             //
-            streams = datanode.data.writeToBlock(block, isRecovery,
-                    clientName == null || clientName.length() == 0);
+            streams = datanode.data.writeToBlock(block, isRecovery, clientName == null || clientName.length() == 0);
             this.finalized = false;
             if (streams != null) {
                 this.out = streams.dataOut;
-                this.checksumOut = new DataOutputStream(new BufferedOutputStream(
-                        streams.checksumOut,
-                        SMALL_BUFFER_SIZE));
-                // If this block is for appends, then remove it from periodic
-                // validation.
+                this.checksumOut = new DataOutputStream(new BufferedOutputStream(streams.checksumOut, SMALL_BUFFER_SIZE));
+                // If this block is for appends, then remove it from periodic validation.
                 if (datanode.blockScanner != null && isRecovery) {
                     datanode.blockScanner.deleteBlock(block);
                 }
@@ -191,9 +187,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
     /**
      * Verify multiple CRC chunks.
      */
-    private void verifyChunks(byte[] dataBuf, int dataOff, int len,
-                              byte[] checksumBuf, int checksumOff)
-            throws IOException {
+    private void verifyChunks(byte[] dataBuf, int dataOff, int len, byte[] checksumBuf, int checksumOff) throws IOException {
         while (len > 0) {
             int chunkLen = Math.min(len, bytesPerChecksum);
 
@@ -202,18 +196,14 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             if (!checksum.compare(checksumBuf, checksumOff)) {
                 if (srcDataNode != null) {
                     try {
-                        LOG.info("report corrupt block " + block + " from datanode " +
-                                srcDataNode + " to namenode");
-                        LocatedBlock lb = new LocatedBlock(block,
-                                new DatanodeInfo[]{srcDataNode});
+                        LOG.info("report corrupt block " + block + " from datanode " + srcDataNode + " to namenode");
+                        LocatedBlock lb = new LocatedBlock(block, new DatanodeInfo[]{srcDataNode});
                         datanode.namenode.reportBadBlocks(new LocatedBlock[]{lb});
                     } catch (IOException e) {
-                        LOG.warn("Failed to report bad block " + block +
-                                " from datanode " + srcDataNode + " to namenode");
+                        LOG.warn("Failed to report bad block " + block + " from datanode " + srcDataNode + " to namenode");
                     }
                 }
-                throw new IOException("Unexpected checksum mismatch " +
-                        "while writing " + block + " from " + inAddr);
+                throw new IOException("Unexpected checksum mismatch " + "while writing " + block + " from " + inAddr);
             }
 
             checksum.reset();
@@ -305,9 +295,8 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             }
             readToBuf(-1);
         }
-    
-    /* We mostly have the full packet or at least enough for an int
-     */
+
+        /* We mostly have the full packet or at least enough for an int*/
         buf.mark();
         int payloadLen = buf.getInt();
         buf.reset();
@@ -366,7 +355,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
      * returns size of the packet.
      */
     private int receivePacket() throws IOException {
-        //通过该方法至少读入一个数据请求包
+        // 通过该方法至少读入一个数据请求包
         int payloadLen = readNextPacket();
 
         if (payloadLen <= 0) {
@@ -429,17 +418,18 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             }
             int checksumOff = buf.position();
             int dataOff = checksumOff + checksumLen;
-            byte pktBuf[] = buf.array();
+            byte[] pktBuf = buf.array();
 
             buf.position(buf.limit()); // move to the end of the data.
 
-      /* skip verifying checksum iff this is not the last one in the 
-       * pipeline and clientName is non-null. i.e. Checksum is verified
-       * on all the datanodes when the data is being written by a 
-       * datanode rather than a client. Whe client is writing the data, 
-       * protocol includes acks and only the last datanode needs to verify 
-       * checksum.
-       */
+          /* skip verifying checksum if this is not the last one in the
+           * pipeline and clientName is non-null. i.e. Checksum is verified
+           * on all the datanodes when the data is being written by a
+           * datanode rather than a client. When client is writing the data,
+           * protocol includes acks and only the last datanode needs to verify
+           * checksum.
+           */
+            /*最后一个数据流管道节点负责校验 数据*/
             if (mirrorOut == null || clientName.length() == 0) {
                 verifyChunks(pktBuf, dataOff, len, pktBuf, checksumOff);
             }
@@ -498,16 +488,16 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
     }
 
 
-    void receiveBlock(
-            DataOutputStream mirrOut, // output to next datanode
-            DataInputStream mirrIn,   // input from next datanode
-            DataOutputStream replyOut,  // output to previous datanode
-            String mirrAddr, BlockTransferThrottler throttlerArg,
-            int numTargets) throws IOException {
+    void receiveBlock(DataOutputStream mirrorOut, // output to next datanode
+                      DataInputStream mirrorIn,   // input from next datanode
+                      DataOutputStream replyOut,  // output to previous datanode
+                      String mirrorAddr,
+                      BlockTransferThrottler throttlerArg,
+                      int numTargets) throws IOException {
 
-        mirrorOut = mirrOut;
-        mirrorAddr = mirrAddr;
-        throttler = throttlerArg;
+        this.mirrorOut = mirrorOut;
+        this.mirrorAddr = mirrorAddr;
+        this.throttler = throttlerArg;
 
         try {
 
@@ -515,10 +505,10 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             if (!finalized) {
                 BlockMetadataHeader.writeHeader(checksumOut, checksum);
             }
-            if (clientName.length() > 0) {
-                /*表示是客户端发起的写请求，而不是复制*/
+
+            if (clientName.length() > 0) {/*表示是客户端发起的写请求，而不是复制*/
                 responder = new Daemon(datanode.threadGroup,
-                                new PacketResponder(this, block, mirrIn, replyOut, numTargets, Thread.currentThread()));
+                        new PacketResponder(this, block, mirrorIn, replyOut, numTargets, Thread.currentThread()));
                 responder.start(); // start thread to processes responses
             }
 
@@ -528,10 +518,10 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             while (receivePacket() > 0) ;
 
             // flush the mirror out
-            if (mirrorOut != null) {
+            if (this.mirrorOut != null) {
                 try {
-                    mirrorOut.writeInt(0); // 标记块的结束
-                    mirrorOut.flush();
+                    this.mirrorOut.writeInt(0); // 标记块的结束
+                    this.mirrorOut.flush();
                 } catch (IOException e) {
                     handleMirrorOutError(e);
                 }
@@ -588,7 +578,10 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
     }
 
     /**
-     * Sets the file pointer in the local block file to the specified value.
+     * 设置本地块文件的指针指向给定的值
+     *
+     * @param offsetInBlock
+     * @throws IOException
      */
     private void setBlockPosition(long offsetInBlock) throws IOException {
         if (finalized) {
@@ -698,12 +691,12 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
     class PacketResponder implements Runnable, FSConstants {
 
         //packet waiting for ack
-        private LinkedList<Packet> ackQueue = new LinkedList<Packet>();
+        private LinkedList<Packet> ackQueue = new LinkedList<>();
         private volatile boolean running = true;
         private Block block;
-        DataInputStream mirrorIn;   // input from downstream datanode
-        DataOutputStream replyOut;  // output to upstream datanode
-        private int numTargets;     // number of downstream datanodes including myself
+        DataInputStream mirrorIn;   // 接受下游节点的确认包
+        DataOutputStream replyOut;  // 向上游节点转发确认包
+        private int numTargets;     // 下游数据节点的数量，不包括当前节点
         private BlockReceiver receiver; // The owner of this responder.
         private Thread receiverThread; // the thread that spawns this responder
 
@@ -766,7 +759,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
             while (running && datanode.shouldRun && !lastPacketInBlock) {
 
                 try {
-                    /**
+                    /*
                      * Sequence number -2 is a special value that is used when
                      * a DN fails to read an ack from a downstream. In this case,
                      * it needs to tell the client that there's been an error downstream
@@ -789,7 +782,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
                                             " for block " + block +
                                             " waiting for local datanode to finish write.");
                                 }
-                               /*当BlockReceiver调用他的enqueue，将packet放入 ackQueue时*/
+                                /*当BlockReceiver调用他的enqueue，将packet放入 ackQueue时*/
                                 /*等待enqueue方法的notifyAll通知*/
                                 wait();
                             }
@@ -842,8 +835,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
                        * because this datanode has a problem. The upstream datanode
                        * will detect that this datanode is bad, and rightly so.
                        */
-                        LOG.info("PacketResponder " + block + " " + numTargets +
-                                " : Thread is interrupted.");
+                        LOG.info("PacketResponder " + block + " " + numTargets + " : Thread is interrupted.");
                         break;
                     }
 
@@ -889,6 +881,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
                     PipelineAck replyAck = new PipelineAck(expected, replies);
 
                     // send my ack back to upstream datanode
+                    /*向上游数据节点继续发送应答包*/
                     replyAck.write(replyOut);
                     replyOut.flush();
                     if (LOG.isDebugEnabled()) {
@@ -908,8 +901,7 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
                     }
                 }
             }
-            LOG.info("PacketResponder " + numTargets +
-                    " for block " + block + " terminating");
+            LOG.info("PacketResponder " + numTargets + " for block " + block + " terminating");
         }
     }
 

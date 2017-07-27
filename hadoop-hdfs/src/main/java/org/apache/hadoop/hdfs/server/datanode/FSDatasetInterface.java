@@ -92,6 +92,7 @@ public interface FSDatasetInterface extends FSDatasetMBean {
 
     /**
      * Returns the specified block's visible length (has metadata for this)
+     * 返回指定块可见长度
      *
      * @param b
      * @return the specified block's visible length

@@ -144,14 +144,16 @@ class INodeFileUnderConstruction extends INodeFile {
         if (blocks == null) {
             throw new IOException("Trying to delete non-existant block " + oldblock);
         }
-        int size_1 = blocks.length - 1;
-        if (!blocks[size_1].equals(oldblock)) {
+        int lastBlock = blocks.length - 1;
+        if (!blocks[lastBlock].equals(oldblock)) {
             throw new IOException("Trying to delete non-last block " + oldblock);
         }
 
         //copy to a new list
-        BlockInfo[] newlist = new BlockInfo[size_1];
-        System.arraycopy(blocks, 0, newlist, 0, size_1);
+        BlockInfo[] newlist = new BlockInfo[lastBlock];
+
+        /*将最后一个块删除了*/
+        System.arraycopy(blocks, 0, newlist, 0, lastBlock);
         blocks = newlist;
 
         // Remove the block locations for the last block.

@@ -191,8 +191,7 @@ public interface Reducer<K2, V2, K3, V3> extends JobConfigurable, Closeable {
    * @param output to collect keys and combined values.
    * @param reporter facility to report progress.
    */
-  void reduce(K2 key, Iterator<V2> values,
-              OutputCollector<K3, V3> output, Reporter reporter)
+  void reduce(K2 key, Iterator<V2> values, OutputCollector<K3, V3> output, Reporter reporter)
     throws IOException;
 
 }

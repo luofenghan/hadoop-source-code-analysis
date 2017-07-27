@@ -283,7 +283,7 @@ public class DataNode extends Configured
         // 获得DataNode的流地址
         InetSocketAddress socAddr = DataNode.getStreamingAddr(conf);
         int tmpPort = socAddr.getPort();
-        storage = new DataStorage();
+
 
         // construct registration
         this.dnRegistration = new DatanodeRegistration(machineName + ":" + tmpPort);
@@ -299,6 +299,7 @@ public class DataNode extends Configured
         assert startOpt != null : "Startup option must be set.";
 
         boolean simulatedFSDataset = conf.getBoolean("dfs.datanode.simulateddatastorage", false);
+
         if (simulatedFSDataset) {/*虚拟存储*/
             setNewStorageID(dnRegistration);
             dnRegistration.storageInfo.layoutVersion = FSConstants.LAYOUT_VERSION;
@@ -315,6 +316,7 @@ public class DataNode extends Configured
                 throw new IOException(StringUtils.stringifyException(e));
             }
         } else {/*真实存储*/
+            storage = new DataStorage();
             // read storage info, lock data dirs and transition fs state if necessary
             storage.recoverTransitionRead(nsInfo, dataDirs, startOpt);
             // adjust
@@ -628,7 +630,7 @@ public class DataNode extends Configured
         }
 
         if (!isBlockTokenInitialized) {
-      /* first time registering with NN */
+            /* first time registering with NN */
             ExportedBlockKeys keys = dnRegistration.exportedKeys;
             this.isBlockTokenEnabled = keys.isBlockTokenEnabled();
             if (isBlockTokenEnabled) {
@@ -690,14 +692,14 @@ public class DataNode extends Configured
                     }
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
             }
             // wait for dataXceiveServer to terminate
             try {
                 this.dataXceiverServer.join();
-            } catch (InterruptedException ie) {
+            } catch (InterruptedException ignored) {
             }
         }
 
@@ -709,20 +711,20 @@ public class DataNode extends Configured
             blockScannerThread.interrupt();
             try {
                 blockScannerThread.join(3600000L); // wait for at most 1 hour
-            } catch (InterruptedException ie) {
+            } catch (InterruptedException ignored) {
             }
         }
         if (storage != null) {
             try {
                 this.storage.unlockAll();
-            } catch (IOException ie) {
+            } catch (IOException ignored) {
             }
         }
         if (dataNodeThread != null) {
             dataNodeThread.interrupt();
             try {
                 dataNodeThread.join();
-            } catch (InterruptedException ie) {
+            } catch (InterruptedException ignored) {
             }
         }
         if (data != null) {
@@ -823,7 +825,6 @@ public class DataNode extends Configured
                 //
                 // Every so often, send heartbeat or block-report
                 //
-
                 if (startTime - lastHeartbeat > heartBeatInterval) {
                     //
                     // All heartbeat messages include following info:
@@ -833,14 +834,15 @@ public class DataNode extends Configured
                     // -- Bytes remaining
                     //
                     lastHeartbeat = startTime;
-                    DatanodeCommand[] cmds = namenode.sendHeartbeat(dnRegistration,
-                            data.getCapacity(),
-                            data.getDfsUsed(),
-                            data.getRemaining(),
-                            xmitsInProgress.get(),
-                            getXceiverCount());
+                    DatanodeCommand[] cmds = namenode.sendHeartbeat(
+                            dnRegistration,/*数据节点的标记*/
+                            data.getCapacity(),/*数据节点的存储容量*/
+                            data.getDfsUsed(),/*目前已使用的容量*/
+                            data.getRemaining(),/*剩余容量*/
+                            xmitsInProgress.get(),/*正在进行数据块拷贝的线程数*/
+                            getXceiverCount());/*DataXceiverServer中服务线程数*/
                     myMetrics.addHeartBeat(now() - startTime);
-                    //LOG.info("Just sent heartbeat, with name " + localName);
+                    // LOG.info("Just sent heartbeat, with name " + localName);
                     if (!processCommand(cmds))
                         continue;
                 }
@@ -1476,6 +1478,7 @@ public class DataNode extends Configured
      * Make an instance of DataNode after ensuring that at least one of the
      * given data directories (and their parent directories, if necessary)
      * can be created.
+     * 在创建 DataNode实例前 ，需要确保给定的数据目录能够创建
      *
      * @param dataDirs  List of directories, where the new DataNode instance should
      *                  keep its files.
@@ -1800,22 +1803,20 @@ public class DataNode extends Configured
     }
 
     /**
-     * Recover a block
+     * 使用场景一：客户端写数据过程中出错，需要进行恢复，这时keepLength=true，closeFile=false
+     * 使用场景二：DataNode接收到NameNode的指令，需要进行【数据块恢复】，这时keepLength=false，closeFile=true
      *
-     * @param keepLength if true, will only recover replicas that have the same length
-     *                   as the block passed in. Otherwise, will calculate the minimum length of the
-     *                   replicas and truncate the rest to that length.
-     *                   如果为true，则只恢复长度和传入数据块长度block 相同的数据块
-     *                   <p>
-     *                   如果为false，由主数据节点获取参与到恢复过程中的各个数据节点上的数据块长度，
-     *                   计算最小值，并讲这些数据节点上的数据块截断到该值
-     **/
+     * @param block
+     * @param keepLength 如果为true，则数据块恢复到长度与传入数据块长度相同；
+     *                   否则，由主数据节点【获取】参与到参与恢复过程中的各个数据节点上的数据长度，然后计算这些长度的最小值，并将这些数据节点上的数据块长度截断到该值。
+     * @param targets    参数数据块恢复的目标数据节点
+     * @param closeFile
+     * @return
+     * @throws IOException
+     */
     private LocatedBlock recoverBlock(Block block, boolean keepLength, DatanodeInfo[] targets, boolean closeFile) throws IOException {
 
-        // If the block is already being recovered, then skip recovering it.
-        // This can happen if the namenode and client start recovering the same
-        // file at the same time.
-        /*如果数据块已经恢复，那么就跳过*/
+        /*如果数据块已经正在恢复，那么就跳过*/
         synchronized (ongoingRecovery) {
             Block tmp = new Block();
             tmp.set(block.getBlockId(), block.getNumBytes(), GenerationStamp.WILDCARD_STAMP);
@@ -1827,38 +1828,39 @@ public class DataNode extends Configured
             }
             ongoingRecovery.put(block, block);
         }
+
         try {
             int errorCount = 0;
-            // Number of "replicasBeingWritten" in 0.21 parlance - these are replicas
-            // on DNs that are still alive from when the write was happening
-            int rbwCount = 0;
-            // Number of "replicasWaitingRecovery" in 0.21 parlance - these replicas
-            // have survived a DN restart, and thus might be truncated (eg if the
-            // DN died because of a machine power failure, and when the ext3 journal
-            // replayed, it truncated the file
 
+            /*恢复前数据节点所在的系统没有重启的数据节点数量 replicasBeingWritten*/
+            int rbwCount = 0;
+
+            /*恢复前数据节点发生重启，EXT3日志重放，导致文件被截断的数据节点数量 replicasWaitingRecovery*/
             int rwrCount = 0;
+
             /*需要执行数据块恢复的DataNode*/
-            List<BlockRecord> blockRecords = new ArrayList<BlockRecord>();
+            List<BlockRecord> blockRecords = new ArrayList<>();
             for (DatanodeID id : targets) {
                 try {
                     // 创建到其他数据节点的InterDatanodeProtocol远程接口实例
-                    InterDatanodeProtocol datanode = dnRegistration.equals(id) ?
-                            this : DataNode.createInterDataNodeProtocolProxy(id, getConf(), socketTimeout);
+                    InterDatanodeProtocol datanode = dnRegistration.equals(id) ? this
+                            : DataNode.createInterDataNodeProtocolProxy(id, getConf(), socketTimeout);
+
                     // 获得数据块的恢复信息
                     BlockRecoveryInfo info = datanode.startBlockRecovery(block);
                     if (info == null) {
-                        LOG.info("No block metadata found for block " + block + " on datanode "
-                                + id);
+                        LOG.info("No block metadata found for block " + block + " on datanode " + id);
                         continue;
                     }
+
                     if (info.getBlock().getGenerationStamp() < block.getGenerationStamp()) {
                         LOG.info("Only old generation stamp " + info.getBlock().getGenerationStamp()
                                 + " found on datanode " + id + " (needed block=" +
                                 block + ")");
                         continue;
                     }
-                    // 将数据块恢复信息保存到列表 blockRecords中
+
+                    // 将数据块恢复信息保存到列表 blockRecords 中 <块id，块所在的节点，块恢复信息>
                     blockRecords.add(new BlockRecord(id, datanode, info));
 
                     if (info.wasRecoveredOnStartup()) {
@@ -1875,29 +1877,34 @@ public class DataNode extends Configured
             // If we *only* have replicas from post-DN-restart, then we should
             // include them in determining length. Otherwise they might cause us
             // to truncate too short.
-            boolean shouldRecoverRwrs = (rbwCount == 0);
+            boolean shouldRecoverRwrs = (rbwCount == 0); /*系统没有重启时的数据恢复*/
 
-            List<BlockRecord> syncList = new ArrayList<BlockRecord>();
-            long minlength = Long.MAX_VALUE;
+            List<BlockRecord> syncList = new ArrayList<>();
+            long minLength = Long.MAX_VALUE;
 
             for (BlockRecord record : blockRecords) {
                 BlockRecoveryInfo info = record.info;
                 assert (info != null && info.getBlock().getGenerationStamp() >= block.getGenerationStamp());
-                if (!shouldRecoverRwrs && info.wasRecoveredOnStartup()) {
+                if (!shouldRecoverRwrs && info.wasRecoveredOnStartup()) { /*如果系统已经重启，则说明数据块已经恢复*/
                     LOG.info("Not recovering replica " + record + " since it was recovered on "
                             + "startup and we have better replicas");
                     continue;
                 }
+
                 /*计算出实际需要参数到恢复过程的的DataNode列表和恢复后的数据块长度*/
                 if (keepLength) {
                     //TODO ？？？？为什么是等于的情况下进行同步呢？
                     if (info.getBlock().getNumBytes() == block.getNumBytes()) {
+                        /*客户端写数据出错的时候 keepLength 才为true*/
+                        /*客户端中存的block对象的长度永远为0，*/
+                        /*info.getBlock()的长度可能为0，就是当构建BlockReceiver出错时，info.getBlock().getNumBytes() ==0*/
+                        //如果数据已经写入（在每个包接收到时都会更新其可见长度），则info.getBlock().getNumBytes()！=0，则不会进入该代码块内
                         syncList.add(record);
                     }
                 } else {
                     syncList.add(record);
-                    if (info.getBlock().getNumBytes() < minlength) {
-                        minlength = info.getBlock().getNumBytes();
+                    if (info.getBlock().getNumBytes() < minLength) {
+                        minLength = info.getBlock().getNumBytes();
                     }
                 }
             }
@@ -1907,7 +1914,7 @@ public class DataNode extends Configured
                         + ", datanodeids=" + Arrays.asList(targets));
             }
             if (!keepLength) {
-                block.setNumBytes(minlength);
+                block.setNumBytes(minLength);
             }
             return syncBlock(block, syncList, targets, closeFile);
         } finally {
@@ -1920,8 +1927,7 @@ public class DataNode extends Configured
     /**
      * Block synchronization
      */
-    private LocatedBlock syncBlock(Block block, List<BlockRecord> syncList,
-                                   DatanodeInfo[] targets, boolean closeFile) throws IOException {
+    private LocatedBlock syncBlock(Block block, List<BlockRecord> syncList, DatanodeInfo[] targets, boolean closeFile) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("block=" + block + ", (length=" + block.getNumBytes()
                     + "), syncList=" + syncList + ", closeFile=" + closeFile);
@@ -1931,9 +1937,9 @@ public class DataNode extends Configured
         //so the block can be deleted.
         /*没有一个数据节点由数据块的数据，则通知NameNode删除数据块*/
         if (syncList.isEmpty()) {
-            namenode.commitBlockSynchronization(block, 0, 0, closeFile, true,
-                    DatanodeID.EMPTY_ARRAY);
-            //always return a new access token even if everything else stays the same
+            namenode.commitBlockSynchronization(block, 0, 0, closeFile, true, DatanodeID.EMPTY_ARRAY);
+
+            /*从源码可以看出，一般客户端写数据出错，则会删除数据块，重新写数据*/
             LocatedBlock b = new LocatedBlock(block, targets);
             if (isBlockTokenEnabled) {
                 b.setBlockToken(blockTokenSecretManager.generateToken(null, b.getBlock(),
@@ -1942,7 +1948,7 @@ public class DataNode extends Configured
             return b;
         }
 
-        List<DatanodeID> successList = new ArrayList<DatanodeID>();
+        List<DatanodeID> successList = new ArrayList<>();
         /*调用远程方法，申请新的版本号*/
         /*防止故障DataNode重启，上报过时的数据块*/
         long generationstamp = namenode.nextGenerationStamp(block, closeFile);
@@ -1961,9 +1967,7 @@ public class DataNode extends Configured
         if (!successList.isEmpty()) {
             DatanodeID[] nlist = successList.toArray(new DatanodeID[successList.size()]);
 
-            namenode.commitBlockSynchronization(block,
-                    newblock.getGenerationStamp(), newblock.getNumBytes(), closeFile, false,
-                    nlist);
+            namenode.commitBlockSynchronization(block, newblock.getGenerationStamp(), newblock.getNumBytes(), closeFile, false, nlist);
             DatanodeInfo[] info = new DatanodeInfo[nlist.length];
             for (int i = 0; i < nlist.length; i++) {
                 info[i] = new DatanodeInfo(nlist[i]);

@@ -87,25 +87,24 @@ public class DataStorage extends Storage {
      * @param startOpt startup option
      * @throws IOException
      */
-    void recoverTransitionRead(NamespaceInfo nsInfo,
-                               Collection<File> dataDirs,
-                               StartupOption startOpt) throws IOException {
+    void recoverTransitionRead(NamespaceInfo nsInfo, Collection<File> dataDirs, StartupOption startOpt) throws IOException {
         assert FSConstants.LAYOUT_VERSION == nsInfo.getLayoutVersion() :
                 "Data-node and name-node layout versions must be the same.";
 
         // 1. For each data directory calculate its state and
         // check whether all is consistent before transitioning.
         // Format and recover.
+        /*第一步：计算每个数据目录的状态，并在过度之前检查是否一致*/
         this.storageID = "";
         this.storageDirs = new ArrayList<>(dataDirs.size());
         /*存储空间状态*/
-        ArrayList<StorageState> dataDirStates = new ArrayList<StorageState>(dataDirs.size());
+        ArrayList<StorageState> dataDirStates = new ArrayList<>(dataDirs.size());
         for (Iterator<File> it = dataDirs.iterator(); it.hasNext(); ) {
             File dataDir = it.next();
-            StorageDirectory sd = new StorageDirectory(dataDir);
+            StorageDirectory storageDirectory = new StorageDirectory(dataDir);
             StorageState curState;
             try {
-                curState = sd.analyzeStorage(startOpt);
+                curState = storageDirectory.analyzeStorage(startOpt);
                 // sd is locked but not opened
                 switch (curState) {
                     case NORMAL:
@@ -118,28 +117,28 @@ public class DataStorage extends Storage {
                     case NOT_FORMATTED: // format
                         LOG.info("Storage directory " + dataDir + " is not formatted.");
                         LOG.info("Formatting ...");
-                        format(sd, nsInfo);
+                        format(storageDirectory, nsInfo);
                         break;
                     default:  // recovery part is common
-                        sd.doRecover(curState);
+                        storageDirectory.doRecover(curState);
                 }
             } catch (IOException ioe) {
-                sd.unlock();
+                storageDirectory.unlock();
                 throw ioe;
             }
             // add to the storage list
-            addStorageDir(sd);
+            addStorageDir(storageDirectory);
             dataDirStates.add(curState);
         }
 
         if (dataDirs.size() == 0)  // none of the data dirs exist
-            throw new IOException(
-                    "All specified directories are not accessible or do not exist.");
+            throw new IOException("All specified directories are not accessible or do not exist.");
 
         // 2. Do transitions
         // Each storage directory is treated individually.
-        // During sturtup some of them can upgrade or rollback
+        // During startup some of them can upgrade or rollback
         // while others could be uptodate for the regular startup.
+        /*第二步：*/
         for (int idx = 0; idx < getNumStorageDirs(); idx++) {
             doTransition(getStorageDir(idx), nsInfo, startOpt);
             assert this.getLayoutVersion() == nsInfo.getLayoutVersion() :
@@ -166,21 +165,16 @@ public class DataStorage extends Storage {
         sd.write();
     }
 
-    protected void setFields(Properties props,
-                             StorageDirectory sd) throws IOException {
+    protected void setFields(Properties props, StorageDirectory sd) throws IOException {
         super.setFields(props, sd);
         props.setProperty("storageID", storageID);
     }
 
-    protected void getFields(Properties props,
-                             StorageDirectory sd) throws IOException {
+    protected void getFields(Properties props, StorageDirectory sd) throws IOException {
         super.getFields(props, sd);
         String ssid = props.getProperty("storageID");
-        if (ssid == null ||
-                !("".equals(storageID) || "".equals(ssid) ||
-                        storageID.equals(ssid)))
-            throw new InconsistentFSStateException(sd.getRoot(),
-                    "has incompatible storage Id.");
+        if (ssid == null || !("".equals(storageID) || "".equals(ssid) || storageID.equals(ssid)))
+            throw new InconsistentFSStateException(sd.getRoot(), "has incompatible storage Id.");
         if ("".equals(storageID)) // update id only if it was empty
             storageID = ssid;
     }
@@ -206,7 +200,7 @@ public class DataStorage extends Storage {
     }
 
     /**
-     * Analize which and whether a transition of the fs state is required
+     * Analyze which and whether a transition of the fs state is required
      * and perform it if necessary.
      * <p>
      * Rollback if previousLV >= LAYOUT_VERSION && prevCTime <= namenode.cTime
@@ -218,9 +212,7 @@ public class DataStorage extends Storage {
      * @param startOpt startup option
      * @throws IOException
      */
-    private void doTransition(StorageDirectory sd,
-                              NamespaceInfo nsInfo,
-                              StartupOption startOpt) throws IOException {
+    private void doTransition(StorageDirectory sd, NamespaceInfo nsInfo, StartupOption startOpt) throws IOException {
         if (startOpt == StartupOption.ROLLBACK)
             doRollback(sd, nsInfo); // rollback if applicable
         sd.read();
@@ -236,8 +228,7 @@ public class DataStorage extends Storage {
 
         // verify necessity of a distributed upgrade
         verifyDistributedUpgradeProgress(nsInfo);
-        if (this.layoutVersion > FSConstants.LAYOUT_VERSION
-                || this.cTime < nsInfo.getCTime()) {
+        if (this.layoutVersion > FSConstants.LAYOUT_VERSION || this.cTime < nsInfo.getCTime()) {
             doUpgrade(sd, nsInfo);  // upgrade
             return;
         }
@@ -442,8 +433,7 @@ public class DataStorage extends Storage {
         }
     }
 
-    private void verifyDistributedUpgradeProgress(
-            NamespaceInfo nsInfo) throws IOException {
+    private void verifyDistributedUpgradeProgress(NamespaceInfo nsInfo) throws IOException {
         UpgradeManagerDatanode um = DataNode.getDataNode().upgradeManager;
         assert um != null : "DataNode.upgradeManager is null.";
         um.setUpgradeState(false, getLayoutVersion());

@@ -44,16 +44,13 @@ public interface ClientDatanodeProtocol extends VersionedProtocol {
     long versionID = 4L;
 
     /**
-     * 启动指定块的基于时间戳的版本恢复
-     *
      * @param block      携带了被恢复数据块的信息
      * @param keepLength 恢复策略的选择
-     *                   如果为true，则只恢复长度和传入数据块长度block 相同的数据块
-     *                   如果为false，由主数据节点获取参与到恢复过程中的各个数据节点上的数据块长度，计算最小值，并讲这些数据节点上的数据块截断到该值
-     * @param targets    参与到恢复过程的数据节点列表
-     * @return either a new generation stamp, or the original generation stamp.
-     * Regardless of whether a new generation stamp is returned, a newly
-     * generated access token is returned as part of the return value.
+     *                   1. 如果为true，则只恢复【本地block长度】和【传入数据块长度】相同的数据块
+     *                   2. 如果为false，由主数据节点获取参与到恢复过程中的各个数据节点上的数据块长度，
+     *                   计算最小值，并将这些数据节点上的数据块长度截断到该值
+     * @param targets    参与到恢复过程的数据节点列表（包括主导数据恢复的主数据节点自身）
+     * @return 返回一个带有【新版本号】或者保持【原版本号】的LocatedBlock，但无论是否有新的版本号，但blockToken一定是最新的
      * @throws IOException
      */
     LocatedBlock recoverBlock(Block block, boolean keepLength, DatanodeInfo[] targets) throws IOException;

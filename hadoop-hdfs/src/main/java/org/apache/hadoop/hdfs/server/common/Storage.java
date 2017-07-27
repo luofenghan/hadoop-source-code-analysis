@@ -428,15 +428,18 @@ public abstract class Storage extends StorageInfo {
                 if (!root.exists()) {
                     // 当前目录并不存在
                     if (startOpt != StartupOption.FORMAT) {
+                        /*当前情况：${dfs.data.dir}目录不存在，并且也不是以format方式启动*/
                         LOG.info("Storage directory " + rootPath + " does not exist.");
                         // 为初始状态，文件不存在
                         return StorageState.NON_EXISTENT;
                     }
+                     /*当前情况：${dfs.data.dir}目录不存在，并且不是以format方式启动，则创建目录*/
                     LOG.info(rootPath + " does not exist. Creating ...");
                     // 则创建目录
                     if (!root.mkdirs())
                         throw new IOException("Cannot create directory " + rootPath);
                 }
+
                 // or is inaccessible
                 if (!root.isDirectory()) {
                     LOG.info(rootPath + "is not a directory.");
@@ -478,28 +481,23 @@ public abstract class Storage extends StorageInfo {
                 if (hasCurrent)
                     return StorageState.NORMAL;
                 if (hasPrevious)
-                    throw new InconsistentFSStateException(root,
-                            "version file in current directory is missing.");
+                    throw new InconsistentFSStateException(root, "version file in current directory is missing.");
                 return StorageState.NOT_FORMATTED;
             }
 
             if ((hasPreviousTmp ? 1 : 0) + (hasRemovedTmp ? 1 : 0)
                     + (hasFinalizedTmp ? 1 : 0) + (hasCheckpointTmp ? 1 : 0) > 1)
                 // more than one temp dirs
-                throw new InconsistentFSStateException(root,
-                        "too many temporary directories.");
+                throw new InconsistentFSStateException(root, "too many temporary directories.");
 
             // # of temp dirs == 1 should either recover or complete a transition
             if (hasCheckpointTmp) {
-                return hasCurrent ? StorageState.COMPLETE_CHECKPOINT
-                        : StorageState.RECOVER_CHECKPOINT;
+                return hasCurrent ? StorageState.COMPLETE_CHECKPOINT : StorageState.RECOVER_CHECKPOINT;
             }
 
             if (hasFinalizedTmp) {
                 if (hasPrevious)
-                    throw new InconsistentFSStateException(root,
-                            STORAGE_DIR_PREVIOUS + " and " + STORAGE_TMP_FINALIZED
-                                    + "cannot exist together.");
+                    throw new InconsistentFSStateException(root, STORAGE_DIR_PREVIOUS + " and " + STORAGE_TMP_FINALIZED + "cannot exist together.");
                 return StorageState.COMPLETE_FINALIZE;
             }
 
@@ -729,13 +727,10 @@ public abstract class Storage extends StorageInfo {
         NodeType rt = NodeType.valueOf(st);
         int rid = Integer.parseInt(sid);
         long rct = Long.parseLong(sct);
-        if (!storageType.equals(rt) ||
-                !((namespaceID == 0) || (rid == 0) || namespaceID == rid))
-            throw new InconsistentFSStateException(sd.root,
-                    "is incompatible with others.");
+        if (!storageType.equals(rt) || !((namespaceID == 0) || (rid == 0) || namespaceID == rid))
+            throw new InconsistentFSStateException(sd.root, "is incompatible with others.");
         if (rv < FSConstants.LAYOUT_VERSION) // future version
-            throw new IncorrectVersionException(rv, "storage directory "
-                    + sd.root.getCanonicalPath());
+            throw new IncorrectVersionException(rv, "storage directory " + sd.root.getCanonicalPath());
         layoutVersion = rv;
         storageType = rt;
         namespaceID = rid;
@@ -749,9 +744,7 @@ public abstract class Storage extends StorageInfo {
      * @param props
      * @throws IOException
      */
-    protected void setFields(Properties props,
-                             StorageDirectory sd
-    ) throws IOException {
+    protected void setFields(Properties props, StorageDirectory sd) throws IOException {
         props.setProperty("layoutVersion", String.valueOf(layoutVersion));
         props.setProperty("storageType", storageType.toString());
         props.setProperty("namespaceID", String.valueOf(namespaceID));

@@ -35,7 +35,7 @@ class UnderReplicatedBlocks implements Iterable<Block> {
     /* constructor */
     UnderReplicatedBlocks() {
         for (int i = 0; i < LEVEL; i++) {
-            priorityQueues.add(new TreeSet<Block>());
+            priorityQueues.add(new TreeSet<>());
         }
     }
 
@@ -67,9 +67,11 @@ class UnderReplicatedBlocks implements Iterable<Block> {
         return false;
     }
 
-    /* Return the priority of a block
-     * @param block a under replication block
-     * @param curReplicas current number of replicas of the block
+    /**
+     * Return the priority of a block
+     *
+     * @param block            a under replication block
+     * @param curReplicas      current number of replicas of the block
      * @param expectedReplicas expected number of replicas of the block
      */
     private int getPriority(Block block,
@@ -79,14 +81,17 @@ class UnderReplicatedBlocks implements Iterable<Block> {
         if (curReplicas < 0 || curReplicas >= expectedReplicas) {
             return LEVEL; // 不需要复制
         } else if (curReplicas == 0) {
-            if (decommissionedReplicas > 0) {/*处理撤销数据节点的特殊情况*/
+            if (decommissionedReplicas > 0) {
+                /*当复制源节点是一个等待撤销的数据节点，并且只要当前撤销的节点独有该数据块，则优先级最高*/
                 return 0;
             }
             return 2; // 保存在队列中
         } else if (curReplicas == 1) {
-            return 0; // 副本数只有一个，优先级最高
+            /*副本数只有一个，优先级最高*/
+            return 0;
         } else if (curReplicas * 3 < expectedReplicas) {
-            return 1;/*副本数不足副本系数的 1/3*/
+            /*副本数不足副本系数的 1/3 */
+            return 1;
         } else {
             return 2;
         }
@@ -97,16 +102,11 @@ class UnderReplicatedBlocks implements Iterable<Block> {
      * @param curReplicas current number of replicas of the block
      * @param expectedReplicas expected number of replicas of the block
      */
-    synchronized boolean add(
-            Block block,
-            int curReplicas,
-            int decomissionedReplicas,
-            int expectedReplicas) {
+    synchronized boolean add(Block block, int curReplicas, int decomissionedReplicas, int expectedReplicas) {
         if (curReplicas < 0 || expectedReplicas <= curReplicas) {
             return false;
         }
-        int priLevel = getPriority(block, curReplicas, decomissionedReplicas,
-                expectedReplicas);
+        int priLevel = getPriority(block, curReplicas, decomissionedReplicas, expectedReplicas);
         if (priLevel != LEVEL && priorityQueues.get(priLevel).add(block)) {
             NameNode.stateChangeLog.debug(
                     "BLOCK* NameSystem.UnderReplicationBlock.add:"
@@ -121,13 +121,8 @@ class UnderReplicatedBlocks implements Iterable<Block> {
     }
 
     /* remove a block from a under replication queue */
-    synchronized boolean remove(Block block,
-                                int oldReplicas,
-                                int decommissionedReplicas,
-                                int oldExpectedReplicas) {
-        int priLevel = getPriority(block, oldReplicas,
-                decommissionedReplicas,
-                oldExpectedReplicas);
+    synchronized boolean remove(Block block, int oldReplicas, int decommissionedReplicas, int oldExpectedReplicas) {
+        int priLevel = getPriority(block, oldReplicas, decommissionedReplicas, oldExpectedReplicas);
         return remove(block, priLevel);
     }
 
@@ -155,10 +150,12 @@ class UnderReplicatedBlocks implements Iterable<Block> {
     }
 
     /* update the priority level of a block */
-    synchronized void update(Block block, int curReplicas,
-                             int decommissionedReplicas,
-                             int curExpectedReplicas,
-                             int curReplicasDelta, int expectedReplicasDelta) {
+    synchronized void update(Block block,
+                             int curReplicas,/*2*/
+                             int decommissionedReplicas,/*0*/
+                             int curExpectedReplicas, /*3*/
+                             int curReplicasDelta, /*-1*/
+                             int expectedReplicasDelta /*0*/) {
         int oldReplicas = curReplicas - curReplicasDelta;
         int oldExpectedReplicas = curExpectedReplicas - expectedReplicasDelta;
         int curPri = getPriority(block, curReplicas, decommissionedReplicas, curExpectedReplicas);
@@ -171,7 +168,7 @@ class UnderReplicatedBlocks implements Iterable<Block> {
                 " oldExpectedReplicas  " + oldExpectedReplicas +
                 " curPri  " + curPri +
                 " oldPri  " + oldPri);
-        if (oldPri != LEVEL && oldPri != curPri) {
+        if (oldPri != LEVEL && oldPri != curPri) {/*优先级发生变化*/
             remove(block, oldPri);
         }
         if (curPri != LEVEL && priorityQueues.get(curPri).add(block)) {
@@ -225,6 +222,6 @@ class UnderReplicatedBlocks implements Iterable<Block> {
             return level;
         }
 
-        ;
+
     }
 }

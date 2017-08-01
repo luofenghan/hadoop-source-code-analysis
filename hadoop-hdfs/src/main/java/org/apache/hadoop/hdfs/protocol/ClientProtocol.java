@@ -202,6 +202,7 @@ public interface ClientProtocol extends VersionedProtocol {
      * The client can then
      * either obtain a new block, or complete or abandon the file.
      * Any partial writes to the block will be discarded.
+     * 如果客户端建立数据流管道失败，则会抛弃当前块，调用此方法
      */
     void abandonBlock(Block b, String src, String holder) throws IOException;
 

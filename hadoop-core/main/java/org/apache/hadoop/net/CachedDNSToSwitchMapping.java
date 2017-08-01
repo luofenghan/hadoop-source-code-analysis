@@ -29,10 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * will get its location from the cache.
  */
 public class CachedDNSToSwitchMapping implements DNSToSwitchMapping {
-    private Map<String, String> cache = new ConcurrentHashMap<String, String>();
-    protected DNSToSwitchMapping rawMapping;
+    private Map<String, String> cache = new ConcurrentHashMap<>();
+    DNSToSwitchMapping rawMapping;
 
-    public CachedDNSToSwitchMapping(DNSToSwitchMapping rawMapping) {
+    CachedDNSToSwitchMapping(DNSToSwitchMapping rawMapping) {
         this.rawMapping = rawMapping;
     }
 

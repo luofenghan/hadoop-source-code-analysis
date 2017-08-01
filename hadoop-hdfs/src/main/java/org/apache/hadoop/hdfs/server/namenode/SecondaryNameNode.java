@@ -152,6 +152,7 @@ public class SecondaryNameNode implements Runnable {
                     DFSConfigKeys.DFS_SECONDARY_NAMENODE_USER_NAME_KEY,
                     infoBindAddress);
         }
+
         // initiate Java VM metrics
         JvmMetricsSource.create("SecondaryNameNode", conf.get("session.id"));
 
@@ -182,8 +183,7 @@ public class SecondaryNameNode implements Runnable {
                         conf.get(DFSConfigKeys.DFS_SECONDARY_NAMENODE_KEYTAB_FILE_KEY));
         try {
             infoServer = httpUGI.doAs((PrivilegedExceptionAction<HttpServer>) () -> {
-                LOG.info("Starting web server as: " +
-                        UserGroupInformation.getCurrentUser().getUserName());
+                LOG.info("Starting web server as: " + UserGroupInformation.getCurrentUser().getUserName());
 
                 int tmpInfoPort = infoSocAddr.getPort();
                 infoServer = new HttpServer("secondary", infoBindAddress, tmpInfoPort,
@@ -246,7 +246,7 @@ public class SecondaryNameNode implements Runnable {
 
     public void run() {
         if (UserGroupInformation.isSecurityEnabled()) {
-            UserGroupInformation ugi = null;
+            UserGroupInformation ugi;
             try {
                 ugi = UserGroupInformation.getLoginUser();
             } catch (IOException e) {
@@ -267,8 +267,7 @@ public class SecondaryNameNode implements Runnable {
     //
     // The main work loop
     //
-    public void doWork() {
-
+    private void doWork() {
         //
         // Poll the Namenode (once every 5 minutes) to find the size of the
         // pending edit log.
@@ -297,8 +296,8 @@ public class SecondaryNameNode implements Runnable {
                 long now = System.currentTimeMillis();
 
                 long size = namenode.getEditLogSize();/*获得名字节点编辑日志大小*/
-                if (size >= checkpointSize ||
-                        now >= lastCheckpointTime + 1000 * checkpointPeriod) {
+                if (size >= checkpointSize
+                        || now >= lastCheckpointTime + 1000 * checkpointPeriod) {
                     doCheckpoint();
                     lastCheckpointTime = now;
                 }
@@ -340,8 +339,7 @@ public class SecondaryNameNode implements Runnable {
                 srcNames = checkpointImage.getEditsFiles();
                 assert srcNames.length > 0 : "No checkpoint targets.";
                 TransferFsImage.getFileClient(fsName, field, srcNames);
-                LOG.info("Downloaded file " + srcNames[0].getName() + " size " +
-                        srcNames[0].length() + " bytes.");
+                LOG.info("Downloaded file " + srcNames[0].getName() + " size " + srcNames[0].length() + " bytes.");
 
                 checkpointImage.checkpointUploadDone();
                 return null;
@@ -604,8 +602,7 @@ public class SecondaryNameNode implements Runnable {
          * @param editsDirs
          * @throws IOException
          */
-        void recoverCreate(Collection<File> dataDirs,
-                           Collection<File> editsDirs) throws IOException {
+        void recoverCreate(Collection<File> dataDirs, Collection<File> editsDirs) throws IOException {
             Collection<File> tempDataDirs = new ArrayList<File>(dataDirs);
             Collection<File> tempEditsDirs = new ArrayList<File>(editsDirs);
             this.storageDirs = new ArrayList<StorageDirectory>();
@@ -675,7 +672,7 @@ public class SecondaryNameNode implements Runnable {
             getEditLog().open();
             StorageDirectory sdName = null;
             StorageDirectory sdEdits = null;
-            Iterator<StorageDirectory> it = null;
+            Iterator<StorageDirectory> it;
             it = dirIterator(NameNodeDirType.IMAGE);
             if (it.hasNext())
                 sdName = it.next();

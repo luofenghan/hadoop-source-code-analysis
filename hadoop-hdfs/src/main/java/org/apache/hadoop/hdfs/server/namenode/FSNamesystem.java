@@ -86,8 +86,7 @@ import java.util.concurrent.TimeUnit;
  * 5)  LRU cache of updated-heartbeat machines
  ***************************************************/
 @SuppressWarnings("all")
-public class FSNamesystem implements FSConstants, FSNamesystemMBean,
-        NameNodeMXBean, MetricsSource {
+public class FSNamesystem implements FSConstants, FSNamesystemMBean, NameNodeMXBean, MetricsSource {
     public static final Log LOG = LogFactory.getLog(FSNamesystem.class);
     public static final String AUDIT_FORMAT =
             "ugi=%s\t" +  // ugi
@@ -314,7 +313,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     private SafeModeInfo safeMode;  // safe mode information
     private Host2NodesMap host2DataNodeMap = new Host2NodesMap();
 
-    // datanode networktoplogy
+    // datanode network toplogy
     NetworkTopology clusterMap = new NetworkTopology();
     private DNSToSwitchMapping dnsToSwitchMapping;
 
@@ -367,6 +366,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         this.nameNodeAddress = nn.getNameNodeAddress();
         this.registerMBean(conf); // register the MBean for the FSNamesystemStutus
+
         this.dir = new FSDirectory(this, conf);
         StartupOption startOpt = NameNode.getStartupOption(conf);
 
@@ -380,8 +380,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         setBlockTotal();
         pendingReplications = new PendingReplicationBlocks(conf.getInt("dfs.replication.pending.timeout.sec", -1) * 1000L);
         if (isAccessTokenEnabled) {
-            accessTokenHandler = new BlockTokenSecretManager(true,
-                    accessKeyUpdateInterval, accessTokenLifetime);
+            accessTokenHandler = new BlockTokenSecretManager(true, accessKeyUpdateInterval, accessTokenLifetime);
         }
         this.hbthread = new Daemon(new HeartbeatMonitor());
         this.lmthread = new Daemon(leaseManager.new Monitor());
@@ -402,11 +401,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 conf.getClass("topology.node.switch.mapping.impl", ScriptBasedMapping.class,
                         DNSToSwitchMapping.class), conf);
 
-    /* If the dns to swith mapping supports cache, resolve network
-     * locations of those hosts in the include list,
-     * and store the mapping in the cache; so future calls to resolve
-     * will be fast.
-     */
+        /* If the dns to swith mapping supports cache, resolve network
+         * locations of those hosts in the include list,
+         * and store the mapping in the cache; so future calls to resolve
+         * will be fast.
+         */
         if (dnsToSwitchMapping instanceof CachedDNSToSwitchMapping) {
             dnsToSwitchMapping.resolve(new ArrayList<String>(hostsReader.getHosts()));
         }
@@ -421,7 +420,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         Collection<String> dirNames = conf.getStringCollection("dfs.name.dir");
         if (dirNames.isEmpty())
             dirNames.add("/tmp/hadoop/dfs/name");
-        Collection<File> dirs = new ArrayList<File>(dirNames.size());
+        Collection<File> dirs = new ArrayList<>(dirNames.size());
         for (String name : dirNames) {
             dirs.add(new File(name));
         }
@@ -429,8 +428,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
     public static Collection<File> getNamespaceEditsDirs(Configuration conf) {
-        Collection<String> editsDirNames =
-                conf.getStringCollection("dfs.name.edits.dir");
+        Collection<String> editsDirNames = conf.getStringCollection("dfs.name.edits.dir");
         if (editsDirNames.isEmpty())
             editsDirNames.add("/tmp/hadoop/dfs/name");
         Collection<File> dirs = new ArrayList<File>(editsDirNames.size());
@@ -453,8 +451,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * Initializes some of the members from configuration
      */
-    private void setConfigurationParameters(Configuration conf)
-            throws IOException {
+    private void setConfigurationParameters(Configuration conf) throws IOException {
         fsNamesystemObject = this;
         fsOwner = UserGroupInformation.getCurrentUser();
         LOG.info("fsOwner=" + fsOwner);
@@ -463,10 +460,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         this.isPermissionEnabled = conf.getBoolean("dfs.permissions", true);
         LOG.info("supergroup=" + supergroup);
         LOG.info("isPermissionEnabled=" + isPermissionEnabled);
+
         short filePermission = (short) conf.getInt("dfs.upgrade.permission", 0777);
         this.defaultPermission = PermissionStatus.createImmutable(
                 fsOwner.getShortUserName(), supergroup, new FsPermission(filePermission));
-
 
         this.replicator = new ReplicationTargetChooser(conf.getBoolean("dfs.replication.considerLoad", true), this, clusterMap);
 
@@ -474,10 +471,9 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         this.maxReplication = conf.getInt("dfs.replication.max", 512);
         this.minReplication = conf.getInt("dfs.replication.min", 1);
         if (minReplication <= 0)
-            throw new IOException(
-                    "Unexpected configuration parameters: dfs.replication.min = "
-                            + minReplication
-                            + " must be greater than 0");
+            throw new IOException("Unexpected configuration parameters: dfs.replication.min = "
+                    + minReplication + " must be greater than 0");
+
         if (maxReplication >= (int) Short.MAX_VALUE)
             throw new IOException("Unexpected configuration parameters: dfs.replication.max = "
                     + maxReplication + " must be less than " + (Short.MAX_VALUE));
@@ -487,10 +483,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     + minReplication
                     + " must be less than dfs.replication.max = "
                     + maxReplication);
+
         this.maxReplicationStreams = conf.getInt("dfs.max-repl-streams", 2);
         long heartbeatInterval = conf.getLong("dfs.heartbeat.interval", 3) * 1000;
-        this.heartbeatRecheckInterval = conf.getInt(
-                "heartbeat.recheck.interval", 5 * 60 * 1000); // 5 minutes
+        this.heartbeatRecheckInterval = conf.getInt("heartbeat.recheck.interval", 5 * 60 * 1000); // 5 minutes
         this.heartbeatExpireInterval = 2 * heartbeatRecheckInterval + 10 * heartbeatInterval;
         this.replicationRecheckInterval = conf.getInt("dfs.replication.interval", 3) * 1000L;
         this.defaultBlockSize = conf.getLong("dfs.block.size", DEFAULT_BLOCK_SIZE);
@@ -504,14 +500,15 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         this.accessTimePrecision = conf.getLong("dfs.access.time.precision", 0);
         this.supportAppends = conf.getBoolean("dfs.support.append", false);
-        this.isAccessTokenEnabled = conf.getBoolean(
-                DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, false);
+        this.isAccessTokenEnabled = conf.getBoolean(DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, false);
+
         if (isAccessTokenEnabled) {
             this.accessKeyUpdateInterval = conf.getLong(
                     DFSConfigKeys.DFS_BLOCK_ACCESS_KEY_UPDATE_INTERVAL_KEY, 600) * 60 * 1000L; // 10 hrs
             this.accessTokenLifetime = conf.getLong(
                     DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_LIFETIME_KEY, 600) * 60 * 1000L; // 10 hrs
         }
+
         LOG.info("isAccessTokenEnabled=" + isAccessTokenEnabled
                 + " accessKeyUpdateInterval=" + accessKeyUpdateInterval / (60 * 1000)
                 + " min(s), accessTokenLifetime=" + accessTokenLifetime / (60 * 1000)
@@ -714,8 +711,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
     /* updates a block in under replication queue */
-    synchronized void updateNeededReplications(Block block,
-                                               int curReplicasDelta, int expectedReplicasDelta) {
+    synchronized void updateNeededReplications(Block block, int curReplicasDelta, int expectedReplicasDelta) {
         NumberReplicas repl = countNodes(block);
         int curExpectedReplicas = getReplication(block);
         neededReplications.update(block,
@@ -873,12 +869,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * Get block locations within the specified range.
      *
-     * @param clientMachine 客户端地址，会使用这个地址对LocatedBlocks对象中的数据节点列表进行排序
+     * @param clientMachine 客户端地址，会使用这个地址对LocatedBlocks对象中的数据节点列表进行【排序】
      *                      保证客户端能访问离他最近的数据块副本
      * @see #getBlockLocations(String, long, long)
      */
-    LocatedBlocks getBlockLocations(String clientMachine, String src,
-                                    long offset, long length) throws IOException {
+    LocatedBlocks getBlockLocations(String clientMachine, String src, long offset, long length) throws IOException {
         LocatedBlocks blocks = getBlockLocations(src, offset, length, true, true);
         if (blocks != null) {
             //sort the blocks
@@ -895,8 +890,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      *
      * @see ClientProtocol#getBlockLocations(String, long, long)
      */
-    public LocatedBlocks getBlockLocations(String src, long offset, long length
-    ) throws IOException {
+    public LocatedBlocks getBlockLocations(String src, long offset, long length) throws IOException {
         return getBlockLocations(src, offset, length, false, true);
     }
 
@@ -916,8 +910,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (length < 0) {
             throw new IOException("Negative length is not supported. File: " + src);
         }
-        final LocatedBlocks ret = getBlockLocationsInternal(src,
-                offset, length, Integer.MAX_VALUE, doAccessTime, needBlockToken);
+        final LocatedBlocks ret = getBlockLocationsInternal(src, offset, length, Integer.MAX_VALUE, doAccessTime, needBlockToken);
         if (auditLog.isInfoEnabled() && isExternalInvocation()) {
             logAuditEvent(UserGroupInformation.getCurrentUser(),
                     Server.getRemoteIp(),
@@ -953,9 +946,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         int curBlk = 0;
         long curPos = 0, blkSize = 0;
         int nrBlocks = (blocks[0].getNumBytes() == 0) ? 0 : blocks.length;
+
+        /*     |--------|-------|-------|*/
+        /*    |---------|-------|-------|*/
+        /*      curBlk       curPos     */
         for (curBlk = 0; curBlk < nrBlocks; curBlk++) {
             blkSize = blocks[curBlk].getNumBytes();
             assert blkSize > 0 : "Block of size 0";
+
             if (curPos + blkSize > offset) {
                 break;
             }
@@ -966,7 +964,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (nrBlocks > 0 && curBlk == nrBlocks)   // offset >= end of file
             return null;
 
-        long endOff = offset + length;
+        long endOffset = offset + length;
         /*
         * 找出读取数据范围内的所有可用的数据块副本，并生成LocatedBlocks对象
         *
@@ -975,6 +973,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             // get block locations
             /*包含副本的数据节点数*/
             int numNodes = blocksMap.numNodes(blocks[curBlk]);
+
             /*副本损坏的数据节点数*/
             int numCorruptNodes = countNodes(blocks[curBlk]).corruptReplicas();
             int numCorruptReplicas = corruptReplicas.numCorruptReplicas(blocks[curBlk]);
@@ -988,6 +987,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             if (inode.isUnderConstruction() && curBlk == blocks.length - 1
                     && blocksMap.numNodes(blocks[curBlk]) == 0) {
                 /*如果数据块时正在构造文件的最后一块，则认为当前参与数据流管道的各个数据节点都是可用节点*/
+
                 // 处理还没有提交，客户端正在写数据的数据块
                 INodeFileUnderConstruction cons = (INodeFileUnderConstruction) inode;
                 machineSet = cons.getTargets();
@@ -1002,7 +1002,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                         DatanodeDescriptor dn = it.next();
                         boolean replicaCorrupt = corruptReplicas.isReplicaCorrupt(blocks[curBlk], dn);
                         /*如果数据块损坏 或者 */
-                        if (blockCorrupt || (!blockCorrupt && !replicaCorrupt)) machineSet[numNodes++] = dn;
+                        if (blockCorrupt || (!blockCorrupt && !replicaCorrupt))
+                            machineSet[numNodes++] = dn;
                     }
                 }
             }
@@ -1014,7 +1015,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             results.add(b);
             curPos += blocks[curBlk].getNumBytes();
             curBlk++;
-        } while (curPos < endOff
+        } while (curPos < endOffset
                 && curBlk < blocks.length
                 && results.size() < nrBlocksToReturn);
 
@@ -1216,16 +1217,18 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     + ", append=" + append);
         }
 
-        if (isInSafeMode())/*文件系统不能处于安全模式，安全模式只提供HDFS的只读视图*/
+        /*文件系统不能处于安全模式，安全模式只提供HDFS的只读视图*/
+        if (isInSafeMode())
             throw new SafeModeException("Cannot create file" + src, safeMode);
 
-        if (!DFSUtil.isValidName(src)) {/*判断文件名是否合法*/
+        /*判断文件名是否合法*/
+        if (!DFSUtil.isValidName(src)) {
             throw new IOException("Invalid file name: " + src);
         }
 
-        // Verify that the destination does not exist as a directory already.
+        /*如果文件已经存在，并且是一个目录*/
         boolean pathExists = dir.exists(src);
-        if (pathExists && dir.isDir(src)) {/*如果文件已经存在，并且是一个目录*/
+        if (pathExists && dir.isDir(src)) {
             throw new IOException("Cannot create file " + src + "; already exists as a directory.");
         }
 
@@ -1239,12 +1242,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             }
         }
 
-        if (!createParent) {/*判断创建文件的父目录是否存在*/
+        /*判断创建文件的父目录是否存在*/
+        if (!createParent) {
             verifyParentDir(src);
         }
 
         try {
             INode myFile = dir.getFileINode(src);
+
             /*判断文件是否被其他客户端打开，防止同时有多个客户端写同一个文件*/
             recoverLeaseInternal(myFile, src, holder, clientMachine, false);
 
@@ -1292,7 +1297,6 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                         clientNode);
                 dir.replaceNode(src, node, cons);
                 leaseManager.addLease(cons.clientName, src);
-
             } else {
                 // Now we can add the name to the filesystem. This file has no
                 // blocks associated with it.
@@ -1357,11 +1361,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         return false;
     }
 
-    private void recoverLeaseInternal(INode fileInode,
-                                      String src, String holder, String clientMachine, boolean force)
+    private void recoverLeaseInternal(INode fileInode, String src, String holder, String clientMachine, boolean force/*表示客户端调用*/)
             throws IOException {
         if (fileInode != null && fileInode.isUnderConstruction()) {
+            /*处理追加文件*/
             INodeFileUnderConstruction pendingFile = (INodeFileUnderConstruction) fileInode;
+
             //
             // If the file is under construction , then it must be in our
             // leases. Find the appropriate lease record.
@@ -1372,6 +1377,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             // holder is trying to recreate this file. This should never occur.
             //
             if (!force && lease != null) {
+                /*文件重复打开*/
                 Lease leaseFile = leaseManager.getLeaseByPath(src);
                 if (leaseFile != null && leaseFile.equals(lease)) {
                     throw new AlreadyBeingCreatedException(
@@ -1539,6 +1545,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 + src + " for " + clientName);
 
         synchronized (this) {
+
             // have we exceeded the configured limit of fs objects.
             checkFsObjectLimit();/*是否达到系统容量*/
 
@@ -1580,6 +1587,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             INodeFileUnderConstruction pendingFile = (INodeFileUnderConstruction) pathINodes[inodesLen - 1];
 
             if (!checkFileProgress(pendingFile, false)) {
+                /*这里会检查之前的那个副本，看是否已达到副本数*/
                 throw new NotReplicatedYetException("Not replicated yet:" + src);
             }
 
@@ -1604,8 +1612,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * The client would like to let go of the given block
      */
-    public synchronized boolean abandonBlock(Block b, String src, String holder
-    ) throws IOException {
+    public synchronized boolean abandonBlock(Block b, String src, String holder) throws IOException {
         //
         // Remove the block from the pending creates list
         //
@@ -1689,7 +1696,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         NameNode.stateChangeLog.debug("DIR* NameSystem.completeFile: " + src + " for " + holder);
 
-        if (isInSafeMode()) throw new SafeModeException("Cannot complete file " + src, safeMode);
+        if (isInSafeMode())
+            throw new SafeModeException("Cannot complete file " + src, safeMode);
 
         INodeFileUnderConstruction pendingFile = checkLease(src, holder);
         Block[] fileBlocks = dir.getFileBlocks(src);
@@ -1699,10 +1707,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     + "failed to complete " + src
                     + " because dir.getFileBlocks() is null,"
                     + " pending from " + pendingFile.getClientMachine());
+            /*操作失败，文件已经被其他客户端删除*/
             return CompleteFileStatus.OPERATION_FAILED;
         }
 
         if (!checkFileProgress(pendingFile, true)) {
+            /*操作成功，但还需要等待数据节点的数据块提交（blockReceived）*/
             return CompleteFileStatus.STILL_WAITING;
         }
 
@@ -1710,6 +1720,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         NameNode.stateChangeLog.info("DIR* NameSystem.completeFile: file " + src
                 + " is closed by " + holder);
+        /*操作成功，文件被成功关闭*/
         return CompleteFileStatus.COMPLETE_SUCCESS;
     }
 
@@ -1831,8 +1842,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * all its datanodes.
      */
     private void addToInvalidates(Block b) {
+        /* 迭代当前数据块所在的 数据节点 */
         for (Iterator<DatanodeDescriptor> it = blocksMap.nodeIterator(b); it.hasNext(); ) {
             DatanodeDescriptor node = it.next();
+            /*将数据块加入到 块所在节点的 待删除列表中*/
             addToInvalidates(b, node);
         }
     }
@@ -1865,8 +1878,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * @param blk Block to be marked as corrupt
      * @param dn  Datanode which holds the corrupt replica
      */
-    public synchronized void markBlockAsCorrupt(Block blk, DatanodeInfo dn)
-            throws IOException {
+    public synchronized void markBlockAsCorrupt(Block blk, DatanodeInfo dn) throws IOException {
         DatanodeDescriptor node = getDatanode(dn);
         if (node == null) {
             throw new IOException("Cannot mark block" + blk.getBlockName() +
@@ -1876,10 +1888,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         final BlockInfo storedBlockInfo = blocksMap.getStoredBlock(blk);
         if (storedBlockInfo == null) {/*归属文件已经删除*/
-            // Check if the replica is in the blockMap, if not
-            // ignore the request for now. This could happen when BlockScanner
-            // thread of Datanode reports bad block before Block reports are sent
-            // by the Datanode on startup
+            /*
+            * 因为HDFS是一个典型的分布式系统，文件删除后，数据块并不会立即从数据节点上删除而需要等待某一个名字节点的指令，
+            * 如果这时候【数据块扫描器】正好又发现副本损坏，并上报名字节点，就可以形成上述特殊的情况。
+            * 名字节点的处理逻辑必须考虑这些偶尔出现的场景，才能保证系统的鲁棒性。
+            * */
             NameNode.stateChangeLog.info("BLOCK NameSystem.markBlockAsCorrupt: " +
                     "block " + blk + " could not be marked " +
                     "as corrupt as it does not exists in " +
@@ -1898,10 +1911,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             corruptReplicas.addToCorruptReplicasMap(storedBlockInfo, node);
             if (countNodes(storedBlockInfo).liveReplicas() > inode.getReplication()) {
                 /*如果当前数据块副本比期望值高，直接删除该副本即可*/
-                // the block is over-replicated so invalidate the replicas immediately
                 invalidateBlock(storedBlockInfo, node);
             } else {
-                // add the block to neededReplication
                 /*需要复制数据块，以保证系统中的数据块副本的数量*/
                 updateNeededReplications(storedBlockInfo, -1, 0);
             }
@@ -1911,8 +1922,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * Invalidates the given block on the given datanode.
      */
-    private synchronized void invalidateBlock(Block blk, DatanodeInfo dn)
-            throws IOException {
+    private synchronized void invalidateBlock(Block blk, DatanodeInfo dn) throws IOException {
         NameNode.stateChangeLog.info("DIR* NameSystem.invalidateBlock: "
                 + blk + " on "
                 + dn.getName());
@@ -1926,7 +1936,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         // Check how many copies we have of the block.  If we have at least one
         // copy on a live node, then we can delete it.
         int count = countNodes(blk).liveReplicas();
-        if (count > 1) {
+        if (count > 1) { /*有足够的副本*/
             /*将当前数据块添加到recentInvalidateSets中*/
             addToInvalidates(blk, dn);
             removeStoredBlock(blk, node);
@@ -2173,6 +2183,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
     /**
      * Move a file that is being written to be immutable.
+     * 释放租约
      *
      * @param src   The filename
      * @param lease The lease for the client creating the file
@@ -2188,14 +2199,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     + "attempt to release a create lock on "
                     + src + " file does not exist.";
             NameNode.stateChangeLog.warn(message);
-            throw new IOException(message);
+            throw new IOException(message);/*将直接删除该租约，不需要参与恢复*/
         }
         if (!iFile.isUnderConstruction()) {/*文件不处于构建状态*/
             final String message = "DIR* NameSystem.internalReleaseCreate: "
                     + "attempt to release a create lock on "
                     + src + " but file is already closed.";
             NameNode.stateChangeLog.warn(message);
-            throw new IOException(message);
+            throw new IOException(message);/*将直接删除该租约，不需要参与恢复*/
         }
 
         INodeFileUnderConstruction pendingFile = (INodeFileUnderConstruction) iFile;
@@ -2203,8 +2214,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         // Initialize lease recovery for pendingFile. If there are no blocks
         // associated with this file, then reap lease immediately. Otherwise
         // renew the lease and trigger lease recovery.
-        if (pendingFile.getTargets() == null ||
-                pendingFile.getTargets().length == 0) {
+        /*客户端调用create方法后，在租约管理器添加了记录，还没有调用getBlocksLocations方法，所以targets为空*/
+        if (pendingFile.getTargets() == null || pendingFile.getTargets().length == 0) {
             if (pendingFile.getBlocks().length == 0) {
                 /*情况一：文件没有拥有数据块，直接关闭文件
                 * （客户端刚创建文件，还没有来得及写，就出现了故障）
@@ -2217,10 +2228,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             // setup the Inode.targets for the last block from the blocksMap
             //
             /*情况二：数据流管道成员为空，选择倒数第二个数据块为最后一个数据块
+            * （如果客户端建立数据流管道失败，则会抛弃当前块，调用abadonBlock()方法）
             * （客户端通过abadonBlock()放弃数据块后故障，这时候打开文件当前的数据流管道为空）
             * */
             Block[] blocks = pendingFile.getBlocks();
             Block last = blocks[blocks.length - 1];
+            //
             DatanodeDescriptor[] targets = new DatanodeDescriptor[blocksMap.numNodes(last)];
             Iterator<DatanodeDescriptor> it = blocksMap.nodeIterator(last);
             for (int i = 0; it != null && it.hasNext(); i++) {
@@ -2244,8 +2257,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
 
     private void finalizeINodeFileUnderConstruction(String src, INodeFileUnderConstruction pendingFile) throws IOException {
-        NameNode.stateChangeLog.info("Removing lease on  file " + src +
-                " from client " + pendingFile.clientName);
+        NameNode.stateChangeLog.info("Removing lease on  file " + src + " from client " + pendingFile.clientName);
         /*释放租约*/
         leaseManager.removeLease(pendingFile.clientName, src);
 
@@ -2301,21 +2313,21 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             /*移除老数据块信息，为了插入新数据块信息做准备*/
             blocksMap.removeBlock(oldblockinfo);
 
-            if (deleteblock) {/*如果主数据节点没有找到一个可恢复的数据块时，则deleteblock设为true*/
+            if (deleteblock) {/*如果主数据节点没有找到一个可恢复的数据块时，则deleteblock设为true,（一般是客户顿发起的数据块恢复）*/
                 pendingFile.removeBlock(lastblock);
             } else {
                 // update last block, construct newblockinfo and add it to the blocks map
                 /*更新数据块信息*/
                 lastblock.set(lastblock.getBlockId(), newlength, newgenerationstamp);
 
-                /*将新信息添加到blocksMap中*/
+                /*将新信息添加到blocksMap中，旧的信息在前面已经移除*/
                 final BlockInfo newblockinfo = blocksMap.addINode(lastblock, pendingFile);
 
                 // find the DatanodeDescriptor objects
                 // There should be no locations in the blocksMap till now because the
                 // file is underConstruction
                 DatanodeDescriptor[] descriptors = null;
-                List<DatanodeDescriptor> descriptorsList = new ArrayList<DatanodeDescriptor>(newtargets.length);
+                List<DatanodeDescriptor> descriptorsList = new ArrayList<>(newtargets.length);
                 for (int i = 0; i < newtargets.length; i++) {
                     DatanodeDescriptor node = datanodeMap.get(newtargets[i].getStorageID());
                     if (node != null) {
@@ -2324,7 +2336,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                             // block list for the node, since the block is still under
                             // construction there. (in getAdditionalBlock, for example
                             // we don't add to the block map for the targets)
-                            /*关闭文件，将数据块信息加入各数据节点的描述符中*/
+                            /*关闭文件，将数据块信息加入各数据节点的描述符中（旧的信息在前面已经移除）*/
                             node.addBlock(newblockinfo);
                         }
                         descriptorsList.add(node);
@@ -2440,6 +2452,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (!verifyNodeRegistration(nodeReg, dnAddress)) {
             throw new DisallowedDatanodeException(nodeReg);
         }
+
         /*获得主机名称*/
         String hostName = nodeReg.getHost();
 
@@ -2458,9 +2471,9 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 "BLOCK* NameSystem.registerDatanode: "
                         + "node registration from " + nodeReg.getName()
                         + " storage " + nodeReg.getStorageID());
-        /*存储标识到数据节点的映射*/
+        /*存储标识到DatanodeDescriptor的映射*/
         DatanodeDescriptor nodeS = datanodeMap.get(nodeReg.getStorageID());
-        /* 服务器名称 到 服务器上启动的数据节点的 DatanodeDescriptor 多个映射*/
+        /*主机到DatanodeDescriptor的映射*/
         DatanodeDescriptor nodeN = host2DataNodeMap.getDatanodeByName(nodeReg.getName());
 
         /*情况三：重复注册，数据节点使用新的存储标识进行注册*/
@@ -2552,9 +2565,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         return;
     }
 
+
     /* Resolve a node's network location */
     private void resolveNetworkLocation(DatanodeDescriptor node) {
-        List<String> names = new ArrayList<String>(1);
+        List<String> names = new ArrayList<>(1);
         if (dnsToSwitchMapping instanceof CachedDNSToSwitchMapping) {
             // get the node's IP address
             names.add(node.getHost());
@@ -2608,8 +2622,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
     private boolean isDatanodeDead(DatanodeDescriptor node) {
-        return (node.getLastUpdate() <
-                (now() - heartbeatExpireInterval));
+        return (node.getLastUpdate() < (now() - heartbeatExpireInterval));
     }
 
     private void setDatanodeDead(DatanodeDescriptor node) throws IOException {
@@ -2669,7 +2682,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     return new DatanodeCommand[]{cmd};
                 }
 
-                ArrayList<DatanodeCommand> cmds = new ArrayList<DatanodeCommand>();
+                ArrayList<DatanodeCommand> cmds = new ArrayList<>();
 
                 // 数据库副本复制指令
                 cmd = nodeinfo.getReplicationCommand(maxReplicationStreams - xmitsInProgress);
@@ -2872,12 +2885,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * @return number of blocks scheduled for replication or removal.
      */
     public int computeDatanodeWork() throws IOException {
-        int replicationWorkFound = 0;
+        int replicationWorkFound = 0;/*复制*/
         int invalidationWorkFound = 0;
         int blocksToProcess = 0;
         int nodesToProcess = 0;
 
-        // blocks should not be replicated or removed if safe mode is on
+        /*如果处于安全模式，副本不应该复制或删除*/
         if (isInSafeMode()) {
             replmon.replicateQueueStats.checkRestart();
             replmon.invalidateQueueStats.checkRestart();
@@ -2940,6 +2953,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         int blockCnt = 0;
         for (int nodeCnt = 0; nodeCnt < nodesToProcess; nodeCnt++) {
+            /*将需要删除的数据块数据移动到 DataNodeDescriptor中*/
             blockCnt += invalidateWorkForOneNode(keyArray.get(nodeCnt));
         }
         return blockCnt;
@@ -2987,7 +3001,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      */
     synchronized List<List<Block>> chooseUnderReplicatedBlocks(int blocksToProcess) {
         // initialize data structure for the return value
-        List<List<Block>> blocksToReplicate = new ArrayList<List<Block>>(UnderReplicatedBlocks.LEVEL);
+        List<List<Block>> blocksToReplicate = new ArrayList<>(UnderReplicatedBlocks.LEVEL);
         for (int i = 0; i < UnderReplicatedBlocks.LEVEL; i++) {
             blocksToReplicate.add(new ArrayList<Block>());
         }
@@ -3001,10 +3015,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
             // Go through all blocks that need replications.
             BlockIterator neededReplicationsIterator = neededReplications.iterator();
+
             // skip to the first unprocessed block, which is at replIndex
             for (int i = 0; i < replIndex && neededReplicationsIterator.hasNext(); i++) {
                 neededReplicationsIterator.next();
             }
+
             // # of blocks to process equals either twice the number of live
             // data-nodes or the number of under-replicated blocks whichever is less
             blocksToProcess = Math.min(blocksToProcess, neededReplications.size());
@@ -3019,8 +3035,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     if (blkCnt >= blocksToProcess)
                         break;
                     neededReplicationsIterator = neededReplications.iterator();
-                    assert neededReplicationsIterator.hasNext() :
-                            "neededReplications should not be empty.";
+                    assert neededReplicationsIterator.hasNext() : "neededReplications should not be empty.";
                 }
 
                 Block block = neededReplicationsIterator.next();
@@ -3051,7 +3066,6 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             synchronized (neededReplications) {
                 // block should belong to a file
                 INodeFile fileINode = blocksMap.getINode(block);
-                // abandoned block or block reopened for append
                 /*如果数据块不属于任何一个文件
                 * 或
                 * 属于一个已经打开的文件，
@@ -3069,13 +3083,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 NumberReplicas numReplicas = new NumberReplicas();
                 srcNode = chooseSourceDatanode(block, containingNodes, numReplicas);
                 /*更新计数器 和 处理没有数据源的情况，没有数据源，方法返回*/
-                if ((numReplicas.liveReplicas() + numReplicas.decommissionedReplicas())
-                        <= 0) {
+                if ((numReplicas.liveReplicas() + numReplicas.decommissionedReplicas()) <= 0) {
                     missingBlocksInCurIter++;
                 }
                 /*
                 * 选择数据源或目标时，没有找到合适的数据节点
-                *
                 * */
                 if (srcNode == null) // block can not be replicated from any node
                     return false;
@@ -3086,8 +3098,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 * 这里的“当前副本数”包括正在进行复制的数据块副本，
                 * 虽然复制工作没有完成，但名字节点乐观地认为复制成功
                 * */
-                numEffectiveReplicas = numReplicas.liveReplicas() +
-                        pendingReplications.getNumReplicas(block);
+                numEffectiveReplicas = numReplicas.liveReplicas() + pendingReplications.getNumReplicas(block);
                 if (numEffectiveReplicas >= requiredReplication) {
                     /*不需要复制，从 neededReplications 删除复制请求并返回*/
                     neededReplications.remove(block, priority); // remove from neededReplications
@@ -3102,8 +3113,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         // choose replication targets: NOT HOLDING THE GLOBAL LOCK
         /*选择复制的目标*/
-        DatanodeDescriptor targets[] = replicator.chooseTarget(
-                requiredReplication - numEffectiveReplicas,
+        DatanodeDescriptor targets[] = replicator.chooseTarget(requiredReplication - numEffectiveReplicas,
                 srcNode, containingNodes, null, block.getNumBytes());
         /*选择复制目标失败，返回*/
         if (targets.length == 0)
@@ -3131,8 +3141,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
                 // do not schedule more if enough replicas is already pending
                 NumberReplicas numReplicas = countNodes(block);
-                numEffectiveReplicas = numReplicas.liveReplicas() +
-                        pendingReplications.getNumReplicas(block);
+                numEffectiveReplicas = numReplicas.liveReplicas() + pendingReplications.getNumReplicas(block);
                 if (numEffectiveReplicas >= requiredReplication) {
                     neededReplications.remove(block, priority); // remove from neededReplications
                     replIndex--;
@@ -3202,22 +3211,18 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * 1. 如果副本所属节点处于“正在撤销”，由于上面写数据的请求很少，优先选择
      * 2. 接下来选择的是“不忙”的数据节点，即数据节点上的复制请求很少的节点
      */
-    private DatanodeDescriptor chooseSourceDatanode(
-            Block block,
-            List<DatanodeDescriptor> containingNodes,
-            NumberReplicas numReplicas) {
+    private DatanodeDescriptor chooseSourceDatanode(Block block, List<DatanodeDescriptor> containingNodes, NumberReplicas numReplicas) {
         containingNodes.clear();
         DatanodeDescriptor srcNode = null;
         int live = 0;
         int decommissioned = 0;
         int corrupt = 0;
         int excess = 0;
-        Iterator<DatanodeDescriptor> it = blocksMap.nodeIterator(block);
         Collection<DatanodeDescriptor> nodesCorrupt = corruptReplicas.getNodes(block);
+        Iterator<DatanodeDescriptor> it = blocksMap.nodeIterator(block);
         while (it.hasNext()) {
             DatanodeDescriptor node = it.next();
-            Collection<Block> excessBlocks =
-                    excessReplicateMap.get(node.getStorageID());
+            Collection<Block> excessBlocks = excessReplicateMap.get(node.getStorageID());
             if ((nodesCorrupt != null) && (nodesCorrupt.contains(node)))
                 corrupt++;
             else if (node.isDecommissionInProgress() || node.isDecommissioned())
@@ -3284,8 +3289,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             return 0;
         }
 
-        ArrayList<Block> blocksToInvalidate =
-                new ArrayList<Block>(blockInvalidateLimit);
+        ArrayList<Block> blocksToInvalidate = new ArrayList<Block>(blockInvalidateLimit);
 
         // # blocks that can be sent in one message is limited
         Iterator<Block> it = invalidateSet.iterator();
@@ -3390,10 +3394,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
 
     void unprotectedAddDatanode(DatanodeDescriptor nodeDescr) {
-    /* To keep host2DataNodeMap consistent with datanodeMap,
-       remove  from host2DataNodeMap the datanodeDescriptor removed
-       from datanodeMap before adding nodeDescr to host2DataNodeMap.
-    */
+        /* To keep host2DataNodeMap consistent with datanodeMap,
+           remove  from host2DataNodeMap the datanodeDescriptor removed
+           from datanodeMap before adding nodeDescr to host2DataNodeMap.
+        */
         host2DataNodeMap.remove(datanodeMap.put(nodeDescr.getStorageID(), nodeDescr));
         host2DataNodeMap.add(nodeDescr);
 
@@ -3593,6 +3597,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
         // To minimize startup time, we discard any second (or later) block reports
         // that we receive while still in startup phase.
+        /*如果是在安全模式下，并且 已经报告过一次*/
         if (isInStartupSafeMode() && !node.firstBlockReport()) {
             NameNode.stateChangeLog.info("BLOCK* NameSystem.processReport: "
                     + "discarded non-initial block report from " + nodeID.getName()
@@ -3615,21 +3620,25 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         for (Block b : toRemove) {
             removeStoredBlock(b, node);/*移除数据块副本*/
         }
+
         for (Block b : toAdd) {
             addStoredBlock(b, node, null);/*待添加副本，更新相关数据结构*/
         }
+
         for (Block b : toInvalidate) {
             NameNode.stateChangeLog.info("BLOCK* NameSystem.processReport: block "
                     + b + " on " + node.getName() + " size " + b.getNumBytes()
                     + " does not belong to any file.");
             addToInvalidates(b, node);/*删除无效副本*/
         }
+
         long endTime = now();
         NameNode.getNameNodeMetrics().addBlockReport(endTime - startTime);
         NameNode.stateChangeLog.info("*BLOCK* NameSystem.processReport: from "
                 + nodeID.getName() + ", blocks: " + newReport.getNumberOfBlocks()
                 + ", processing time: " + (endTime - startTime) + " msecs");
         node.processedBlockReport();
+
     }
 
     /**
@@ -3639,21 +3648,20 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      *
      * @return the block that is stored in blockMap.
      */
-    synchronized Block addStoredBlock(Block newBlock,
-                                      DatanodeDescriptor datanode,
-                                      DatanodeDescriptor delNodeHint) {
+    synchronized Block addStoredBlock(Block newBlock, DatanodeDescriptor datanode, DatanodeDescriptor delNodeHint) {
         BlockInfo storedBlock = blocksMap.getStoredBlock(newBlock);
         if (storedBlock == null) {/*在blockMap没有发现该数据块*/
             // If we have a block in the block map with the same ID, but a different
             // generation stamp, and the corresponding file is under construction,
             // then we need to do some special processing.
 
-            /*不带数据块版本号，在blockMap中再次查找数据块
+            /*
+            * 不带数据块版本号，在blockMap中再次查找数据块
             * <>
             *     在数据块恢复的过程中，数据块的版本号会发生变化。这时，
             *     故障节点上不参与数据块恢复的数据块版本号会维持不变，
-            *     集群会出现同一个数据块的不同副本拥有不同的版本号的情况。
-            * */
+            *     集群会出现【同一个数据块的不同副本】拥有不同的版本号的情况。
+            */
             storedBlock = blocksMap.getStoredBlockWithoutMatchingGS(newBlock);
 
             if (storedBlock == null) {
@@ -3667,6 +3675,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
             /*上报的是一个旧副本*/
             boolean reportedOldGS = newBlock.getGenerationStamp() < storedBlock.getGenerationStamp();
+
             /*上报的是一个新副本*/
             boolean reportedNewGS = newBlock.getGenerationStamp() > storedBlock.getGenerationStamp();
             /*文件是否处于构建状态*/
@@ -3691,11 +3700,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             // commitBlockSynchronization runs
 
             /*
-            * 它是某个处于构建状态文件的最后一个数据块，在INodeFileUnderConstruction
-            * 记录这个数据块，并等待数据块恢复过程 commitBlockSynchronization()
-            * */
-            if (underConstruction && isLastBlock
-                    && (reportedOldGS || reportedNewGS)) {
+             * 它是某个处于构建状态文件的最后一个数据块，在INodeFileUnderConstruction
+             * 记录这个数据块，并等待数据块恢复过程 commitBlockSynchronization()
+             */
+            if (underConstruction && isLastBlock && (reportedOldGS || reportedNewGS)) {
                 NameNode.stateChangeLog.info("BLOCK* NameSystem.addStoredBlock: "
                         + "Targets updated: block " + newBlock + " on " + datanode.getName() +
                         " is added as a target for block " + storedBlock + " with size " +
@@ -3835,8 +3843,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         // filter out containingNodes that are marked for decommission.
         NumberReplicas num = countNodes(storedBlock);
         int numLiveReplicas = num.liveReplicas();
-        int numCurrentReplica = numLiveReplicas
-                + pendingReplications.getNumReplicas(newBlock);
+        int numCurrentReplica = numLiveReplicas + pendingReplications.getNumReplicas(newBlock);
 
         // check whether safe replication is reached for the block
         incrementSafeBlockCount(numCurrentReplica);
@@ -3971,8 +3978,10 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (addedNode == delNodeHint) {
             delNodeHint = null;
         }
+        /*【等待删除数据块】 的 候选数据节点*/
         Collection<DatanodeDescriptor> nonExcess = new ArrayList<>();
-        Collection<DatanodeDescriptor> corruptNodes = corruptReplicas.getNodes(block);
+
+        Collection<DatanodeDescriptor> corruptNodes = corruptReplicas.getNodes(block);/*损坏副本所在的数据节点*/
 
         /*遍历数据块的所有副本所在的数据节点*/
         for (Iterator<DatanodeDescriptor> it = blocksMap.nodeIterator(block); it.hasNext(); ) {
@@ -3984,7 +3993,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
                 /*该节点不是一个处于“正在撤销” 或 “已撤销” 的数据节点*/
                 if (!cur.isDecommissionInProgress() && !cur.isDecommissioned()) {
-                    // exclude corrupt replicas
+
                     /*该节点保存的副本没有损坏*/
                     if (corruptNodes == null || !corruptNodes.contains(cur)) {
                         nonExcess.add(cur);
@@ -3992,8 +4001,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 }
             }
         }
-        chooseExcessReplicates(nonExcess, block, replication,
-                addedNode, delNodeHint);
+        chooseExcessReplicates(nonExcess, block, replication, addedNode, delNodeHint);
     }
 
     /**
@@ -4014,9 +4022,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                                         Block b, short replication,
                                         DatanodeDescriptor addedNode,
                                         DatanodeDescriptor delNodeHint) {
-        /*rackMap保存了 机架 到 数据节点 的映射*/
+        /*第一步：把候选数据节点 按【机架】进行分组*/
         Map<String, ArrayList<DatanodeDescriptor>> rackMap = new HashMap<String, ArrayList<DatanodeDescriptor>>();
-        /*获取数据节点的机架信息，并保存在rackMap中*/
         for (DatanodeDescriptor node : nonExcess) {
             String rackName = node.getNetworkLocation();
             ArrayList<DatanodeDescriptor> datanodeList = rackMap.get(rackName);
@@ -4027,26 +4034,22 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             rackMap.put(rackName, datanodeList);
         }
 
-        // split nodes into two sets
-        // priSet contains nodes on rack with more than one replica
-        // remains contains the remaining nodes
-        /*将数据节点划分为连个集合*/
-        /*priSet是 一个机架上包含多个副本 的数据节点集合*/
-        ArrayList<DatanodeDescriptor> priSet = new ArrayList<DatanodeDescriptor>();
-        /*其他节点保存在remains中*/
-        ArrayList<DatanodeDescriptor> remains = new ArrayList<DatanodeDescriptor>();
-        for (Map.Entry<String, ArrayList<DatanodeDescriptor>> rackEntry : rackMap.entrySet()) {
-            ArrayList<DatanodeDescriptor> datanodeList = rackEntry.getValue();
+        /*将数据节点分割到两个数据集中*/
+        ArrayList<DatanodeDescriptor> primarySet = new ArrayList<>();/*priSet是 一个机架上包含多个副本 的数据节点集合*/
+        ArrayList<DatanodeDescriptor> remains = new ArrayList<>();
+        rackMap.forEach((rack, datanodeList) -> {
             if (datanodeList.size() == 1) {
                 remains.add(datanodeList.get(0));
             } else {
-                priSet.addAll(datanodeList);
+                /*尽量不在同一个机架上放置相同的副本，所以某个机架上副本多个座位主要删除目标*/
+                primarySet.addAll(datanodeList);
             }
-        }
+        });
 
         // pick one node to delete that favors the delete hint
         // otherwise pick one with least space from priSet if it is not empty
         // otherwise one node with least space from remains
+
         /*循环删除副本，首先选择节点delNodeHint，
         * 接下来选择priSet中的数据节点
         * 最后选择remains中存储空间剩余最少的节点*/
@@ -4057,10 +4060,11 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
             // check if we can del delNodeHint
             if (firstOne && delNodeHint != null && nonExcess.contains(delNodeHint) &&
-                    (priSet.contains(delNodeHint) || (addedNode != null && !priSet.contains(addedNode)))) {
+                    (primarySet.contains(delNodeHint) || (addedNode != null && !primarySet.contains(addedNode)))) {
                 cur = delNodeHint;
             } else { // regular excessive replica removal
-                Iterator<DatanodeDescriptor> iter = priSet.isEmpty() ? remains.iterator() : priSet.iterator();
+                /*选择剩余空间最小的数据节点，进行副本的删除*/
+                Iterator<DatanodeDescriptor> iter = primarySet.isEmpty() ? remains.iterator() : primarySet.iterator();
                 while (iter.hasNext()) {
                     DatanodeDescriptor node = iter.next();
                     long free = node.getRemaining();
@@ -4080,9 +4084,9 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             if (datanodes.isEmpty()) {
                 rackMap.remove(rack);
             }
-            if (priSet.remove(cur)) {
+            if (primarySet.remove(cur)) {
                 if (datanodes.size() == 1) {
-                    priSet.remove(datanodes.get(0));
+                    primarySet.remove(datanodes.get(0));
                     remains.add(datanodes.get(0));
                 }
             } else {
@@ -4121,6 +4125,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * Modify (block-->datanode) map.  Possibly generate
      * replication tasks, if the removed block is still valid.
+     * 该方法的作用和addStoredBlock相反
      */
     synchronized void removeStoredBlock(Block block, DatanodeDescriptor node) {
         NameNode.stateChangeLog.debug("BLOCK* NameSystem.removeStoredBlock: "
@@ -4154,7 +4159,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                 excessBlocksCount--;
                 NameNode.stateChangeLog.debug("BLOCK* NameSystem.removeStoredBlock: "
                         + block + " is removed from excessBlocks");
-                if (excessBlocks.size() == 0) {
+                if (excessBlocks.isEmpty()) {
                     excessReplicateMap.remove(node.getStorageID());
                 }
             }
@@ -4170,9 +4175,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /**
      * The given node is reporting that it received a certain block.
      */
-    public synchronized void blockReceived(DatanodeID nodeID,
-                                           Block block,
-                                           String delHint) throws IOException {
+    public synchronized void blockReceived(DatanodeID nodeID, Block block, String delHint) throws IOException {
         DatanodeDescriptor node = getDatanode(nodeID);
         if (node == null || !node.isAlive) {
             NameNode.stateChangeLog.warn("BLOCK* NameSystem.blockReceived: " + block
@@ -4207,6 +4210,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         //
         // Modify the blocks->datanode map and node's map.
         //
+        /*说明已经复制完成，删除该快*/
         pendingReplications.remove(block);
         /*添加数据块所需要的逻辑都实现在 addStoredBlock()*/
         addStoredBlock(block, node, delHintNode);
@@ -4549,8 +4553,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
             } else if (node.isDecommissionInProgress() || node.isDecommissioned()) {
                 count++;/*位于撤销数据节点的复本数*/
             } else {
-                Collection<Block> blocksExcess =
-                        excessReplicateMap.get(node.getStorageID());
+                Collection<Block> blocksExcess = excessReplicateMap.get(node.getStorageID());
                 if (blocksExcess != null && blocksExcess.contains(b)) {
                     excess++;/*多余的复本*/
                 } else {
@@ -4601,7 +4604,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         boolean status = false;
         int underReplicatedBlocks = 0;/*处于复制状态的数据块*/
         int decommissionOnlyReplicas = 0;/*只存在于当前撤销节点的数据块副本数*/
-        int underReplicatedInOpenFiles = 0;/*正在写数据 状态的数据块副本数*/
+        int underReplicatedInOpenFiles = 0;/*正在写数据状态的数据块副本数*/
 
         for (final Iterator<Block> blockIter = srcNode.getBlockIterator(); blockIter.hasNext(); ) {
             final Block block = blockIter.next();
@@ -4609,24 +4612,26 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
             if (fileINode != null) {
                 NumberReplicas num = countNodes(block);/*获取当前副本状态*/
-                int curReplicas = num.liveReplicas();
+                int curReplicas = num.liveReplicas();/*正常的副本*/
                 int curExpectedReplicas = getReplication(block);
-                if (curExpectedReplicas > curReplicas) {/*根据当前处于 正常副本 的副本数和文件的期望副本数，判断数据块副本的复制是否结束*/
-                    // Log info about one block for this node which needs replication
+                if (curExpectedReplicas > curReplicas) {
+                    /*节点刚进入撤销状态，由于liveReplicas 不会把位于待撤销节点的副本计算在内，所以 curExpectedReplicas一般会比 curReplicas要大*/
+                    /*意思说，该节点上的副本都需要进行复制*/
                     if (!status) {
                         status = true;
                         logBlockReplicationInfo(block, srcNode, num);
                     }
                     underReplicatedBlocks++;
                     if ((curReplicas == 0) && (num.decommissionedReplicas() > 0)) {
-                        decommissionOnlyReplicas++;/*只有当前节点拥有*/
+                        decommissionOnlyReplicas++;/*只有当前撤销的数据节点独有该数据块，其他节点没有*/
                     }
+
                     if (fileINode.isUnderConstruction()) {
                         underReplicatedInOpenFiles++;/*写过程还没有结束*/
                     }
 
-                    if (!neededReplications.contains(block) &&
-                            pendingReplications.getNumReplicas(block) == 0) {
+                    if (!neededReplications.contains(block)
+                            && pendingReplications.getNumReplicas(block) == 0) {
                         //
                         // These blocks have been reported from the datanode
                         // after the startDecommission method has been executed. These
@@ -4634,15 +4639,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                         //
                         /*startDecommission()调用，或者写过程刚刚结束，都会执行这段逻辑*/
                         neededReplications.add(block,
-                                curReplicas,
-                                num.decommissionedReplicas(),
+                                curReplicas,/*除去当前节点剩下的副本数*/
+                                num.decommissionedReplicas(),/*位于当前撤销数据节点的副本数*/
                                 curExpectedReplicas);
                     }
                 }
             }
         }
-        srcNode.decommissioningStatus.set(underReplicatedBlocks,
-                decommissionOnlyReplicas, underReplicatedInOpenFiles);
+        srcNode.decommissioningStatus.set(underReplicatedBlocks, decommissionOnlyReplicas, underReplicatedInOpenFiles);
 
         return status;
     }
@@ -4757,8 +4761,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (inExcludedHostsList(nodeReg, ipAddr)) {
             DatanodeDescriptor node = getDatanode(nodeReg);
             if (node == null) {
-                throw new IOException("verifyNodeRegistration: unknown datanode " +
-                        nodeReg.getName());
+                throw new IOException("verifyNodeRegistration: unknown datanode " + nodeReg.getName());
             }
             if (!checkDecommissionStateInternal(node)) {
                 startDecommission(node);
@@ -5298,8 +5301,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         }
         safeMode.setManual();
         getEditLog().logSync();
-        NameNode.stateChangeLog.info("STATE* Safe mode is ON. "
-                + safeMode.getTurnOffTip());
+        NameNode.stateChangeLog.info("STATE* Safe mode is ON. " + safeMode.getTurnOffTip());
     }
 
     /**
@@ -5440,8 +5442,7 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
      * of inodes.
      */
     void checkFsObjectLimit() throws IOException {
-        if (maxFsObjects != 0 &&
-                maxFsObjects <= dir.totalInodes() + getBlocksTotal()) {
+        if (maxFsObjects != 0 && maxFsObjects <= dir.totalInodes() + getBlocksTotal()) {
             throw new IOException("Exceeded the configured number of objects " +
                     maxFsObjects + " in the filesystem.");
         }

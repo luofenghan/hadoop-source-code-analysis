@@ -1157,7 +1157,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         }
 
 
-        // Protect against a straggler updateblock call moving a block backwards in time.
+        // Protect against a straggler update block call moving a block backwards in time.
         boolean isValidUpdate = (newblock.getGenerationStamp() > oldblock.getGenerationStamp())
                 || (newblock.getGenerationStamp() == oldblock.getGenerationStamp()
                 && newblock.getNumBytes() == oldblock.getNumBytes());
@@ -1266,8 +1266,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         // Now perform the update
 
         //rename meta file to a tmp file
-        File tmpMetaFile = new File(oldMetaFile.getParent(),
-                oldMetaFile.getName() + "_tmp" + newblock.getGenerationStamp());
+        File tmpMetaFile = new File(oldMetaFile.getParent(), oldMetaFile.getName() + "_tmp" + newblock.getGenerationStamp());
         if (!oldMetaFile.renameTo(tmpMetaFile)) {
             throw new IOException("Cannot rename block meta file to " + tmpMetaFile);
         }
@@ -1304,19 +1303,13 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         if (newlen == 0) {
             // Special case for truncating to 0 length, since there's no previous
             // chunk.
-            RandomAccessFile blockRAF = new RandomAccessFile(blockFile, "rw");
-            try {
+            try (RandomAccessFile blockRAF = new RandomAccessFile(blockFile, "rw")) {
                 //truncate blockFile
                 blockRAF.setLength(newlen);
-            } finally {
-                blockRAF.close();
             }
             //update metaFile
-            RandomAccessFile metaRAF = new RandomAccessFile(metaFile, "rw");
-            try {
+            try (RandomAccessFile metaRAF = new RandomAccessFile(metaFile, "rw")) {
                 metaRAF.setLength(BlockMetadataHeader.getHeaderSize());
-            } finally {
-                metaRAF.close();
             }
             return;
         }
@@ -1329,16 +1322,13 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         int lastchunksize = (int) (newlen - lastchunkoffset);
         byte[] b = new byte[Math.max(lastchunksize, checksumsize)];
 
-        RandomAccessFile blockRAF = new RandomAccessFile(blockFile, "rw");
-        try {
+        try (RandomAccessFile blockRAF = new RandomAccessFile(blockFile, "rw")) {
             //truncate blockFile
             blockRAF.setLength(newlen);
 
             //read last chunk
             blockRAF.seek(lastchunkoffset);
             blockRAF.readFully(b, 0, lastchunksize);
-        } finally {
-            blockRAF.close();
         }
 
         //compute checksum
@@ -1346,13 +1336,10 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         dcs.writeValue(b, 0, false);
 
         //update metaFile
-        RandomAccessFile metaRAF = new RandomAccessFile(metaFile, "rw");
-        try {
+        try (RandomAccessFile metaRAF = new RandomAccessFile(metaFile, "rw")) {
             metaRAF.setLength(newmetalen);
             metaRAF.seek(newmetalen - checksumsize);
             metaRAF.write(b, 0, checksumsize);
-        } finally {
-            metaRAF.close();
         }
     }
 

@@ -45,7 +45,7 @@ public class NetworkTopology {
      * Different from a leave node, it has non-null children.
      */
     private class InnerNode extends NodeBase {
-        private ArrayList<Node> children = new ArrayList<Node>();
+        private ArrayList<Node> children = new ArrayList<>();
         private int numOfLeaves;
 
         /**
@@ -104,9 +104,8 @@ public class NetworkTopology {
          * @return true if this node is an ancestor of <i>n</i>
          */
         boolean isAncestor(Node n) {
-            return getPath(this).equals(NodeBase.PATH_SEPARATOR_STR) ||
-                    (n.getNetworkLocation() + NodeBase.PATH_SEPARATOR_STR).
-                            startsWith(getPath(this) + NodeBase.PATH_SEPARATOR_STR);
+            return getPath(this).equals(NodeBase.PATH_SEPARATOR_STR)
+                    || (n.getNetworkLocation() + NodeBase.PATH_SEPARATOR_STR).startsWith(getPath(this) + NodeBase.PATH_SEPARATOR_STR);
         }
 
         /**
@@ -163,16 +162,15 @@ public class NetworkTopology {
                 // find the next ancestor node
                 String parentName = getNextAncestorName(n);
                 InnerNode parentNode = null;
-                for (int i = 0; i < children.size(); i++) {
-                    if (children.get(i).getName().equals(parentName)) {
-                        parentNode = (InnerNode) children.get(i);
+                for (Node aChildren : children) {
+                    if (aChildren.getName().equals(parentName)) {
+                        parentNode = (InnerNode) aChildren;
                         break;
                     }
                 }
                 if (parentNode == null) {
                     // create a new InnerNode
-                    parentNode = new InnerNode(parentName, getPath(this),
-                            this, this.getLevel() + 1);
+                    parentNode = new InnerNode(parentName, getPath(this), this, this.getLevel() + 1);
                     children.add(parentNode);
                 }
                 // add n to the subtree of the next ancestor node
@@ -244,13 +242,17 @@ public class NetworkTopology {
 
             String[] path = loc.split(PATH_SEPARATOR_STR, 2);
             Node childnode = null;
-            for (int i = 0; i < children.size(); i++) {
-                if (children.get(i).getName().equals(path[0])) {
-                    childnode = children.get(i);
+
+            for (Node aChildren : children) {
+                if (aChildren.getName().equals(path[0])) {
+                    childnode = aChildren;
                 }
             }
+
             if (childnode == null) return null; // non-existing node
+
             if (path.length == 1) return childnode;
+
             if (childnode instanceof InnerNode) {
                 return ((InnerNode) childnode).getLoc(path[1]);
             } else {
@@ -284,8 +286,8 @@ public class NetworkTopology {
                 }
                 return children.get(leafIndex);
             } else {
-                for (int i = 0; i < children.size(); i++) {
-                    InnerNode child = (InnerNode) children.get(i);
+                for (Node aChildren : children) {
+                    InnerNode child = (InnerNode) aChildren;
                     if (excludedNode == null || excludedNode != child) {
                         // not the excludedNode
                         int numOfLeaves = child.getNumOfLeaves();
@@ -617,7 +619,7 @@ public class NetworkTopology {
      */
     public String toString() {
         // print the number of racks
-        StringBuffer tree = new StringBuffer();
+        StringBuilder tree = new StringBuilder();
         tree.append("Number of racks: ");
         tree.append(numOfRacks);
         tree.append("\n");
@@ -692,4 +694,6 @@ public class NetworkTopology {
             swap(nodes, 0, r.nextInt(nodes.length));
         }
     }
+
+
 }

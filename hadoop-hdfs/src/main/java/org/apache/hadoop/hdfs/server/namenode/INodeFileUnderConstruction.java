@@ -28,12 +28,12 @@ import java.io.IOException;
  * 当客户端正在为写 数据打开HDFS文件时，该文件就处于构建状态
  */
 class INodeFileUnderConstruction extends INodeFile {
-    String clientName;         // 写文件的客户端，也是这个文件租约的文件所有者
-    private final String clientMachine; // 客户端所在的主机
-    private final DatanodeDescriptor clientNode; // 如果客户端运行在集群内的某个数据节点上，数据节点的信息
+    String clientName;// 写文件的客户端，也是这个文件租约的文件所有者
+    private final String clientMachine;//客户端所在的主机
+    private final DatanodeDescriptor clientNode;// 如果客户端运行在集群内的某个数据节点上，数据节点的信息
 
     private int primaryNodeIndex = -1; //租约恢复时的主数据节点，保存了恢复时的主数据节点索引
-    private DatanodeDescriptor[] targets = null;   //最后一个数据块的数据流管道成员
+    private DatanodeDescriptor[] targets = null;//参与到当前数据块的数据节点成员列表
     private long lastRecoveryTime = 0; //租约恢复的开始时间
 
     INodeFileUnderConstruction(PermissionStatus permissions,
@@ -50,15 +50,15 @@ class INodeFileUnderConstruction extends INodeFile {
         this.clientNode = clientNode;
     }
 
-    public INodeFileUnderConstruction(byte[] name,
-                                      short blockReplication,
-                                      long modificationTime,
-                                      long preferredBlockSize,
-                                      BlockInfo[] blocks,
-                                      PermissionStatus perm,
-                                      String clientName,
-                                      String clientMachine,
-                                      DatanodeDescriptor clientNode) {
+    INodeFileUnderConstruction(byte[] name,
+                               short blockReplication,
+                               long modificationTime,
+                               long preferredBlockSize,
+                               BlockInfo[] blocks,
+                               PermissionStatus perm,
+                               String clientName,
+                               String clientMachine,
+                               DatanodeDescriptor clientNode) {
         super(perm, blocks, blockReplication, modificationTime, modificationTime,
                 preferredBlockSize);
         setLocalName(name);

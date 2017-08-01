@@ -194,9 +194,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
      * @param networkLocation location of the data node in network
      * @param hostName        it could be different from host specified for DatanodeID
      */
-    public DatanodeDescriptor(DatanodeID nodeID,
-                              String networkLocation,
-                              String hostName) {
+    public DatanodeDescriptor(DatanodeID nodeID, String networkLocation, String hostName) {
         this(nodeID, networkLocation, hostName, 0L, 0L, 0L, 0);
     }
 
@@ -287,8 +285,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
 
     /**
      */
-    void updateHeartbeat(long capacity, long dfsUsed, long remaining,
-                         int xceiverCount) {
+    void updateHeartbeat(long capacity, long dfsUsed, long remaining, int xceiverCount) {
         this.capacity = capacity;
         this.dfsUsed = dfsUsed;
         this.remaining = remaining;
@@ -439,8 +436,9 @@ public class DatanodeDescriptor extends DatanodeInfo {
         // 添加一个特殊的数据块 delimiter 到 DatanodeDescriptor中
         // 用于分割 原有数据块 和 新添加的数据块
         BlockInfo delimiter = new BlockInfo(new Block(), 1);
-        boolean added = this.addBlock(delimiter);
+        boolean added = this.addBlock(delimiter);/*添加成功后，delimiter在头结点位置*/
         assert added : "Delimiting block cannot be present in the node";
+
         if (newReport == null)
             newReport = new BlockListAsLongs(new long[0]);
         // scan the report and collect newly reported blocks
@@ -451,16 +449,15 @@ public class DatanodeDescriptor extends DatanodeInfo {
         Block iblk = new Block(); // 工作Block对象，将newReport中的信息转换为对象
         Block oblk = new Block(); // for fixing genstamps
         for (int i = 0; i < newReport.getNumberOfBlocks(); ++i) {
-            iblk.set(newReport.getBlockId(i), newReport.getBlockLen(i),
-                    newReport.getBlockGenStamp(i));
+            iblk.set(newReport.getBlockId(i), newReport.getBlockLen(i), newReport.getBlockGenStamp(i));
+            /*情况一：找出需要删除的数据块副本
+            * 1. blocksMap中已经不存在的记录
+            * 2. 所属的文件已经删除（找不到所属的INode）
+            * 3. 时间戳不匹配
+            * */
             BlockInfo storedBlock = blocksMap.getStoredBlock(iblk);
             if (storedBlock == null) {
-                // if the block with a WILDCARD generation stamp matches
-                // then accept this block.
-                // This block has a diferent generation stamp on the datanode
-                // because of a lease-recovery-attempt.
-                oblk.set(newReport.getBlockId(i), newReport.getBlockLen(i),
-                        GenerationStamp.WILDCARD_STAMP);/*不带时间戳查找*/
+                oblk.set(newReport.getBlockId(i), newReport.getBlockLen(i), GenerationStamp.WILDCARD_STAMP);/*不带时间戳查找*/
                 storedBlock = blocksMap.getStoredBlock(oblk);
                 if (storedBlock != null && storedBlock.getINode() != null &&
                         (storedBlock.getGenerationStamp() <= iblk.getGenerationStamp() ||
@@ -470,15 +467,16 @@ public class DatanodeDescriptor extends DatanodeInfo {
                     storedBlock = null;
                 }
             }
-            if (storedBlock == null) {/*没有找到任何信息*/
-                // If block is not in blocksMap it does not belong to any file
+            if (storedBlock == null) {/*无法在文件系统目录树中找到当前数据块的信息，说明已经被删除*/
                 toInvalidate.add(new Block(iblk));
                 continue;
             }
+
+
+            /*情况二：新添加的副本，出现在*newReport*中，但名字节点中的*DatanodeDescriptor*对象并不管理该数据块副本；*/
             if (storedBlock.findDatanode(this) < 0) {// Known block, but not on the DN
-                // if the size differs from what is in the blockmap, then return
-                // the new block. addStoredBlock will then pick up the right size of this
-                // block and will update the block object in the BlocksMap
+                /*如果数据节点汇报的数据块大小和 名字节点存储的大小不一致，那么返回一个新块*/
+                /*addStoredBlock 接下来会挑选一个正确的大小 并 更新 BlocksMap 中的块对象*/
                 if (storedBlock.getNumBytes() != iblk.getNumBytes()) {
                     toAdd.add(new Block(iblk));
                 } else {
@@ -487,13 +485,10 @@ public class DatanodeDescriptor extends DatanodeInfo {
                 continue;
             }
             // move block to the head of the list
+            /*情况三：原有的数据块*/
             this.moveBlockToHead(storedBlock);
         }
-        // collect blocks that have not been reported
-        // all of them are next to the delimiter
-        /*这次上报中没有出现的数据块，即数据节点已经没有，而 DatanodeDescriptor 中
-        * 还保存的副本
-        * */
+        /*情况四：需要移除的副本就是本次报告中不包含（数据节点没有），而存在于名字节点记录的副本。*/
         Iterator<Block> it = new BlockIterator(delimiter.getNext(0), this);
         while (it.hasNext()) {
             BlockInfo storedBlock = (BlockInfo) it.next();

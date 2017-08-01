@@ -57,7 +57,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivilegedExceptionAction;
 
-/** Web-hdfs NameNode implementation. */
+/**
+ * Web-hdfs NameNode implementation.
+ */
 @Path("")
 @ResourceFilters(ParamFilter.class)
 public class NamenodeWebHdfsMethods {
@@ -67,7 +69,9 @@ public class NamenodeWebHdfsMethods {
 
     private static final ThreadLocal<String> REMOTE_ADDRESS = new ThreadLocal<String>();
 
-    /** @return the remote client address. */
+    /**
+     * @return the remote client address.
+     */
     public static String getRemoteAddress() {
         return REMOTE_ADDRESS.get();
     }
@@ -170,7 +174,9 @@ public class NamenodeWebHdfsMethods {
         return uri;
     }
 
-    /** Handle HTTP PUT request for the root. */
+    /**
+     * Handle HTTP PUT request for the root.
+     */
     @PUT
     @Path("/")
     @Consumes({"*/*"})
@@ -213,7 +219,9 @@ public class NamenodeWebHdfsMethods {
                 blockSize, modificationTime, accessTime, delegationTokenArgument);
     }
 
-    /** Handle HTTP PUT request. */
+    /**
+     * Handle HTTP PUT request.
+     */
     @PUT
     @Path("{" + UriFsPathParam.NAME + ":.*}")
     @Consumes({"*/*"})
@@ -329,7 +337,9 @@ public class NamenodeWebHdfsMethods {
         });
     }
 
-    /** Handle HTTP POST request for the root. */
+    /**
+     * Handle HTTP POST request for the root.
+     */
     @POST
     @Path("/")
     @Consumes({"*/*"})
@@ -350,7 +360,9 @@ public class NamenodeWebHdfsMethods {
         return post(ugi, delegation, username, doAsUser, ROOT, op, bufferSize);
     }
 
-    /** Handle HTTP POST request. */
+    /**
+     * Handle HTTP POST request.
+     */
     @POST
     @Path("{" + UriFsPathParam.NAME + ":.*}")
     @Consumes({"*/*"})
@@ -398,7 +410,9 @@ public class NamenodeWebHdfsMethods {
         });
     }
 
-    /** Handle HTTP GET request for the root. */
+    /**
+     * Handle HTTP GET request for the root.
+     */
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
@@ -425,7 +439,9 @@ public class NamenodeWebHdfsMethods {
                 offset, length, renewer, bufferSize);
     }
 
-    /** Handle HTTP GET request. */
+    /**
+     * Handle HTTP GET request.
+     */
     @GET
     @Path("{" + UriFsPathParam.NAME + ":.*}")
     @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
@@ -570,7 +586,9 @@ public class NamenodeWebHdfsMethods {
         };
     }
 
-    /** Handle HTTP DELETE request for the root. */
+    /**
+     * Handle HTTP DELETE request for the root.
+     */
     @DELETE
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -590,7 +608,9 @@ public class NamenodeWebHdfsMethods {
         return delete(ugi, delegation, username, doAsUser, ROOT, op, recursive);
     }
 
-    /** Handle HTTP DELETE request. */
+    /**
+     * Handle HTTP DELETE request.
+     */
     @DELETE
     @Path("{" + UriFsPathParam.NAME + ":.*}")
     @Produces(MediaType.APPLICATION_JSON)

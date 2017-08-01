@@ -71,9 +71,9 @@ class PendingReplicationBlocks {
         init();
     }
 
-    void init() {
-        pendingReplications = new HashMap<Block, PendingBlockInfo>();
-        timedOutItems = new ArrayList<Block>();
+    private void init() {
+        pendingReplications = new HashMap<>();
+        timedOutItems = new ArrayList<>();
         this.timerThread = new Daemon(new PendingReplicationMonitor());
         timerThread.start();
     }

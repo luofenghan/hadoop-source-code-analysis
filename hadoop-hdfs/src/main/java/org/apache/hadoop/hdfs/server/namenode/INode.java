@@ -38,8 +38,8 @@ import java.util.List;
 abstract class INode implements Comparable<byte[]> {
     protected byte[] name;// 文件目录名
     protected INodeDirectory parent;// 父目录
-    protected long modificationTime; // 最后修改时间
-    protected long accessTime; // 最后访问时间
+    long modificationTime; // 最后修改时间
+    private long accessTime; // 最后访问时间
     //Only updated by updatePermissionStatus(...).
     //Other codes should not modify it.
     private long permission; // 访问权限

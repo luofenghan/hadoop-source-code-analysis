@@ -305,10 +305,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
      * Returns true if the node is in the process of being decommissioned
      */
     public boolean isDecommissionInProgress() {
-        if (adminState == AdminStates.DECOMMISSION_INPROGRESS) {
-            return true;
-        }
-        return false;
+        return adminState == AdminStates.DECOMMISSION_INPROGRESS;
     }
 
     /**

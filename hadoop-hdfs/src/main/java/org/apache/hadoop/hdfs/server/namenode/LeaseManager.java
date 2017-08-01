@@ -60,10 +60,10 @@ public class LeaseManager {
     // Mapping: leaseHolder -> Lease
     //
     /*客户端到Lease对象的映射*/
-    private SortedMap<String, Lease> leases = new TreeMap<String, Lease>();
+    private SortedMap<String, Lease> leases = new TreeMap<>();
 
     /*Lease对象集合*/
-    private SortedSet<Lease> sortedLeases = new TreeSet<Lease>();
+    private SortedSet<Lease> sortedLeases = new TreeSet<>();
 
     //
     // Map path names to leases. It is protected by the sortedLeases lock.
@@ -211,7 +211,7 @@ public class LeaseManager {
     class Lease implements Comparable<Lease> {
         private final String holder;/*租约持有者*/
         private long lastUpdate;/*最后更新时间*/
-        private final Collection<String> paths = new TreeSet<String>();/*客户端当前打开的所有文件*/
+        private final Collection<String> paths = new TreeSet<>();/*客户端当前打开的所有文件*/
 
         /**
          * Only LeaseManager object can create a lease
@@ -326,8 +326,7 @@ public class LeaseManager {
         }
     }
 
-    synchronized void changeLease(String src, String dst,
-                                  String overwrite, String replaceBy) {
+    synchronized void changeLease(String src, String dst, String overwrite, String replaceBy) {
         if (LOG.isDebugEnabled()) {
             LOG.debug(getClass().getSimpleName() + ".changelease: " +
                     " src=" + src + ", dest=" + dst +
@@ -434,7 +433,7 @@ public class LeaseManager {
             for (String p : leasePaths) {
                 try {
                     /*租约恢复，
-                    * 租约恢复是针对已打开的文件，
+                    * 租约恢复是针对【已打开】的文件，
                     * 所以，根据 【路径找不到文件】 或者 【文件不处于打开状态时】，
                     * 方法抛出异常，直接删除租约
                     * */

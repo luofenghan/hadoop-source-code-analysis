@@ -111,8 +111,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
         Configuration.addDefaultResource("hdfs-site.xml");
     }
 
-    public long getProtocolVersion(String protocol,
-                                   long clientVersion) throws IOException {
+    public long getProtocolVersion(String protocol, long clientVersion) throws IOException {
         if (protocol.equals(ClientProtocol.class.getName())) {
             return ClientProtocol.versionID;
         } else if (protocol.equals(DatanodeProtocol.class.getName())) {
@@ -168,10 +167,12 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
     private InetSocketAddress httpAddress = null;
 
     private Thread emptier;
+
     /**
      * only used for testing purposes
      */
     private boolean stopRequested = false;
+
     /**
      * Is service level authorization enabled?
      */
@@ -280,9 +281,8 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
         // create rpc server
         InetSocketAddress dnSocketAddr = getServiceRpcServerAddress(conf);
         if (dnSocketAddr != null) {
-            int serviceHandlerCount =
-                    conf.getInt(DFSConfigKeys.DFS_NAMENODE_SERVICE_HANDLER_COUNT_KEY,
-                            DFSConfigKeys.DFS_NAMENODE_SERVICE_HANDLER_COUNT_DEFAULT);
+            int serviceHandlerCount = conf.getInt(DFSConfigKeys.DFS_NAMENODE_SERVICE_HANDLER_COUNT_KEY,
+                    DFSConfigKeys.DFS_NAMENODE_SERVICE_HANDLER_COUNT_DEFAULT);
             this.serviceRpcServer = RPC.getServer(this, dnSocketAddr.getHostName(),
                     dnSocketAddr.getPort(), serviceHandlerCount,
                     false, conf, namesystem.getDelegationTokenSecretManager());
@@ -297,7 +297,6 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
         this.serverAddress = this.server.getListenerAddress();
         FileSystem.setDefaultUri(conf, getUri(serverAddress));
         LOG.info("Namenode up at: " + this.serverAddress);
-
 
         startHttpServer(conf);
         /*HDFS客户端使用server IPC*/
@@ -589,8 +588,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
                                            long offset,
                                            long length) throws IOException {
         myMetrics.incrNumGetBlockLocations();
-        return namesystem.getBlockLocations(getClientMachine()/*获取客户端地址*/,
-                src, offset, length);
+        return namesystem.getBlockLocations(getClientMachine()/*获取客户端地址*/, src, offset, length);
     }
 
     private static String getClientMachine() {
@@ -692,8 +690,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
     /**
      * Stub for 0.20 clients that don't support HDFS-630
      */
-    public LocatedBlock addBlock(String src,
-                                 String clientName) throws IOException {
+    public LocatedBlock addBlock(String src, String clientName) throws IOException {
         return addBlock(src, clientName, null);
     }
 
@@ -725,9 +722,9 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
 
     /**
      * The client needs to give up on the block.
+     * 如果客户端建立数据流管道失败，则会抛弃当前块，调用此方法
      */
-    public void abandonBlock(Block b, String src, String holder
-    ) throws IOException {
+    public void abandonBlock(Block b, String src, String holder) throws IOException {
         stateChangeLog.debug("*BLOCK* NameNode.abandonBlock: "
                 + b + " of file " + src);
         if (!namesystem.abandonBlock(b, src, holder)) {
@@ -761,8 +758,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
         stateChangeLog.info("*DIR* NameNode.reportBadBlocks");
         for (LocatedBlock block : blocks) {
             Block blk = block.getBlock();
-            DatanodeInfo[] nodes = block.getLocations();
-            for (DatanodeInfo dn : nodes) {
+            for (DatanodeInfo dn : block.getLocations()) {
                 namesystem.markBlockAsCorrupt(blk, dn);
             }
         }
@@ -1070,9 +1066,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
 
     }
 
-    public void blockReceived(DatanodeRegistration nodeReg,
-                              Block[] blocks,
-                              String[] delHints) throws IOException {
+    public void blockReceived(DatanodeRegistration nodeReg, Block[] blocks, String[] delHints) throws IOException {
         verifyRequest(nodeReg);
         stateChangeLog.debug("*BLOCK* NameNode.blockReceived: "
                 + "from " + nodeReg.getName() + " " + blocks.length + " blocks.");
@@ -1193,8 +1187,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
      * @return true if formatting was aborted, false otherwise
      * @throws IOException
      */
-    private static boolean format(Configuration conf,
-                                  boolean isConfirmationNeeded) throws IOException {
+    private static boolean format(Configuration conf, boolean isConfirmationNeeded) throws IOException {
         Collection<File> dirsToFormat = FSNamesystem.getNamespaceDirs(conf);
         Collection<File> editDirsToFormat = FSNamesystem.getNamespaceEditsDirs(conf);
         for (File curDir : dirsToFormat) {
@@ -1300,8 +1293,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol, NamenodeProto
     }
 
     static StartupOption getStartupOption(Configuration conf) {
-        return StartupOption.valueOf(conf.get("dfs.namenode.startup",
-                StartupOption.REGULAR.toString()));
+        return StartupOption.valueOf(conf.get("dfs.namenode.startup", StartupOption.REGULAR.toString()));
     }
 
     public static NameNode createNameNode(String[] argv, Configuration conf) throws IOException {

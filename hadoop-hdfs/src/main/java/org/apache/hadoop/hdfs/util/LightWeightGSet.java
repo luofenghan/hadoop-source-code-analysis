@@ -82,11 +82,11 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
     private volatile int modification = 0;
 
     /**
-     * @param recommended_length Recommended size of the internal array.
+     * @param recommendedLength Recommended size of the internal array.
      */
-    public LightWeightGSet(final int recommended_length) {
-        final int actual = actualArrayLength(recommended_length);
-        LOG.info("recommended=" + recommended_length + ", actual=" + actual);
+    public LightWeightGSet(final int recommendedLength) {
+        final int actual = actualArrayLength(recommendedLength);
+        LOG.info("recommended=" + recommendedLength + ", actual=" + actual);
 
         entries = new LinkedElement[actual];
         hash_mask = entries.length - 1;
@@ -227,7 +227,8 @@ public class LightWeightGSet<K, E extends K> implements GSet<K, E> {
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder(getClass().getSimpleName());
-        b.append("(size=").append(size)
+        b.append("(size=")
+                .append(size)
                 .append(String.format(", %08x", hash_mask))
                 .append(", modification=").append(modification)
                 .append(", entries.length=").append(entries.length)

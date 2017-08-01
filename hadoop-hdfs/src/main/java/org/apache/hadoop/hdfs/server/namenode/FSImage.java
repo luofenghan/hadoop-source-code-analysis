@@ -72,7 +72,7 @@ public class FSImage extends Storage {
 
     // checkpoint states
     enum CheckpointStates {
-        START, ROLLED_EDITS, UPLOAD_START, UPLOAD_DONE;
+        START, ROLLED_EDITS, UPLOAD_START, UPLOAD_DONE
     }
 
     /**
@@ -131,8 +131,7 @@ public class FSImage extends Storage {
 
     /**
      */
-    FSImage(Collection<File> fsDirs, Collection<File> fsEditsDirs)
-            throws IOException {
+    FSImage(Collection<File> fsDirs, Collection<File> fsEditsDirs) throws IOException {
         this();
         setStorageDirectories(fsDirs, fsEditsDirs);
     }
@@ -1009,16 +1008,14 @@ public class FSImage extends Storage {
     /**
      * Save the contents of the FS image to the file.
      */
-    void saveFSImage(File newFile) throws IOException {
+    private void saveFSImage(File newFile) throws IOException {
         FSNamesystem fsNamesys = FSNamesystem.getFSNamesystem();
         FSDirectory fsDir = fsNamesys.dir;
         long startTime = FSNamesystem.now();
         //
         // Write out data
         //
-        DataOutputStream out = new DataOutputStream(
-                new BufferedOutputStream(
-                        new FileOutputStream(newFile)));
+        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(newFile)));
         try {
             /*首先输出镜像文件的文件头*/
             out.writeInt(FSConstants.LAYOUT_VERSION);/*命名空间镜像格式的版本号*/
@@ -1028,13 +1025,14 @@ public class FSImage extends Storage {
 
             byte[] byteStore = new byte[4 * FSConstants.MAX_PATH_LENGTH];
             ByteBuffer strbuf = ByteBuffer.wrap(byteStore);
+
             // save the root
             saveINode2Image(strbuf, fsDir.rootDir, out); //保存根节点
+
             // save the rest of the nodes
             saveImage(strbuf, 0, fsDir.rootDir, out); // 保存其他节点
             fsNamesys.saveFilesUnderConstruction(out); // 保存构建中的节点
             fsNamesys.saveSecretManagerState(out); //安全信息
-            strbuf = null;
         } finally {
             out.close();
         }
@@ -1240,13 +1238,12 @@ public class FSImage extends Storage {
     /*
      * Save one inode's attributes to the image.
      */
-    private static void saveINode2Image(ByteBuffer name,
-                                        INode node,
-                                        DataOutputStream out) throws IOException {
+    private static void saveINode2Image(ByteBuffer name, INode node, DataOutputStream out) throws IOException {
         int nameLen = name.position();
         out.writeShort(nameLen);
+        /*都是绝对路径*/
         out.write(name.array(), name.arrayOffset(), nameLen);
-        if (!node.isDirectory()) {  // write file inode
+        if (!node.isDirectory()) {   // write file inode
             INodeFile fileINode = (INodeFile) node;
             out.writeShort(fileINode.getReplication());
             out.writeLong(fileINode.getModificationTime());
@@ -1254,24 +1251,21 @@ public class FSImage extends Storage {
             out.writeLong(fileINode.getPreferredBlockSize());
             Block[] blocks = fileINode.getBlocks();
             out.writeInt(blocks.length);
-            for (Block blk : blocks)
-                blk.write(out);
+            for (Block blk : blocks) blk.write(out);
             FILE_PERM.fromShort(fileINode.getFsPermissionShort());
-            PermissionStatus.write(out, fileINode.getUserName(),
-                    fileINode.getGroupName(),
-                    FILE_PERM);
-        } else {   // write directory inode
-            out.writeShort(0);  // replication
+            /*INode中，用户名和用户组以整数形式保存在INode.permission中*/
+            /*但在命名空间镜像中，用户名和用户组以字符串的形式保存*/
+            PermissionStatus.write(out, fileINode.getUserName(), fileINode.getGroupName(), FILE_PERM);
+        } else {                   // write directory inode
+            out.writeShort(0);  // 副本数
             out.writeLong(node.getModificationTime());
-            out.writeLong(0);   // access time
-            out.writeLong(0);   // preferred block size
-            out.writeInt(-1);    // # of blocks
+            out.writeLong(0);   // 访问时间
+            out.writeLong(0);   // 文件数据块大小
+            out.writeInt(-1);   // # of blocks
             out.writeLong(node.getNsQuota());
             out.writeLong(node.getDsQuota());
             FILE_PERM.fromShort(node.getFsPermissionShort());
-            PermissionStatus.write(out, node.getUserName(),
-                    node.getGroupName(),
-                    FILE_PERM);
+            PermissionStatus.write(out, node.getUserName(), node.getGroupName(), FILE_PERM);
         }
     }
 
@@ -1279,29 +1273,43 @@ public class FSImage extends Storage {
      * Save file tree image starting from the given root.
      * This is a recursive procedure, which first saves all children of
      * a current directory and then moves inside the sub-directories.
-     * 将目录树current下的所有INode信息输出到输出流out中、
-     * 首先处理该目录下的所有文件数据，然后在处理子目录
+
      */
-    private static void saveImage(ByteBuffer parentPrefix,
-                                  int prefixLength,
+    /**
+     * 将目录树current下的所有INode信息输出到输出流out中、
+     * 首先处理该目录下的所有子文件，然后在处理子目录
+     *
+     * @param parentPrefix
+     * @param prefixLength
+     * @param current
+     * @param out
+     * @throws IOException
+     */
+    private static void saveImage(ByteBuffer parentPrefix, /*父目录绝对路径*/
+                                  int prefixLength, /*父目录长度*/
                                   INodeDirectory current,
                                   DataOutputStream out) throws IOException {
         int newPrefixLength = prefixLength;
         if (current.getChildrenRaw() == null)
             return;
+
+        /*先处理某个目录下的所有子文件*/
         for (INode child : current.getChildren()) {
-            // print all children first
+            /*通过设置初始缓冲区位置，将上次的文件路径从缓冲区中抹去*/
+            /*利用这种方式，将INode节点中的相对路径转换成绝对路径*/
             parentPrefix.position(prefixLength);
             parentPrefix.put(PATH_SEPARATOR).put(child.getLocalNameBytes());
             saveINode2Image(parentPrefix, child, out);
         }
 
+        /*在处理该目录下的所有子目录*/
         for (INode child : current.getChildren()) {
             if (!child.isDirectory())
                 continue;
             parentPrefix.position(prefixLength);
             parentPrefix.put(PATH_SEPARATOR).put(child.getLocalNameBytes());
             newPrefixLength = parentPrefix.position();
+            /*通过递归调用，输出子目录下的文件和目录*/
             saveImage(parentPrefix, newPrefixLength, (INodeDirectory) child, out);
         }
         parentPrefix.position(prefixLength);
@@ -1403,8 +1411,7 @@ public class FSImage extends Storage {
     //
     static void writeINodeUnderConstruction(DataOutputStream out,
                                             INodeFileUnderConstruction cons,
-                                            String path)
-            throws IOException {
+                                            String path) throws IOException {
         writeString(path, out);
         out.writeShort(cons.getReplication());
         out.writeLong(cons.getModificationTime());

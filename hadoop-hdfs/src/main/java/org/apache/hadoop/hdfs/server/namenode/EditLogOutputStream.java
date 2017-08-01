@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * A generic abstract class to support journaling of edits logs into 
+ * A generic abstract class to support journaling of edits logs into
  * a persistent storage.
  */
 abstract class EditLogOutputStream extends OutputStream {
@@ -42,7 +42,9 @@ abstract class EditLogOutputStream extends OutputStream {
      */
     abstract String getName();
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     abstract public void write(int b) throws IOException;
 
     /**
@@ -50,7 +52,7 @@ abstract class EditLogOutputStream extends OutputStream {
      * The record is represented by operation name and
      * an array of Writable arguments.
      *
-     * @param op operation
+     * @param op        operation
      * @param writables array of Writable arguments
      * @throws IOException
      */
@@ -63,7 +65,9 @@ abstract class EditLogOutputStream extends OutputStream {
      */
     abstract void create() throws IOException;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     abstract public void close() throws IOException;
 
     /**
@@ -75,6 +79,7 @@ abstract class EditLogOutputStream extends OutputStream {
     /**
      * Flush and sync all data that is ready to be flush
      * {@link #setReadyToFlush()} into underlying persistent store.
+     *
      * @throws IOException
      */
     abstract protected void flushAndSync() throws IOException;
@@ -83,7 +88,7 @@ abstract class EditLogOutputStream extends OutputStream {
      * Flush data to persistent store.
      * Collect sync metrics.
      */
-    public void flush() throws IOException {
+    public final void flush() throws IOException {
         numSync++;
         long start = FSNamesystem.now();
         flushAndSync();

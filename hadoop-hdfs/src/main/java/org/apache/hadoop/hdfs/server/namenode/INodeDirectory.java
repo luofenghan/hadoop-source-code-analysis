@@ -165,8 +165,7 @@ class INodeDirectory extends INode {
      * @return number of existing INodes in the path
      */
     int getExistingPathINodes(byte[][] components, INode[] existing) {
-        assert compareBytes(this.name, components[0]) == 0 :
-                "Incorrect name " + getLocalName() + " expected " + components[0];
+        assert compareBytes(this.name, components[0]) == 0 : "Incorrect name " + getLocalName() + " expected " + components[0];
 
         INode curNode = this;/*根节点*/
         int count = 0;
@@ -288,24 +287,18 @@ class INodeDirectory extends INode {
      * Add new inode to the parent if specified.
      * Optimized version of addNode() if parent is not null.
      *
-     * @return parent INode if new inode is inserted
-     * or null if it already exists.
-     * @throws FileNotFoundException if parent does not exist or
-     *                               is not a directory.
+     * @return parent INode if new i-node is inserted or null if it already exists.
+     * @throws FileNotFoundException if parent does not exist or is not a directory.
      */
-    <T extends INode> INodeDirectory addToParent(
-            String path,
-            T newNode,
-            INodeDirectory parent,
-            boolean inheritPermission
-    ) throws FileNotFoundException {
+    <T extends INode> INodeDirectory addToParent(String path, T newNode, INodeDirectory parent, boolean inheritPermission)
+            throws FileNotFoundException {
         byte[][] pathComponents = getPathComponents(path);
         assert pathComponents != null : "Incorrect path " + path;
         int pathLen = pathComponents.length;
         if (pathLen < 2)  // add root
             return null;
         if (parent == null) {
-            // Gets the parent INode
+
             INode[] inodes = new INode[2];
             getExistingPathINodes(pathComponents, inodes);
             INode inode = inodes[0];

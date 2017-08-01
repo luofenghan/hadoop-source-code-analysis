@@ -47,7 +47,7 @@ public class CorruptReplicasMap {
     public void addToCorruptReplicasMap(Block blk, DatanodeDescriptor dn) {
         Collection<DatanodeDescriptor> nodes = getNodes(blk);
         if (nodes == null) {
-            nodes = new TreeSet<DatanodeDescriptor>();
+            nodes = new TreeSet<>();
             corruptReplicasMap.put(blk, nodes);
         }
         if (!nodes.contains(dn)) {
@@ -121,7 +121,7 @@ public class CorruptReplicasMap {
         return ((nodes != null) && (nodes.contains(node)));
     }
 
-    public int numCorruptReplicas(Block blk) {
+    int numCorruptReplicas(Block blk) {
         Collection<DatanodeDescriptor> nodes = getNodes(blk);
         return (nodes == null) ? 0 : nodes.size();
     }

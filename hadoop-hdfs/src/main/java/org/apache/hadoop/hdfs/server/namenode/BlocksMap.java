@@ -52,8 +52,6 @@ class BlocksMap {
          * triplets[3*i] 保存DatanodeDescriptor对象
          * triplets[3*i+1] 或 triplets[3*i+2] 保存同一数据节点上的其他
          * 两个（前、后）数据块的BlockInfo，通过这种方法形成一个链表
-         * <p>
-         * <p>
          * 沿着 triplets[3*i+1] 或 triplets[3*i+2]，可以遍历某个数据节点拥有的所有数据块的BlockInfo信息
          */
         private Object[] triplets;

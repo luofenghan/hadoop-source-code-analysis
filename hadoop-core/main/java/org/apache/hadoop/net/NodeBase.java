@@ -17,8 +17,8 @@
  */
 package org.apache.hadoop.net;
 
-/** A base class that implements interface Node
- *
+/**
+ * A base class that implements interface Node
  */
 
 public class NodeBase implements Node {
@@ -31,13 +31,16 @@ public class NodeBase implements Node {
     protected int level; //which level of the tree the node resides
     protected Node parent; //its parent
 
-    /** Default constructor */
+    /**
+     * Default constructor
+     */
     public NodeBase() {
     }
 
-    /** Construct a node from its path
-     * @param path
-     *   a concatenation of this node's location, the path seperator, and its name
+    /**
+     * Construct a node from its path
+     *
+     * @param path a concatenation of this node's location, the path seperator, and its name
      */
     public NodeBase(String path) {
         path = normalize(path);
@@ -49,19 +52,23 @@ public class NodeBase implements Node {
         }
     }
 
-    /** Construct a node from its name and its location
-     * @param name this node's name
+    /**
+     * Construct a node from its name and its location
+     *
+     * @param name     this node's name
      * @param location this node's location
      */
     public NodeBase(String name, String location) {
         set(name, normalize(location));
     }
 
-    /** Construct a node from its name and its location
-     * @param name this node's name
+    /**
+     * Construct a node from its name and its location
+     *
+     * @param name     this node's name
      * @param location this node's location
-     * @param parent this node's parent node
-     * @param level this node's level in the tree
+     * @param parent   this node's parent node
+     * @param level    this node's level in the tree
      */
     public NodeBase(String name, String location, Node parent, int level) {
         set(name, normalize(location));
@@ -77,32 +84,46 @@ public class NodeBase implements Node {
         this.location = location;
     }
 
-    /** Return this node's name */
+    /**
+     * Return this node's name
+     */
     public String getName() {
         return name;
     }
 
-    /** Return this node's network location */
+    /**
+     * Return this node's network location
+     */
     public String getNetworkLocation() {
         return location;
     }
 
-    /** Set this node's network location */
+    /**
+     * Set this node's network location
+     */
     public void setNetworkLocation(String location) {
         this.location = location;
     }
 
-    /** Return this node's path */
+    /**
+     * Return this node's path
+     */
     public static String getPath(Node node) {
         return node.getNetworkLocation() + PATH_SEPARATOR_STR + node.getName();
     }
 
-    /** Return this node's string representation */
+    /**
+     * Return this node's string representation
+     */
     public String toString() {
         return getPath(this);
     }
 
-    /** Normalize a path */
+    /**
+     * Normalize a path
+     * 开头必须以/
+     * 结尾不能是/
+     */
     static public String normalize(String path) {
         if (path == null || path.length() == 0) return ROOT;
 
@@ -119,24 +140,31 @@ public class NodeBase implements Node {
         return path;
     }
 
-    /** Return this node's parent */
+    /**
+     * Return this node's parent
+     */
     public Node getParent() {
         return parent;
     }
 
-    /** Set this node's parent */
+    /**
+     * Set this node's parent
+     */
     public void setParent(Node parent) {
         this.parent = parent;
     }
 
-    /** Return this node's level in the tree.
+    /**
+     * Return this node's level in the tree.
      * E.g. the root of a tree returns 0 and its children return 1
      */
     public int getLevel() {
         return level;
     }
 
-    /** Set this node's level in the tree */
+    /**
+     * Set this node's level in the tree
+     */
     public void setLevel(int level) {
         this.level = level;
     }

@@ -91,19 +91,17 @@ class ReplicationTargetChooser {
      * 否则，选择源机架上的另一个数据节点，作为目标
      * </div>
      *
-     * @param numOfReplicas: additional number of replicas wanted.
-     * @param writer:        the writer's machine, null if not in the cluster.
+     * @param numOfReplicas additional number of replicas wanted.
+     * @param writer:        the writer's machine, null if not in the cluster.复制源
      * @param choosenNodes:  datanodes that have been choosen as targets.
      * @param excludedNodes: datanodesthat should not be considered targets.
      * @param blocksize:     size of the data to be written.
      * @return array of DatanodeDescriptor instances chosen as target
      * and sorted as a pipeline.
      */
-    DatanodeDescriptor[] chooseTarget(int numOfReplicas,
-                                      DatanodeDescriptor writer,
+    DatanodeDescriptor[] chooseTarget(int numOfReplicas, DatanodeDescriptor writer,
                                       List<DatanodeDescriptor> choosenNodes,
-                                      List<Node> excludedNodes,
-                                      long blocksize) {
+                                      List<Node> excludedNodes, long blocksize) {
         if (numOfReplicas == 0 || clusterMap.getNumOfLeaves() == 0) {
             return new DatanodeDescriptor[0];
         }
@@ -112,7 +110,7 @@ class ReplicationTargetChooser {
             excludedNodes = new ArrayList<Node>();
         }
 
-        int clusterSize = clusterMap.getNumOfLeaves();
+        int clusterSize = clusterMap.getNumOfLeaves(); /*得到节点数*/
         int totalNumOfReplicas = choosenNodes.size() + numOfReplicas;
         if (totalNumOfReplicas > clusterSize) {
             numOfReplicas -= (totalNumOfReplicas - clusterSize);
@@ -152,7 +150,7 @@ class ReplicationTargetChooser {
         int numOfResults = results.size();
         boolean newBlock = (numOfResults == 0);
         if (writer == null && !newBlock) {
-            writer = (DatanodeDescriptor) results.get(0);
+            writer = results.get(0);
         }
 
         try {

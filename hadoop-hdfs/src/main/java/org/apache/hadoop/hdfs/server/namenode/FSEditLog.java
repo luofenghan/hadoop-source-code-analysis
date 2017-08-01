@@ -115,7 +115,7 @@ public class FSEditLog {
     static private class EditLogFileOutputStream extends EditLogOutputStream {
         private File file;
         private FileOutputStream fp;    // file stream for storing edit logs
-        private FileChannel fc;         // channel of the file stream for sync
+        private FileChannel fc;         // 输出文件对应的文件通道
 
         /*通过write输出的日志记录会写到缓冲区bufCurrent中，
         * 当bufCurrent中的内容需要写往文件时，
@@ -154,18 +154,20 @@ public class FSEditLog {
          */
         @Override
         void write(byte op, Writable... writables) throws IOException {
-            write(op);
-            for (Writable w : writables) {
+            write(op); /*输出操作码*/
+            for (Writable w : writables) { /*输出操作参数*/
                 w.write(bufCurrent);
             }
         }
 
         /**
          * Create empty edits logs file.
+         * 将文件清空，并在缓冲区bufCurrent写入版本号
+         * 再将数据输出到文件
          */
         @Override
         void create() throws IOException {
-            fc.truncate(0);
+            fc.truncate(0); /*清空文件现有的内容，fc是文件的文件通道对象*/
             fc.position(0);
             bufCurrent.writeInt(FSConstants.LAYOUT_VERSION);
             setReadyToFlush();
@@ -201,7 +203,7 @@ public class FSEditLog {
         @Override
         void setReadyToFlush() throws IOException {
             assert bufReady.size() == 0 : "previous data is not flushed yet";
-            write(OP_INVALID);           // insert end-of-file marker
+            write(OP_INVALID);// 写入日志文件结束标识 OP_INVALID
             DataOutputBuffer tmp = bufReady;
             bufReady = bufCurrent;/*开始保存要写入文件的日志内容*/
             bufCurrent = tmp;/*交换后，bufCurrent 缓冲区为空，可以立即写入日志*/
@@ -214,13 +216,14 @@ public class FSEditLog {
          * 实现了输出内存缓冲区中的日志数据斌持久化到磁盘两个目标
          * flush：刷新输出流并强制写出所有缓冲的输出数据，flush只是将输出流缓冲区的数据传递给操作系统，并不保证数据实际写入物理设备，往往只保存在操作系统的内核缓冲区
          * sync：强制将刷新数据写入包含该文件的存储设备中，
+         * FileChannel.force方法返回时，与文件相关的内核缓冲区的所有修改，将持久化到磁盘中
          */
         @Override
         protected void flushAndSync() throws IOException {
-            preallocate();            // preallocate file if necessary
-            bufReady.writeTo(fp);     // 写数据到文件
-            bufReady.reset();         // 擦除缓冲区中所有数据
-            fc.force(false);          // 持久化日志数据到磁盘
+            preallocate();// preallocate file if necessary
+            bufReady.writeTo(fp);// 写数据到文件
+            bufReady.reset();// 擦除缓冲区中所有数据
+            fc.force(false);// 持久化日志数据到磁盘
             fc.position(fc.position() - 1); // 设置下次执行写操作时的文件位置，以便覆盖日志文件结束标识
         }
 
@@ -314,13 +317,12 @@ public class FSEditLog {
 
     private int getNumStorageDirs() {
         int numStorageDirs = 0;
-        for (Iterator<StorageDirectory> it =
-             fsimage.dirIterator(NameNodeDirType.EDITS); it.hasNext(); it.next())
+        for (Iterator<StorageDirectory> it = fsimage.dirIterator(NameNodeDirType.EDITS); it.hasNext(); it.next())
             numStorageDirs++;
         return numStorageDirs;
     }
 
-    synchronized int getNumEditStreams() {
+    private synchronized int getNumEditStreams() {
         return editStreams == null ? 0 : editStreams.size();
     }
 
@@ -916,7 +918,7 @@ public class FSEditLog {
      * Write an operation to the edit log. Do not sync to persistent
      * store yet.
      */
-    synchronized void logEdit(byte op, Writable... writables) {
+    private synchronized void logEdit(byte op, Writable... writables) {
         assert this.getNumEditStreams() > 0 : "no editlog streams";
         long start = FSNamesystem.now();
         for (int idx = 0; idx < editStreams.size(); idx++) {
@@ -949,9 +951,9 @@ public class FSEditLog {
 
     //
     // Sync all modifications done by this thread.
-    // 当调用完logEdit方法后，就会使用logSync()同步日志修改
+    // 当调用完【logEdit】方法后，就会使用logSync()同步日志修改
     //
-    public void logSync() throws IOException {
+    void logSync() throws IOException {
         ArrayList<EditLogOutputStream> errorStreams = null;
         long syncStart = 0;
 
@@ -965,9 +967,10 @@ public class FSEditLog {
             printStatistics(false);
 
             // 有其他线程正在执行日志同步操作
-            /*namenode是一个多线程应用，
-            * 如果饭前事务标识大于已处理的事务标识
-            * 需要等待其他线程执行完毕*/
+            /* namenode 是一个多线程应用，
+             * 如果饭前事务标识大于已处理的事务标识
+             * 需要等待其他线程执行完毕
+             * */
             while (mytxid > synctxid && isSyncRunning) {
                 try {
                     wait(1000);
@@ -1008,7 +1011,7 @@ public class FSEditLog {
                 // remember the streams that encountered an error.
                 //
                 if (errorStreams == null) {
-                    errorStreams = new ArrayList<EditLogOutputStream>(1);
+                    errorStreams = new ArrayList<>(1);
                 }
                 errorStreams.add(eStream);
                 FSNamesystem.LOG.error("Unable to sync edit log. " +
@@ -1051,9 +1054,7 @@ public class FSEditLog {
         buf.append(editStreams.get(0).getNumSync());
         buf.append(" SyncTimes(ms): ");
 
-        int numEditStreams = editStreams.size();
-        for (int idx = 0; idx < numEditStreams; idx++) {
-            EditLogOutputStream eStream = editStreams.get(idx);
+        for (EditLogOutputStream eStream : editStreams) {
             buf.append(eStream.getTotalSyncTime());
             buf.append(" ");
         }

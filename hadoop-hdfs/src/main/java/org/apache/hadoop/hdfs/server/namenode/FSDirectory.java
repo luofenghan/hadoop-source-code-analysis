@@ -255,20 +255,20 @@ class FSDirectory implements FSConstants, Closeable {
         // create new inode
         /*创建一个新节点*/
         INode newNode;
-        if (blocks == null) {/*输入信息是一个目录*/
+        if (blocks == null) /*输入信息是一个目录*/ {
+
             /*根据情况创建INodeDirectoryWithQuota 或 INodeDirectory*/
             if (nsQuota >= 0 || dsQuota >= 0) {
-                newNode = new INodeDirectoryWithQuota(
-                        permissions, modificationTime, nsQuota, dsQuota);
+                newNode = new INodeDirectoryWithQuota(permissions, modificationTime, nsQuota, dsQuota);
             } else {
                 newNode = new INodeDirectory(permissions, modificationTime);
             }
-        } else/*输入信息是一个文件*/
-            newNode = new INodeFile(permissions, blocks.length, replication,
-                    modificationTime, atime, preferredBlockSize);
-        // add new node to the parent
+        } else /*输入信息是一个文件*/ {
+            newNode = new INodeFile(permissions, blocks.length, replication, modificationTime, atime, preferredBlockSize);
+        }
+
         /*将节点添加到它的父节点中*/
-        INodeDirectory newParent = null;
+        INodeDirectory newParent;
         synchronized (rootDir) {
             try {
                 newParent = rootDir.addToParent(src, newNode, parentINode, false);
@@ -354,9 +354,6 @@ class FSDirectory implements FSConstants, Closeable {
         }
     }
 
-    /**
-     * Remove a block to the file.
-     */
     /**
      * 由于这时候数据节点上并不存在数据块的副本，
      * 所以实现相当简单，只需要从内存中移除相应记录即可
@@ -664,7 +661,9 @@ class FSDirectory implements FSConstants, Closeable {
         src = normalizePath(src);
 
         synchronized (rootDir) {
+            /*获得当前路径中的所有节点*/
             INode[] inodes = rootDir.getExistingPathINodes(src);
+
             /*待删除的节点*/
             INode targetNode = inodes[inodes.length - 1];
 
@@ -681,13 +680,16 @@ class FSDirectory implements FSConstants, Closeable {
                 return 0;
             } else {
                 try {
-                    // Remove the node from the namespace
+                    // 从文件系统目录树中移除该节点
                     removeChild(inodes, inodes.length - 1);
+
                     // set the parent's modification time
                     /*更新父目录的修改时间*/
                     inodes[inodes.length - 2].setModificationTime(modificationTime);
                     // GC all the blocks underneath the node.
-                    ArrayList<Block> v = new ArrayList<Block>();
+
+                    ArrayList<Block> v = new ArrayList<>();
+                    /*收集当前文件拥有的数据块*/
                     int filesRemoved = targetNode.collectSubtreeBlocksAndClear(v);
                     namesystem.removePathAndBlocks(src, v);
                     if (NameNode.stateChangeLog.isDebugEnabled()) {
@@ -903,6 +905,7 @@ class FSDirectory implements FSConstants, Closeable {
         if (checkQuota) {
             verifyQuota(inodes, numOfINodes, nsDelta, dsDelta, null);
         }
+        /*调整该路径下目录的当前配额*/
         for (int i = 0; i < numOfINodes; i++) {
             if (inodes[i].isQuotaSet()) { // a directory with quota
                 INodeDirectoryWithQuota node = (INodeDirectoryWithQuota) inodes[i];
@@ -1179,6 +1182,9 @@ class FSDirectory implements FSConstants, Closeable {
      */
     private INode removeChild(INode[] pathComponents, int pos) {
         /*在待删除节点的父目录中移除该节点*/
+        /*/in/dsf/ser/df/word.txt*/
+        /* /in/dsf/ser/df/==> ((INodeDirectory) pathComponents[pos - 1]) */
+        /*word.txt ==> pathComponents[pos]*/
         INode removedNode = ((INodeDirectory) pathComponents[pos - 1]).removeChild(pathComponents[pos]);
         if (removedNode != null) {
             INode.DirCounts counts = new INode.DirCounts();

@@ -149,13 +149,10 @@ class TransferFsImage implements FSConstants {
         byte[] buf = new byte[BUFFER_SIZE];
         String proto = UserGroupInformation.isSecurityEnabled() ? "https://" : "http://";
 
-        StringBuilder str = new StringBuilder(proto + fsName + "/getimage?");
-        str.append(id);
-
         //
         // open connection to remote server
         //
-        URL url = new URL(str.toString());
+        URL url = new URL(proto + fsName + "/getimage?" + id);
 
         // Avoid Krb bug with cross-realm hosts
         SecurityUtil.fetchServiceTicket(url);

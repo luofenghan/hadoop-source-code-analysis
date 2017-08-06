@@ -42,8 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NetUtils {
     private static final Log LOG = LogFactory.getLog(NetUtils.class);
 
-    private static Map<String, String> hostToResolved =
-            new HashMap<String, String>();
+    private static Map<String, String> hostToResolved = new HashMap<String, String>();
 
     private static HostResolver hostResolver;
 
@@ -157,9 +156,7 @@ public class NetUtils {
         try {
             uri = hasScheme ? URI.create(target) : URI.create("dummyscheme://" + target);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    "Does not contain a valid host:port authority: " + target
-            );
+            throw new IllegalArgumentException("Does not contain a valid host:port authority: " + target);
         }
 
         String host = uri.getHost();
@@ -171,9 +168,7 @@ public class NetUtils {
 
         if ((host == null) || (port < 0) ||
                 (!hasScheme && path != null && !path.isEmpty())) {
-            throw new IllegalArgumentException(
-                    "Does not contain a valid host:port authority: " + target
-            );
+            throw new IllegalArgumentException("Does not contain a valid host:port authority: " + target);
         }
         return makeSocketAddr(host, port);
     }
@@ -245,8 +240,7 @@ public class NetUtils {
      */
     protected static class QualifiedHostResolver implements HostResolver {
         @SuppressWarnings("unchecked")
-        private List<String> searchDomains =
-                ResolverConfiguration.open().searchlist();
+        private List<String> searchDomains = ResolverConfiguration.open().searchlist();
 
         /**
          * Create an InetAddress with a fully qualified hostname of the given

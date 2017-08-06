@@ -81,30 +81,25 @@ public abstract class Server {
      * How many calls/handler are allowed in the queue.
      */
     private static final int IPC_SERVER_HANDLER_QUEUE_SIZE_DEFAULT = 100;
-    private static final String IPC_SERVER_HANDLER_QUEUE_SIZE_KEY =
-            "ipc.server.handler.queue.size";
+    private static final String IPC_SERVER_HANDLER_QUEUE_SIZE_KEY = "ipc.server.handler.queue.size";
 
     /**
      * Initial and max size of response buffer
      */
     static int INITIAL_RESP_BUF_SIZE = 10240;
-    static final String IPC_SERVER_RPC_MAX_RESPONSE_SIZE_KEY =
-            "ipc.server.max.response.size";
+    static final String IPC_SERVER_RPC_MAX_RESPONSE_SIZE_KEY = "ipc.server.max.response.size";
     static final int IPC_SERVER_RPC_MAX_RESPONSE_SIZE_DEFAULT = 1024 * 1024;
 
     public static final Log LOG = LogFactory.getLog(Server.class);
-    private static final Log AUDITLOG =
-            LogFactory.getLog("SecurityLogger." + Server.class.getName());
+    private static final Log AUDITLOG = LogFactory.getLog("SecurityLogger." + Server.class.getName());
     private static final String AUTH_FAILED_FOR = "Auth failed for ";
     private static final String AUTH_SUCCESSFULL_FOR = "Auth successfull for ";
 
     private static final ThreadLocal<Server> SERVER = new ThreadLocal<>();
 
-    private static final Map<String, Class<?>> PROTOCOL_CACHE =
-            new ConcurrentHashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> PROTOCOL_CACHE = new ConcurrentHashMap<String, Class<?>>();
 
-    static Class<?> getProtocolClass(String protocolName, Configuration conf)
-            throws ClassNotFoundException {
+    static Class<?> getProtocolClass(String protocolName, Configuration conf) throws ClassNotFoundException {
         Class<?> protocol = PROTOCOL_CACHE.get(protocolName);
         if (protocol == null) {
             protocol = conf.getClassByName(protocolName);
@@ -198,8 +193,7 @@ public abstract class Server {
      * @throws UnknownHostException if the address isn't a valid host name
      * @throws IOException          other random errors from bind
      */
-    public static void bind(ServerSocket socket, InetSocketAddress address,
-                            int backlog) throws IOException {
+    public static void bind(ServerSocket socket, InetSocketAddress address, int backlog) throws IOException {
         try {
             socket.bind(address, backlog);
         } catch (BindException e) {
@@ -272,6 +266,7 @@ public abstract class Server {
         private long lastCleanupRunTime = 0; //the last time when a cleanup connec-
         //-tion (for idle connections) ran
         private long cleanupInterval = 10000; //the minimum interval between
+
         //用于指定在监听端口上排队的请求的最大长度，队满后到达的客户端连接请求会被拒绝。
         private int backlogLength = conf.getInt("ipc.server.listen.queue.size", 128);
         private ExecutorService readPool;
@@ -347,7 +342,7 @@ public abstract class Server {
              * it will return even if there is nothing to read and wait
              * in while(adding) for finishAdd call
              */
-            public void startAdd() {
+            void startAdd() {
                 adding = true;
                 readSelector.wakeup();
             }
@@ -1410,8 +1405,7 @@ public abstract class Server {
         public void run() {
             LOG.info(getName() + ": starting");
             SERVER.set(Server.this);
-            ByteArrayOutputStream buf =
-                    new ByteArrayOutputStream(INITIAL_RESP_BUF_SIZE);
+            ByteArrayOutputStream buf = new ByteArrayOutputStream(INITIAL_RESP_BUF_SIZE);
             while (running) {
                 try {
                     final Call call = callQueue.take(); // pop the queue; maybe blocked here

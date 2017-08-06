@@ -58,11 +58,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Client {
 
-    public static final Log LOG =
-            LogFactory.getLog(Client.class);
+    public static final Log LOG = LogFactory.getLog(Client.class);
     private Hashtable<ConnectionId, Connection> connections = new Hashtable<>();
 
-    private Class<? extends Writable> valueClass;   // class of call values
+    private Class<? extends Writable> valueClass;   // class of call values  ObjectWritable.class
     private int counter;                            // counter for call ids
     private AtomicBoolean running = new AtomicBoolean(true); // if client runs
     final private Configuration conf;
@@ -442,15 +441,15 @@ public class Client {
                     this.socket.setSoTimeout(pingInterval);
                     return;
                 } catch (SocketTimeoutException toe) {
-          /* Check for an address change and update the local reference.
-           * Reset the failure counter if the address was changed
-           */
+                    /* Check for an address change and update the local reference.
+                    * Reset the failure counter if the address was changed
+                    */
                     if (updateAddress()) {
                         timeoutFailures = ioFailures = 0;
                     }
-          /* The max number of retries is 45,
-           * which amounts to 20s*45 = 15 minutes retries.
-           */
+                    /* The max number of retries is 45,
+                    * which amounts to 20s*45 = 15 minutes retries.
+                    */
                     handleConnectionFailure(timeoutFailures++, 45, toe);
                 } catch (IOException ie) {
                     if (updateAddress()) {
@@ -1206,8 +1205,7 @@ public class Client {
      * Get a connection from the pool, or create a new one and add it to the
      * pool.  Connections to a given ConnectionId are reused.
      */
-    private Connection getConnection(ConnectionId remoteId,
-                                     Call call)
+    private Connection getConnection(ConnectionId remoteId, Call call)
             throws IOException, InterruptedException {
         if (!running.get()) {
             // the client is stopped

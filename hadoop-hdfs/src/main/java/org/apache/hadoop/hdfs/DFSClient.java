@@ -201,8 +201,7 @@ public class DFSClient implements FSConstants, Closeable {
      *
      * @see #DFSClient(InetSocketAddress, Configuration, org.apache.hadoop.fs.FileSystem.Statistics)
      */
-    public DFSClient(InetSocketAddress nameNodeAddr, Configuration conf
-    ) throws IOException {
+    public DFSClient(InetSocketAddress nameNodeAddr, Configuration conf) throws IOException {
         this(nameNodeAddr, conf, null);
     }
 
@@ -211,9 +210,7 @@ public class DFSClient implements FSConstants, Closeable {
      *
      * @see #DFSClient(InetSocketAddress, ClientProtocol, Configuration, org.apache.hadoop.fs.FileSystem.Statistics)
      */
-    public DFSClient(InetSocketAddress nameNodeAddr, Configuration conf,
-                     FileSystem.Statistics stats)
-            throws IOException {
+    public DFSClient(InetSocketAddress nameNodeAddr, Configuration conf, FileSystem.Statistics stats) throws IOException {
         this(nameNodeAddr, null, conf, stats);
     }
 
@@ -227,10 +224,8 @@ public class DFSClient implements FSConstants, Closeable {
         this.stats = stats;
         /*网络相关的参数*/
         this.nnAddress = nameNodeAddr;
-        this.socketTimeout = conf.getInt("dfs.socket.timeout",
-                HdfsConstants.READ_TIMEOUT);
-        this.datanodeWriteTimeout = conf.getInt("dfs.datanode.socket.write.timeout",
-                HdfsConstants.WRITE_TIMEOUT);
+        this.socketTimeout = conf.getInt("dfs.socket.timeout", HdfsConstants.READ_TIMEOUT);
+        this.datanodeWriteTimeout = conf.getInt("dfs.datanode.socket.write.timeout", HdfsConstants.WRITE_TIMEOUT);
         this.timeoutValue = this.socketTimeout;
         this.socketFactory = NetUtils.getSocketFactory(conf, ClientProtocol.class);
 

@@ -37,6 +37,5 @@ public interface VersionedProtocol {
      * @param clientVersion 客户端期望的服务的版本号
      * @return the version that the server will speak
      */
-    long getProtocolVersion(String protocol,
-                            long clientVersion) throws IOException;
+    long getProtocolVersion(String protocol, long clientVersion) throws IOException;
 }

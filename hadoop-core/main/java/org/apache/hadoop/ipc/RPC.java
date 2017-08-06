@@ -602,8 +602,7 @@ public class RPC {
             this.verbose = verbose;
         }
 
-        public Writable call(Class<?> protocol, Writable param, long receivedTime)
-                throws IOException {
+        public Writable call(Class<?> protocol, Writable param, long receivedTime) throws IOException {
             try {
                 Invocation call = (Invocation) param;
                 if (verbose) log("Call: " + call);
